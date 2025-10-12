@@ -86,11 +86,6 @@ const DashboardPage: React.FC = () => {
           </div>
         )}
 
-        {/* Design Showcase */}
-        <div className="mt-12 card bg-gradient-to-r from-primary-500 to-secondary-500 text-white">
-          <h3 className="text-2xl font-display font-bold mb-3">🎨 Beautiful New Design!</h3>
-          <p className="text-lg opacity-90">Your MoodMap now has a stunning new look with custom colors, doodle backgrounds, and smooth animations.</p>
-        </div>
       </main>
     </div>
   );

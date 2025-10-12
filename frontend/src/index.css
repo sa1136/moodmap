@@ -28,26 +28,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%);
+  background: linear-gradient(135deg, #dbeafe 0%, #60a5fa 50%, #3b82f6 100%);
   background-attachment: fixed;
   min-height: 100vh;
-}
-
-/* Doodle Background */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e0f2fe' fill-opacity='0.3'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3Ccircle cx='10' cy='10' r='1'/%3E%3Ccircle cx='50' cy='10' r='1'/%3E%3Ccircle cx='10' cy='50' r='1'/%3E%3Ccircle cx='50' cy='50' r='1'/%3E%3Cpath d='M30 5c0-2.5-2-4.5-4.5-4.5S21 2.5 21 5s2 4.5 4.5 4.5S30 7.5 30 5zm0 50c0-2.5-2-4.5-4.5-4.5S21 52.5 21 55s2 4.5 4.5 4.5S30 57.5 30 55z'/%3E%3Cpath d='M5 30c-2.5 0-4.5-2-4.5-4.5S2.5 21 5 21s4.5 2 4.5 4.5S7.5 30 5 30zm50 0c-2.5 0-4.5-2-4.5-4.5S52.5 21 55 21s4.5 2 4.5 4.5S57.5 30 55 30z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23bae6fd' fill-opacity='0.2'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 60px 60px, 40px 40px;
-  background-position: 0 0, 30px 30px;
-  z-index: -1;
-  pointer-events: none;
 }
 
 /* Custom Components */

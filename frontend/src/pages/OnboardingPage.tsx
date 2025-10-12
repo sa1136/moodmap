@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import '../styles/OnboardingPage.css';
 
 const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -59,20 +60,20 @@ const OnboardingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto form-card">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-display font-bold text-white mb-2">Welcome to MoodMap</h1>
-          <p className="text-blue-100 text-lg">Let's get to know you better!</p>
-          <div className="mt-4 floating">
-            <span className="text-4xl">🗺️</span>
+    <div className="onboarding-container">
+      <div className="onboarding-form-card">
+        <div className="onboarding-header">
+          <h1 className="onboarding-title">Welcome to MoodMap</h1>
+          <p className="onboarding-subtitle">Let's get to know you better!</p>
+          <div className="onboarding-map-container">
+            <span className="onboarding-map">🗺️</span>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="onboarding-form">
           {/* Name Input */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-semibold text-blue-100 mb-2">
+          <div className="onboarding-field">
+            <label htmlFor="name" className="onboarding-label">
               What's your name?
             </label>
             <input
@@ -82,14 +83,14 @@ const OnboardingPage: React.FC = () => {
               value={formData.name}
               onChange={handleInputChange}
               required
-              className="form-input"
+              className="onboarding-input"
               placeholder="Enter your name"
             />
           </div>
 
           {/* City Input */}
-          <div>
-            <label htmlFor="city" className="block text-sm font-semibold text-blue-100 mb-2">
+          <div className="onboarding-field">
+            <label htmlFor="city" className="onboarding-label">
               What city are you in?
             </label>
             <input
@@ -99,26 +100,26 @@ const OnboardingPage: React.FC = () => {
               value={formData.city}
               onChange={handleInputChange}
               required
-              className="form-input"
+              className="onboarding-input"
               placeholder="Enter your city"
             />
           </div>
 
           {/* Preferences */}
-          <div>
-            <label className="block text-sm font-semibold text-blue-100 mb-3">
+          <div className="onboarding-preferences">
+            <label className="onboarding-preferences-label">
               What activities do you enjoy? (Select all that apply)
             </label>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="onboarding-preferences-grid">
               {preferenceOptions.map((preference) => (
-                <label key={preference} className="flex items-center p-2 rounded-lg hover:bg-blue-800/30 transition-colors duration-200 cursor-pointer">
+                <label key={preference} className="onboarding-preference-item">
                   <input
                     type="checkbox"
                     checked={formData.preferences.includes(preference)}
                     onChange={() => handlePreferenceToggle(preference)}
-                    className="h-4 w-4 text-blue-400 focus:ring-blue-300 border-blue-300 rounded"
+                    className="onboarding-checkbox"
                   />
-                  <span className="ml-3 text-sm font-medium text-blue-100">{preference}</span>
+                  <span className="onboarding-preference-text">{preference}</span>
                 </label>
               ))}
             </div>
@@ -128,7 +129,7 @@ const OnboardingPage: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting || !formData.name || !formData.city}
-            className="btn-primary w-full py-3 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="onboarding-button"
           >
             {isSubmitting ? 'Saving...' : 'Continue to Mood Selection'}
           </button>
