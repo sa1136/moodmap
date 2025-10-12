@@ -59,17 +59,20 @@ const OnboardingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md mx-auto form-card">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to MoodMap</h1>
-          <p className="text-gray-600">Let's get to know you better!</p>
+          <h1 className="text-4xl font-display font-bold text-white mb-2">Welcome to MoodMap</h1>
+          <p className="text-blue-100 text-lg">Let's get to know you better!</p>
+          <div className="mt-4 floating">
+            <span className="text-4xl">🗺️</span>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Name Input */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="name" className="block text-sm font-semibold text-blue-100 mb-2">
               What's your name?
             </label>
             <input
@@ -79,14 +82,14 @@ const OnboardingPage: React.FC = () => {
               value={formData.name}
               onChange={handleInputChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="form-input"
               placeholder="Enter your name"
             />
           </div>
 
           {/* City Input */}
           <div>
-            <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="city" className="block text-sm font-semibold text-blue-100 mb-2">
               What city are you in?
             </label>
             <input
@@ -96,26 +99,26 @@ const OnboardingPage: React.FC = () => {
               value={formData.city}
               onChange={handleInputChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="form-input"
               placeholder="Enter your city"
             />
           </div>
 
           {/* Preferences */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-semibold text-blue-100 mb-3">
               What activities do you enjoy? (Select all that apply)
             </label>
             <div className="grid grid-cols-1 gap-2">
               {preferenceOptions.map((preference) => (
-                <label key={preference} className="flex items-center">
+                <label key={preference} className="flex items-center p-2 rounded-lg hover:bg-blue-800/30 transition-colors duration-200 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={formData.preferences.includes(preference)}
                     onChange={() => handlePreferenceToggle(preference)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-400 focus:ring-blue-300 border-blue-300 rounded"
                   />
-                  <span className="ml-2 text-sm text-gray-700">{preference}</span>
+                  <span className="ml-3 text-sm font-medium text-blue-100">{preference}</span>
                 </label>
               ))}
             </div>
@@ -125,9 +128,9 @@ const OnboardingPage: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting || !formData.name || !formData.city}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+            className="btn-primary w-full py-3 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? 'Saving...' : 'Continue'}
+            {isSubmitting ? 'Saving...' : 'Continue to Mood Selection'}
           </button>
         </form>
       </div>

@@ -13,37 +13,43 @@ const MoodInputPage: React.FC = () => {
       id: 'relaxed',
       label: 'Relaxed',
       emoji: '😌',
-      description: 'Looking for peaceful, calm places'
+      description: 'Looking for peaceful, calm places',
+      color: 'mood-relaxed'
     },
     {
       id: 'energetic',
       label: 'Energetic',
       emoji: '⚡',
-      description: 'Want to be active and lively'
+      description: 'Want to be active and lively',
+      color: 'mood-energetic'
     },
     {
       id: 'adventurous',
       label: 'Adventurous',
       emoji: '🏔️',
-      description: 'Ready for new experiences'
+      description: 'Ready for new experiences',
+      color: 'mood-adventurous'
     },
     {
       id: 'social',
       label: 'Social',
       emoji: '👥',
-      description: 'Want to connect with people'
+      description: 'Want to connect with people',
+      color: 'mood-social'
     },
     {
       id: 'creative',
       label: 'Creative',
       emoji: '🎨',
-      description: 'Feeling inspired and artistic'
+      description: 'Feeling inspired and artistic',
+      color: 'mood-creative'
     },
     {
       id: 'focused',
       label: 'Focused',
       emoji: '🎯',
-      description: 'Need to concentrate or work'
+      description: 'Need to concentrate or work',
+      color: 'mood-focused'
     }
   ];
 
@@ -86,51 +92,54 @@ const MoodInputPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto form-card">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">How are you feeling?</h1>
-          <p className="text-gray-600">This helps us recommend the perfect places for you</p>
+          <h1 className="text-4xl font-display font-bold text-white mb-2">How are you feeling?</h1>
+          <p className="text-blue-100 text-lg">This helps us recommend the perfect places for you</p>
+          <div className="mt-4 floating">
+            <span className="text-4xl">💭</span>
+          </div>
         </div>
 
         <div className="space-y-6">
           {/* Preset Mood Options */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">Choose your mood:</h2>
+            <h2 className="text-xl font-semibold text-blue-100 mb-6">Choose your mood:</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {moodOptions.map((mood) => (
                 <button
                   key={mood.id}
                   onClick={() => handleMoodSelect(mood.id)}
-                  className={`p-4 rounded-lg border-2 transition-all duration-200 ${
+                  className={`mood-card transition-all duration-300 ${
                     selectedMood === mood.id
-                      ? 'border-blue-500 bg-blue-50 shadow-md'
-                      : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                      ? `border-2 bg-${mood.color}-50 border-${mood.color}-500 shadow-lg`
+                      : 'border-2 border-blue-300 hover:border-blue-200 bg-blue-900/30'
                   }`}
                 >
                   <div className="text-center">
-                    <div className="text-3xl mb-2">{mood.emoji}</div>
-                    <div className="font-semibold text-gray-800 mb-1">{mood.label}</div>
-                    <div className="text-sm text-gray-600">{mood.description}</div>
+                    <div className={`text-4xl mb-3 ${selectedMood === mood.id ? 'bounce-gentle' : ''}`}>{mood.emoji}</div>
+                    <div className="font-semibold text-blue-100 mb-2 text-lg">{mood.label}</div>
+                    <div className="text-sm text-blue-200">{mood.description}</div>
                   </div>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">or</span>
-            </div>
-          </div>
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-blue-300/50" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-blue-900 text-blue-200 font-medium">or</span>
+                </div>
+              </div>
 
           {/* Custom Mood Input */}
           <div>
-            <label htmlFor="customMood" className="block text-lg font-semibold text-gray-800 mb-2">
+            <label htmlFor="customMood" className="block text-xl font-semibold text-blue-100 mb-3">
               Describe your mood in your own words:
             </label>
             <input
@@ -139,7 +148,7 @@ const MoodInputPage: React.FC = () => {
               value={customMood}
               onChange={handleCustomMoodChange}
               placeholder="e.g., nostalgic, excited, contemplative..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+              className="form-input text-lg"
             />
           </div>
 
@@ -147,25 +156,25 @@ const MoodInputPage: React.FC = () => {
           <button
             onClick={handleSubmit}
             disabled={isSubmitting || (!selectedMood && !customMood.trim())}
-            className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 text-lg font-semibold"
+            className="btn-primary w-full py-4 text-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? 'Finding places...' : 'Find My Perfect Places!'}
           </button>
         </div>
 
-        {/* Current Selection Display */}
-        {(selectedMood || customMood) && (
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-blue-800 font-medium">
-              Selected mood: <span className="font-semibold">
-                {selectedMood 
-                  ? moodOptions.find(m => m.id === selectedMood)?.label 
-                  : customMood
-                }
-              </span>
-            </p>
-          </div>
-        )}
+            {/* Current Selection Display */}
+            {(selectedMood || customMood) && (
+              <div className="mt-6 p-4 bg-blue-800/30 rounded-lg border border-blue-300/30">
+                <p className="text-blue-100 font-medium">
+                  Selected mood: <span className="font-semibold text-white">
+                    {selectedMood
+                      ? moodOptions.find(m => m.id === selectedMood)?.label
+                      : customMood
+                    }
+                  </span>
+                </p>
+              </div>
+            )}
       </div>
     </div>
   );
