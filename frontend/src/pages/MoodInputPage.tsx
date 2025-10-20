@@ -82,6 +82,11 @@ const MoodInputPage: React.FC = () => {
       };
 
       await axios.post('http://localhost:5001/api/mood', moodData);
+      
+      // Save mood to localStorage for dashboard to use
+      const moodLabel = selectedMood ? moodOptions.find(m => m.id === selectedMood)?.label : customMood;
+      localStorage.setItem('currentMood', moodLabel || '');
+      
       alert('Mood recorded! Let\'s find some great places for you.');
       navigate('/dashboard');
     } catch (error) {
