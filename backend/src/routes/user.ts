@@ -37,10 +37,8 @@ router.post('/', (req, res) => {
 
     if (existingUserIndex >= 0) {
       users[existingUserIndex] = { ...user, id: users[existingUserIndex].id };
-      console.log(`Updated user: ${user.name} from ${user.city}`);
     } else {
       users.push(user);
-      console.log(`Created new user: ${user.name} from ${user.city}`);
     }
 
     res.status(201).json({
@@ -61,56 +59,5 @@ router.post('/', (req, res) => {
   }
 });
 
-// GET /api/user - Get user preferences (for demo)
-router.get('/', (req, res) => {
-  try {
-    res.json({
-      message: 'Users retrieved successfully',
-      users: users.map(u => ({
-        id: u.id,
-        name: u.name,
-        city: u.city,
-        preferences: u.preferences,
-        createdAt: u.createdAt
-      }))
-    });
-  } catch (error) {
-    console.error('Error retrieving users:', error);
-    res.status(500).json({ 
-      error: 'Internal server error' 
-    });
-  }
-});
-
-// GET /api/user/:id - Get specific user
-router.get('/:id', (req, res) => {
-  try {
-    const { id } = req.params;
-    const user = users.find(u => u.id === id);
-
-    if (!user) {
-      return res.status(404).json({ 
-        error: 'User not found' 
-      });
-    }
-
-    res.json({
-      message: 'User retrieved successfully',
-      user: {
-        id: user.id,
-        name: user.name,
-        city: user.city,
-        preferences: user.preferences,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt
-      }
-    });
-  } catch (error) {
-    console.error('Error retrieving user:', error);
-    res.status(500).json({ 
-      error: 'Internal server error' 
-    });
-  }
-});
 
 export default router;

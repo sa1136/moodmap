@@ -1,79 +1,14 @@
 import { Router } from "express";
-import axios from "axios";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 const router = Router();
-
-// API configuration
-const FOURSQUARE_API_KEY = process.env.FOURSQUARE_API_KEY;
-const FOURSQUARE_API_SECRET = process.env.FOURSQUARE_API_SECRET;
-const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY; // For geocoding
-
-// Geocoding function to convert city name to coordinates
-async function getCoordinates(cityName: string): Promise<{lat: number, lng: number} | null> {
-  try {
-    // Try OpenWeatherMap Geocoding API first (free tier: 1000 calls/day)
-    if (OPENWEATHER_API_KEY) {
-      const response = await axios.get(`http://api.openweathermap.org/geo/1.0/direct`, {
-        params: {
-          q: cityName,
-          limit: 1,
-          appid: OPENWEATHER_API_KEY
-        }
-      });
-      
-      if (response.data && response.data.length > 0) {
-        return {
-          lat: response.data[0].lat,
-          lng: response.data[0].lon
-        };
-      }
-    }
-    
-    // Fallback to Nominatim (OpenStreetMap) - completely free
-    const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
-      params: {
-        q: cityName,
-        format: 'json',
-        limit: 1
-      },
-      headers: {
-        'User-Agent': 'MoodMap/1.0'
-      }
-    });
-    
-    if (response.data && response.data.length > 0) {
-      return {
-        lat: parseFloat(response.data[0].lat),
-        lng: parseFloat(response.data[0].lon)
-      };
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('Geocoding error:', error);
-    return null;
-  }
-}
 
 // Get places based on mood and location
 router.get("/", async (req, res) => {
   try {
-    const { mood, city, lat, lng } = req.query;
-    
-    console.log("Places API - Received request with params:", { mood, city, lat, lng });
-    
-    // For now, use enhanced mock data until Foursquare API issues are resolved
-    // TODO: Fix Foursquare API integration
-    console.log("Using enhanced mock data for better user experience");
+    const { mood, city } = req.query;
     const mockData = getMockPlaces(mood as string, city as string);
     return res.json(mockData);
-
   } catch (error) {
-    console.error('Error fetching places:', error);
-    // Fallback to mock data on error
     res.json(getMockPlaces(req.query.mood as string, req.query.city as string));
   }
 });
@@ -558,15 +493,11 @@ function getMockPlaces(mood?: string, city?: string) {
     ]
   };
 
-  console.log(`Mock data - Looking for mood: "${normalizedMood}" in available moods:`, Object.keys(mockPlaces));
-  
   const selectedPlaces = mockPlaces[normalizedMood as keyof typeof mockPlaces];
   
   if (selectedPlaces) {
-    console.log(`Mock data - Found ${selectedPlaces.length} places for mood "${normalizedMood}"`);
     return selectedPlaces;
   } else {
-    console.log(`Mock data - No specific places found for mood "${normalizedMood}", returning default places`);
     return [
       { 
         id: 31, 

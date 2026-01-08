@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/OnboardingPage.css';
@@ -16,6 +16,8 @@ const OnboardingPage: React.FC = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const preferenceOptions = [
     'Cafes & Coffee',
@@ -37,48 +39,112 @@ const OnboardingPage: React.FC = () => {
       [name]: value
     }));
 
-    // If it's the city input, search for suggestions
-    if (name === 'city' && value.length > 2) {
-      searchLocationSuggestions(value);
-    } else if (name === 'city' && value.length <= 2) {
-      setLocationSuggestions([]);
-      setShowSuggestions(false);
+    // If it's the city input, debounce the search for suggestions
+    if (name === 'city') {
+      // Clear previous timeout
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+
+      if (value.length > 2) {
+        // Debounce the search by 300ms
+        const timeout = setTimeout(() => {
+          searchLocationSuggestions(value);
+        }, 300);
+        setSearchTimeout(timeout);
+      } else {
+        setLocationSuggestions([]);
+        setShowSuggestions(false);
+      }
     }
   };
 
   // Debounced search for location suggestions
   const searchLocationSuggestions = async (query: string) => {
-    if (query.length < 3) return;
+    if (query.length < 2) return;
     
     setIsLoadingSuggestions(true);
     try {
-      // Use Nominatim API for autocomplete (free, no API key needed)
+      // Use Nominatim API for autocomplete with better parameters
+      // Add 'accept-language' for better results and 'featuretype' to prioritize cities
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1&extratags=1`
+        `https://nominatim.openstreetmap.org/search?` +
+        `q=${encodeURIComponent(query)}` +
+        `&format=json` +
+        `&limit=8` +
+        `&addressdetails=1` +
+        `&extratags=1` +
+        `&featuretype=city,town,village,municipality` +
+        `&accept-language=en`,
+        {
+          headers: {
+            'User-Agent': 'MoodMap/1.0'
+          }
+        }
       );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch location suggestions');
+      }
+      
       const data = await response.json();
       
-      const suggestions = data.map((item: any) => ({
-        display_name: item.display_name,
-        lat: parseFloat(item.lat),
-        lon: parseFloat(item.lon),
-        city: item.address?.city || item.address?.town || item.address?.village || item.address?.municipality,
-        country: item.address?.country,
-        state: item.address?.state
-      })).filter((item: any) => item.city); // Only include results with city names
+      // Process and format suggestions more flexibly
+      const suggestions = data
+        .map((item: any) => {
+          const address = item.address || {};
+          
+          // Try multiple fields to get the city/town name
+          const cityName = 
+            address.city || 
+            address.town || 
+            address.village || 
+            address.municipality ||
+            address.county ||
+            address.state_district ||
+            (item.display_name?.split(',')[0]?.trim()); // Fallback to first part of display name
+          
+          // Build a more complete location string
+          const locationParts = [];
+          if (cityName) locationParts.push(cityName);
+          if (address.state) locationParts.push(address.state);
+          if (address.country) locationParts.push(address.country);
+          
+          return {
+            display_name: item.display_name,
+            lat: parseFloat(item.lat),
+            lon: parseFloat(item.lon),
+            city: cityName,
+            fullLocation: locationParts.join(', '),
+            country: address.country,
+            state: address.state,
+            type: item.type || item.class,
+            importance: item.importance || 0
+          };
+        })
+        // Filter out results without a valid location name
+        .filter((item: any) => item.city && item.city.trim().length > 0)
+        // Sort by importance (higher importance = more relevant)
+        .sort((a: any, b: any) => (b.importance || 0) - (a.importance || 0))
+        // Limit to top 5 most relevant results
+        .slice(0, 5);
       
       setLocationSuggestions(suggestions);
-      setShowSuggestions(true);
+      setShowSuggestions(suggestions.length > 0);
     } catch (error) {
       console.error('Error fetching location suggestions:', error);
       setLocationSuggestions([]);
+      setShowSuggestions(false);
     } finally {
       setIsLoadingSuggestions(false);
     }
   };
 
   const handleLocationSelect = (suggestion: any) => {
-    const cityName = suggestion.city + (suggestion.country ? `, ${suggestion.country}` : '');
+    // Use the full location string if available, otherwise build it
+    const cityName = suggestion.fullLocation || 
+      (suggestion.city + (suggestion.state ? `, ${suggestion.state}` : '') + (suggestion.country ? `, ${suggestion.country}` : ''));
+    
     setFormData(prev => ({
       ...prev,
       city: cityName
@@ -90,6 +156,7 @@ const OnboardingPage: React.FC = () => {
     // Save coordinates for more accurate place search
     localStorage.setItem('userLat', suggestion.lat.toString());
     localStorage.setItem('userLng', suggestion.lon.toString());
+    localStorage.setItem('userCity', cityName);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -132,33 +199,98 @@ const OnboardingPage: React.FC = () => {
 
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by this browser.');
+      alert('Geolocation is not supported by this browser. Please enter your city manually.');
       return;
     }
+
+    setIsGettingLocation(true);
+
+    // Configure geolocation options
+    const geoOptions = {
+      enableHighAccuracy: true,
+      timeout: 10000, // 10 seconds timeout
+      maximumAge: 300000 // Accept cached position if less than 5 minutes old
+    };
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
         
         try {
-          // Reverse geocoding to get city name
-          const response = await fetch(
-            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-          );
-          const data = await response.json();
-          
-          const cityName = data.city || data.locality || data.principalSubdivision || 'Current Location';
+          // Try multiple reverse geocoding services for better reliability
+          let cityName = 'Current Location';
+          let reverseGeocodeSuccess = false;
+
+          // Try BigDataCloud first (free, no API key needed)
+          try {
+            const response = await fetch(
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+              { 
+                method: 'GET',
+                headers: {
+                  'Accept': 'application/json'
+                }
+              }
+            );
+            
+            if (response.ok) {
+              const data = await response.json();
+              cityName = data.city || data.locality || data.principalSubdivision || data.countryName || 'Current Location';
+              if (cityName !== 'Current Location') {
+                reverseGeocodeSuccess = true;
+              }
+            }
+          } catch (error) {
+            // BigDataCloud failed, trying fallback
+          }
+
+          // Fallback to Nominatim (OpenStreetMap) if BigDataCloud fails
+          if (!reverseGeocodeSuccess) {
+            try {
+              const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`,
+                {
+                  headers: {
+                    'User-Agent': 'MoodMap/1.0'
+                  }
+                }
+              );
+              
+              if (response.ok) {
+                const data = await response.json();
+                const address = data.address || {};
+                cityName = address.city || address.town || address.village || address.municipality || address.county || 'Current Location';
+                if (cityName !== 'Current Location') {
+                  reverseGeocodeSuccess = true;
+                }
+              }
+            } catch (error) {
+              // Nominatim also failed
+            }
+          }
+
+          // If both fail, use coordinates as fallback
+          if (!reverseGeocodeSuccess) {
+            cityName = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+          }
           
           setFormData(prev => ({
             ...prev,
             city: cityName
           }));
           
-          // Also save coordinates for more accurate place search
+          // Always save coordinates for more accurate place search
           localStorage.setItem('userLat', latitude.toString());
           localStorage.setItem('userLng', longitude.toString());
+          localStorage.setItem('userCity', cityName);
           
-          alert(`Location detected: ${cityName}`);
+          setIsGettingLocation(false);
+          
+          if (reverseGeocodeSuccess) {
+            alert(`Location detected: ${cityName}`);
+          } else {
+            alert(`Location coordinates saved. Please enter your city name manually for better results.`);
+          }
         } catch (error) {
           console.error('Error getting location name:', error);
           setFormData(prev => ({
@@ -167,14 +299,45 @@ const OnboardingPage: React.FC = () => {
           }));
           localStorage.setItem('userLat', latitude.toString());
           localStorage.setItem('userLng', longitude.toString());
+          setIsGettingLocation(false);
+          alert('Got your coordinates but couldn\'t determine city name. Please enter your city manually.');
         }
       },
       (error) => {
-        console.error('Error getting location:', error);
-        alert('Unable to get your location. Please enter your city manually.');
-      }
+        setIsGettingLocation(false);
+        console.error('Geolocation error:', error);
+        
+        let errorMessage = 'Unable to get your location. ';
+        
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage += 'Location access was denied. Please enable location permissions in your browser settings or enter your city manually.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage += 'Location information is unavailable. Please enter your city manually.';
+            break;
+          case error.TIMEOUT:
+            errorMessage += 'Location request timed out. Please try again or enter your city manually.';
+            break;
+          default:
+            errorMessage += 'An unknown error occurred. Please enter your city manually.';
+            break;
+        }
+        
+        alert(errorMessage);
+      },
+      geoOptions
     );
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTimeout]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -313,11 +476,14 @@ const OnboardingPage: React.FC = () => {
                             }
                           }}
                         >
-                          <div style={{ fontWeight: '500', color: '#1f2937' }}>
+                          <div style={{ fontWeight: '500', color: '#1f2937', marginBottom: '4px' }}>
                             {suggestion.city}
                           </div>
-                          <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                            {suggestion.state && `${suggestion.state}, `}{suggestion.country}
+                          <div style={{ fontSize: '13px', color: '#6b7280' }}>
+                            {suggestion.fullLocation || 
+                              (suggestion.state && suggestion.country 
+                                ? `${suggestion.state}, ${suggestion.country}`
+                                : suggestion.country || suggestion.state || '')}
                           </div>
                         </div>
                       ))}
@@ -328,30 +494,55 @@ const OnboardingPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleGetCurrentLocation}
+                  disabled={isGettingLocation}
                   style={{ 
                     padding: '8px 12px', 
                     fontSize: '12px',
                     whiteSpace: 'nowrap',
-                    background: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
+                    background: isGettingLocation 
+                      ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)'
+                      : 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
                     color: 'white',
                     border: 'none',
                     borderRadius: '6px',
-                    cursor: 'pointer',
+                    cursor: isGettingLocation ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s ease',
                     boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                     minWidth: 'auto',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    opacity: isGettingLocation ? 0.7 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
-                    e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+                    if (!isGettingLocation) {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                      e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
-                    e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
+                    if (!isGettingLocation) {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
+                      e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
+                    }
                   }}
                 >
-                  📍 Current
+                  {isGettingLocation ? (
+                    <>
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        border: '2px solid rgba(255,255,255,0.3)',
+                        borderTop: '2px solid white',
+                        borderRadius: '50%',
+                        animation: 'spin 0.8s linear infinite'
+                      }}></div>
+                      <span>Locating...</span>
+                    </>
+                  ) : (
+                    <span>📍 Current</span>
+                  )}
                 </button>
               </div>
             </div>
