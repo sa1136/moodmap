@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { generatePersonalizedRecommendations, generateRecommendationExplanation, Place, UserContext } from "../services/aiService";
 import { vectorStore } from "../services/vectorStore";
+import { fetchPlacesFromFoursquare, fetchPlacesFromGoogle } from "../services/placesApi";
 
 const router = Router();
 
@@ -16,8 +17,42 @@ router.get("/", async (req, res) => {
       });
     }
 
-    // Get all available places from mock data
-    const allPlaces = getAllMockPlaces(city as string);
+    // Try to fetch real places from APIs, fallback to mock data
+    let allPlaces: Place[] = [];
+    
+    // Try Foursquare API first
+    if (process.env.FOURSQUARE_API_KEY && process.env.FOURSQUARE_API_SECRET) {
+      const foursquarePlaces = await fetchPlacesFromFoursquare(
+        city as string,
+        lat ? parseFloat(lat as string) : undefined,
+        lng ? parseFloat(lng as string) : undefined,
+        mood as string
+      );
+      if (foursquarePlaces.length > 0) {
+        allPlaces = foursquarePlaces;
+        console.log(`Fetched ${allPlaces.length} places from Foursquare`);
+      }
+    }
+    
+    // Try Google Places API if Foursquare didn't return results
+    if (allPlaces.length === 0 && process.env.GOOGLE_PLACES_API_KEY) {
+      const googlePlaces = await fetchPlacesFromGoogle(
+        city as string,
+        lat ? parseFloat(lat as string) : undefined,
+        lng ? parseFloat(lng as string) : undefined,
+        mood as string
+      );
+      if (googlePlaces.length > 0) {
+        allPlaces = googlePlaces;
+        console.log(`Fetched ${allPlaces.length} places from Google Places`);
+      }
+    }
+    
+    // Fallback to mock data if no API returned results
+    if (allPlaces.length === 0) {
+      console.log('No API configured or no results found, using mock data');
+      allPlaces = getAllMockPlaces(city as string);
+    }
     
     // Initialize vector store if not already done
     if (!vectorStore.getStats().initialized) {

@@ -28,7 +28,7 @@ MoodMap is a web application that provides personalized location recommendations
 **Frontend:** React.js + TypeScript + Tailwind CSS  
 **Backend:** Node.js + Express.js + TypeScript  
 **AI/ML:** OpenAI GPT-4o-mini, Text Embeddings (text-embedding-3-small), RAG (Retrieval-Augmented Generation)  
-**APIs:** Foursquare Places API, OpenWeatherMap, Nominatim  
+**APIs:** Foursquare Places API, Google Places API (optional), OpenWeatherMap, Nominatim  
 **Location Services:** Geolocation API, BigDataCloud Reverse Geocoding  
 **Vector Storage:** In-memory vector store (production-ready for Pinecone/Weaviate integration)  
 
@@ -108,7 +108,7 @@ MoodMap is a web application that provides personalized location recommendations
 
 ## 🔑 API Keys Setup
 
-### OpenAI API (Required)
+### OpenAI API (Required for AI features)
 1. Visit [OpenAI Platform](https://platform.openai.com/)
 2. Sign up or log in to your account
 3. Navigate to [API Keys](https://platform.openai.com/api-keys)
@@ -116,11 +116,33 @@ MoodMap is a web application that provides personalized location recommendations
 5. Add it to your `.env` file as `OPENAI_API_KEY`
 6. **Note:** The app will work without this key but will use fallback mock data instead of AI recommendations
 
-### Foursquare Places API (Optional)
+### Places Data Sources
+The app fetches real places in this priority order:
+1. **Foursquare Places API** (if configured) - Primary source for real location data
+2. **Google Places API** (if configured) - Alternative source if Foursquare is unavailable
+3. **Mock Data** (fallback) - Hardcoded sample places if no API is configured
+
+**Note:** Without API keys, the app uses mock/demo data. To get real places, configure at least one of the above APIs.
+
+### Foursquare Places API (Recommended for real places)
 1. Visit [Foursquare Developer Console](https://developer.foursquare.com/)
 2. Create a new project
-3. Get your API Key and Client Secret
-4. Add them to your `.env` file
+3. Get your API Key (Client ID) and Client Secret
+4. Add them to your `.env` file:
+   ```env
+   FOURSQUARE_API_KEY=your_client_id_here
+   FOURSQUARE_API_SECRET=your_client_secret_here
+   ```
+
+### Google Places API (Alternative to Foursquare)
+1. Visit [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Places API
+4. Create credentials (API Key)
+5. Add it to your `.env` file:
+   ```env
+   GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
+   ```
 
 ### OpenWeatherMap API (Optional)
 1. Visit [OpenWeatherMap API](https://openweathermap.org/api)
