@@ -39,15 +39,12 @@ const OnboardingPage: React.FC = () => {
       [name]: value
     }));
 
-    // If it's the city input, debounce the search for suggestions
     if (name === 'city') {
-      // Clear previous timeout
       if (searchTimeout) {
         clearTimeout(searchTimeout);
       }
 
       if (value.length > 2) {
-        // Debounce the search by 300ms
         const timeout = setTimeout(() => {
           searchLocationSuggestions(value);
         }, 300);
@@ -59,42 +56,23 @@ const OnboardingPage: React.FC = () => {
     }
   };
 
-  // Debounced search for location suggestions
   const searchLocationSuggestions = async (query: string) => {
     if (query.length < 2) return;
     
     setIsLoadingSuggestions(true);
     try {
-      // Use Nominatim API for autocomplete with better parameters
-      // Add 'accept-language' for better results and 'featuretype' to prioritize cities
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?` +
-        `q=${encodeURIComponent(query)}` +
-        `&format=json` +
-        `&limit=8` +
-        `&addressdetails=1` +
-        `&extratags=1` +
-        `&featuretype=city,town,village,municipality` +
-        `&accept-language=en`,
-        {
-          headers: {
-            'User-Agent': 'MoodMap/1.0'
-          }
+      const response = await axios.get('http://localhost:5001/api/locations/search', {
+        params: {
+          q: query
         }
-      );
+      });
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch location suggestions');
-      }
+      const data = response.data;
       
-      const data = await response.json();
-      
-      // Process and format suggestions more flexibly
       const suggestions = data
         .map((item: any) => {
           const address = item.address || {};
           
-          // Try multiple fields to get the city/town name
           const cityName = 
             address.city || 
             address.town || 
@@ -102,9 +80,8 @@ const OnboardingPage: React.FC = () => {
             address.municipality ||
             address.county ||
             address.state_district ||
-            (item.display_name?.split(',')[0]?.trim()); // Fallback to first part of display name
+            (item.display_name?.split(',')[0]?.trim());
           
-          // Build a more complete location string
           const locationParts = [];
           if (cityName) locationParts.push(cityName);
           if (address.state) locationParts.push(address.state);
@@ -122,11 +99,8 @@ const OnboardingPage: React.FC = () => {
             importance: item.importance || 0
           };
         })
-        // Filter out results without a valid location name
         .filter((item: any) => item.city && item.city.trim().length > 0)
-        // Sort by importance (higher importance = more relevant)
         .sort((a: any, b: any) => (b.importance || 0) - (a.importance || 0))
-        // Limit to top 5 most relevant results
         .slice(0, 5);
       
       setLocationSuggestions(suggestions);
@@ -141,7 +115,6 @@ const OnboardingPage: React.FC = () => {
   };
 
   const handleLocationSelect = (suggestion: any) => {
-    // Use the full location string if available, otherwise build it
     const cityName = suggestion.fullLocation || 
       (suggestion.city + (suggestion.state ? `, ${suggestion.state}` : '') + (suggestion.country ? `, ${suggestion.country}` : ''));
     
@@ -153,7 +126,6 @@ const OnboardingPage: React.FC = () => {
     setShowSuggestions(false);
     setSelectedSuggestionIndex(-1);
     
-    // Save coordinates for more accurate place search
     localStorage.setItem('userLat', suggestion.lat.toString());
     localStorage.setItem('userLng', suggestion.lon.toString());
     localStorage.setItem('userCity', cityName);
@@ -217,11 +189,9 @@ const OnboardingPage: React.FC = () => {
         const { latitude, longitude } = position.coords;
         
         try {
-          // Try multiple reverse geocoding services for better reliability
           let cityName = 'Current Location';
           let reverseGeocodeSuccess = false;
 
-          // Try BigDataCloud first (free, no API key needed)
           try {
             const response = await fetch(
               `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
@@ -241,10 +211,8 @@ const OnboardingPage: React.FC = () => {
               }
             }
           } catch (error) {
-            // BigDataCloud failed, trying fallback
           }
 
-          // Fallback to Nominatim (OpenStreetMap) if BigDataCloud fails
           if (!reverseGeocodeSuccess) {
             try {
               const response = await fetch(
@@ -265,11 +233,9 @@ const OnboardingPage: React.FC = () => {
                 }
               }
             } catch (error) {
-              // Nominatim also failed
             }
           }
 
-          // If both fail, use coordinates as fallback
           if (!reverseGeocodeSuccess) {
             cityName = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
           }
@@ -279,7 +245,6 @@ const OnboardingPage: React.FC = () => {
             city: cityName
           }));
           
-          // Always save coordinates for more accurate place search
           localStorage.setItem('userLat', latitude.toString());
           localStorage.setItem('userLng', longitude.toString());
           localStorage.setItem('userCity', cityName);
@@ -330,7 +295,6 @@ const OnboardingPage: React.FC = () => {
     );
   };
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (searchTimeout) {
@@ -346,7 +310,6 @@ const OnboardingPage: React.FC = () => {
     try {
       await axios.post('http://localhost:5001/api/user', formData);
       
-      // Save city to localStorage for dashboard to use
       localStorage.setItem('userCity', formData.city);
       
       alert('Preferences saved successfully!');
@@ -371,7 +334,6 @@ const OnboardingPage: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="onboarding-form">
-          {/* Name Input */}
           <div className="onboarding-field">
             <label htmlFor="name" className="onboarding-label">
               What's your name?
@@ -388,7 +350,6 @@ const OnboardingPage: React.FC = () => {
             />
           </div>
 
-          {/* City Input */}
           <div className="onboarding-field">
             <label htmlFor="city" className="onboarding-label">
               What city are you in?
@@ -409,7 +370,6 @@ const OnboardingPage: React.FC = () => {
                       }
                     }}
                     onBlur={() => {
-                      // Delay hiding suggestions to allow clicking on them
                       setTimeout(() => setShowSuggestions(false), 200);
                     }}
                     required

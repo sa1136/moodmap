@@ -2,247 +2,161 @@ import axios from 'axios';
 import { Place } from './aiService';
 
 /**
- * Fetch real places from Foursquare API
+ * Fetch places from OpenStreetMap/Nominatim (100% FREE, no API key required!)
+ * This is a great free alternative that doesn't require any registration.
  */
-export async function fetchPlacesFromFoursquare(
+function extractCityName(fullAddress: string): string {
+  const parts = fullAddress.split(',');
+  return parts[0]?.trim() || fullAddress;
+}
+
+// Helper function to add delay (rate limiting for Nominatim)
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export async function fetchPlacesFromOpenStreetMap(
   city: string,
   lat?: number,
   lng?: number,
-  category?: string
+  mood?: string
 ): Promise<Place[]> {
-  const apiKey = process.env.FOURSQUARE_API_KEY;
-  const apiSecret = process.env.FOURSQUARE_API_SECRET;
-
-  if (!apiKey || !apiSecret) {
-    console.warn('Foursquare API credentials not configured');
-    return [];
-  }
-
   try {
-    // Build query based on location
-    let query = city;
-    let ll = '';
+    const cityName = extractCityName(city);
+    console.log(`[OpenStreetMap] Fetching places for city: ${cityName}, mood: ${mood}`);
     
-    if (lat && lng) {
-      ll = `${lat},${lng}`;
-      query = ''; // Use coordinates instead of city name
-    }
-
-    // Map mood to Foursquare categories
-    const categoryId = mapMoodToCategory(category);
-
-    const url = 'https://api.foursquare.com/v2/venues/search';
-    const params: any = {
-      client_id: apiKey,
-      client_secret: apiSecret,
-      v: '20240101', // API version
-      limit: 50,
-    };
-
-    if (ll) {
-      params.ll = ll;
-      params.radius = 5000; // 5km radius
-    } else {
-      params.near = city;
-    }
-
-    if (categoryId) {
-      params.categoryId = categoryId;
-    }
-
-    const response = await axios.get(url, { params });
-    const venues = response.data.response?.venues || [];
-
-    // Transform Foursquare venues to our Place format
-    return venues.map((venue: any, index: number) => {
-      const location = venue.location || {};
-      const categories = venue.categories || [];
-      const primaryCategory = categories[0] || {};
-
-      return {
-        id: parseInt(venue.id?.substring(0, 8) || `${index}`, 16) || index + 1000,
-        name: venue.name || 'Unknown Place',
-        type: primaryCategory.name || 'Venue',
-        rating: venue.rating ? venue.rating.toFixed(1) : '4.0',
-        address: [
-          location.address,
-          location.city,
-          location.state,
-          location.country,
-        ]
-          .filter(Boolean)
-          .join(', ') || city,
-        city: location.city || city,
-        description: `${primaryCategory.name || 'A great place'} in ${city}. ${venue.description || 'Check it out!'}`,
-        hours: venue.hours?.status || 'Hours vary',
-        price: venue.price?.tier
-          ? '$'.repeat(venue.price.tier)
-          : '$$',
-        phone: venue.contact?.formattedPhone || venue.contact?.phone || '',
-        website: venue.url || venue.shortUrl || '',
-        amenities: categories.slice(0, 3).map((cat: any) => cat.name),
-        photos: venue.photos?.groups?.[0]?.items?.slice(0, 2).map((photo: any) => 
-          `${photo.prefix}${photo.width}x${photo.height}${photo.suffix}`
-        ) || [
-          'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400',
-          'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=400',
-        ],
-      };
-    });
-  } catch (error) {
-    console.error('Error fetching places from Foursquare:', error);
-    return [];
-  }
-}
-
-/**
- * Map mood to Foursquare category IDs
- */
-function mapMoodToCategory(mood?: string): string {
-  const moodLower = mood?.toLowerCase() || '';
-  
-  const categoryMap: Record<string, string> = {
-    happy: '4d4b7105d754a06376d81259', // Arts & Entertainment
-    excited: '4d4b7105d754a06378d81259', // Nightlife
-    relaxed: '4bf58dd8d48988d1e2931735', // Spa
-    creative: '4d4b7105d754a06376d81259', // Arts & Entertainment
-    adventurous: '4d4b7105d754a06377d81259', // Outdoors & Recreation
-    social: '4d4b7105d754a06374d81259', // Food
-    peaceful: '4bf58dd8d48988d163941735', // Park
-    energetic: '4bf58dd8d48988d175941735', // Gym / Fitness Center
-    curious: '4bf58dd8d48988d181941735', // Museum
-    romantic: '4d4b7105d754a06374d81259', // Food (restaurants)
-  };
-
-  return categoryMap[moodLower] || '';
-}
-
-/**
- * Fetch places from Google Places API (alternative)
- */
-export async function fetchPlacesFromGoogle(
-  city: string,
-  lat?: number,
-  lng?: number,
-  type?: string
-): Promise<Place[]> {
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
-
-  if (!apiKey) {
-    console.warn('Google Places API key not configured');
-    return [];
-  }
-
-  try {
-    let location = '';
-    if (lat && lng) {
-      location = `${lat},${lng}`;
-    } else {
-      // Geocode city to get coordinates first
-      const geocodeUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
+    console.log(`[OpenStreetMap] Geocoding city: ${cityName}`);
+    await delay(2000);
+    
+    const geocodeUrl = 'https://nominatim.openstreetmap.org/search';
+    let searchLat: number | undefined;
+    let searchLng: number | undefined;
+    
+    try {
       const geocodeResponse = await axios.get(geocodeUrl, {
         params: {
-          address: city,
-          key: apiKey,
+          q: cityName,
+          format: 'json',
+          limit: 1,
+        },
+        headers: {
+          'User-Agent': 'MoodMap/1.0', // Required by Nominatim
         },
       });
 
-      const results = geocodeResponse.data.results;
-      if (results && results.length > 0) {
-        const locationData = results[0].geometry.location;
-        location = `${locationData.lat},${locationData.lng}`;
+      if (geocodeResponse.data && geocodeResponse.data.length > 0) {
+        searchLat = parseFloat(geocodeResponse.data[0].lat);
+        searchLng = parseFloat(geocodeResponse.data[0].lon);
+        console.log(`[OpenStreetMap] Geocoded "${cityName}" to: ${searchLat}, ${searchLng}`);
       } else {
+        console.warn(`[OpenStreetMap] Could not geocode city: ${cityName}`);
         return [];
+      }
+    } catch (error: any) {
+      if (error.response?.status === 418) {
+        console.warn(`[OpenStreetMap] Rate limited during geocoding. Waiting longer...`);
+        await delay(5000);
+        return [];
+      }
+      console.error(`[OpenStreetMap] Error geocoding city: ${cityName}`, error.message);
+      return [];
+    }
+
+    const searchTerms = mapMoodToSearchTerms(mood);
+    console.log(`[OpenStreetMap] Search terms for mood "${mood}":`, searchTerms);
+    
+    const places: Place[] = [];
+    const primaryTerm = searchTerms[0];
+    
+    try {
+      await delay(2000);
+      
+      const query = `${primaryTerm} in ${cityName}`;
+      console.log(`[OpenStreetMap] Searching for: ${query}`);
+      
+      const searchUrl = 'https://nominatim.openstreetmap.org/search';
+      const searchResponse = await axios.get(searchUrl, {
+        params: {
+          q: query,
+          format: 'json',
+          limit: 15,
+          addressdetails: 1,
+        },
+        headers: {
+          'User-Agent': 'MoodMap/1.0',
+        },
+        timeout: 10000,
+      });
+
+      const results = searchResponse.data || [];
+      console.log(`[OpenStreetMap] Found ${results.length} results for "${query}"`);
+      
+      if (results.length > 0) {
+        for (const result of results) {
+          const address = result.address || {};
+          const name = result.name || result.display_name?.split(',')[0] || 'Place';
+          
+          if (places.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+            continue;
+          }
+          
+          places.push({
+            id: parseInt(result.place_id || `${Math.random() * 1000000}`, 10),
+            name,
+            type: result.type || result.class || primaryTerm || 'Place',
+            rating: '4.0',
+            address: result.display_name || `${cityName}`,
+            city: address.city || address.town || address.village || address.municipality || cityName,
+            description: `A ${primaryTerm || 'place'} in ${cityName}. Discovered via OpenStreetMap.`,
+            hours: 'Hours vary',
+            price: '$$',
+            phone: '',
+            website: '',
+            amenities: [result.type || result.class || primaryTerm].filter(Boolean),
+            photos: [
+              'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
+              'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=800&h=600&fit=crop',
+            ],
+          });
+          
+          if (places.length >= 15) break;
+        }
+      }
+    } catch (error: any) {
+      if (error.response?.status === 418) {
+        console.warn(`[OpenStreetMap] Rate limited (418) for "${primaryTerm}". OpenStreetMap has strict rate limits.`);
+        console.warn(`[OpenStreetMap] Will use mock data instead.`);
+      } else {
+        console.error(`[OpenStreetMap] Error searching for "${primaryTerm}":`, error.message);
       }
     }
 
-    // Search for places
-    const placesUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
-    const placesResponse = await axios.get(placesUrl, {
-      params: {
-        location,
-        radius: 5000,
-        type: mapMoodToGoogleType(type),
-        key: apiKey,
-      },
-    });
-
-    const places = placesResponse.data.results || [];
-
-    // Get details for each place (to get more info)
-    const placesWithDetails = await Promise.all(
-      places.slice(0, 20).map(async (place: any) => {
-        try {
-          const detailsUrl = 'https://maps.googleapis.com/maps/api/place/details/json';
-          const detailsResponse = await axios.get(detailsUrl, {
-            params: {
-              place_id: place.place_id,
-              fields: 'name,formatted_address,formatted_phone_number,website,opening_hours,rating,photos,types',
-              key: apiKey,
-            },
-          });
-
-          const details = detailsResponse.data.result;
-          return {
-            ...place,
-            details,
-          };
-        } catch (error) {
-          return place;
-        }
-      })
-    );
-
-    // Transform to our Place format
-    return placesWithDetails.map((place: any, index: number) => {
-      const details = place.details || {};
-      const address = details.formatted_address || place.vicinity || city;
-
-      return {
-        id: parseInt(place.place_id?.substring(0, 8) || `${index}`, 36) || index + 2000,
-        name: place.name || details.name || 'Unknown Place',
-        type: place.types?.[0]?.replace(/_/g, ' ') || 'Place',
-        rating: place.rating ? place.rating.toFixed(1) : '4.0',
-        address,
-        city,
-        description: `${place.types?.[0]?.replace(/_/g, ' ') || 'A great place'} in ${city}.`,
-        hours: details.opening_hours?.weekday_text?.join(', ') || 'Hours vary',
-        price: place.price_level ? '$'.repeat(place.price_level) : '$$',
-        phone: details.formatted_phone_number || '',
-        website: details.website || '',
-        amenities: place.types?.slice(0, 3) || [],
-        photos: details.photos?.slice(0, 2).map((photo: any) => 
-          `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${apiKey}`
-        ) || [
-          'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400',
-          'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=400',
-        ],
-      };
-    });
-  } catch (error) {
-    console.error('Error fetching places from Google Places:', error);
+    console.log(`[OpenStreetMap] Total places found: ${places.length}`);
+    return places;
+  } catch (error: any) {
+    console.error('[OpenStreetMap] Error fetching places:', error.message);
     return [];
   }
 }
 
 /**
- * Map mood to Google Places type
+ * Map mood to search terms for Nominatim
  */
-function mapMoodToGoogleType(mood?: string): string {
+function mapMoodToSearchTerms(mood?: string): string[] {
   const moodLower = mood?.toLowerCase() || '';
   
-  const typeMap: Record<string, string> = {
-    happy: 'art_gallery',
-    excited: 'night_club',
-    relaxed: 'spa',
-    creative: 'art_gallery',
-    adventurous: 'park',
-    social: 'restaurant',
-    peaceful: 'park',
-    energetic: 'gym',
-    curious: 'museum',
-    romantic: 'restaurant',
+  const termMap: Record<string, string[]> = {
+    happy: ['art gallery', 'comedy club', 'entertainment'],
+    excited: ['nightclub', 'adventure park', 'escape room'],
+    relaxed: ['spa', 'park', 'library'],
+    creative: ['art gallery', 'museum', 'art studio'],
+    adventurous: ['hiking trail', 'rock climbing', 'outdoor activities'],
+    social: ['restaurant', 'cafe', 'community center'],
+    peaceful: ['park', 'garden', 'meditation center'],
+    energetic: ['gym', 'fitness center', 'sports complex'],
+    curious: ['museum', 'science center', 'planetarium'],
+    romantic: ['restaurant', 'wine bar', 'scenic overlook'],
   };
 
-  return typeMap[moodLower] || 'establishment';
+  return termMap[moodLower] || ['restaurant', 'cafe', 'park'];
 }

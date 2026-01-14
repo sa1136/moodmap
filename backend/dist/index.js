@@ -13,12 +13,13 @@ app.use(express_1.default.json());
 app.get("/", (req, res) => {
     res.json({ message: "MoodMap backend running 🚀" });
 });
-// Import routes
 const places_1 = __importDefault(require("./routes/places"));
 const user_1 = __importDefault(require("./routes/user"));
 const mood_1 = __importDefault(require("./routes/mood"));
+const locations_1 = __importDefault(require("./routes/locations"));
 app.use("/api/places", places_1.default);
 app.use("/api/user", user_1.default);
 app.use("/api/mood", mood_1.default);
-const PORT = process.env.PORT || 5001; // change from 5000
+app.use("/api/locations", locations_1.default);
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

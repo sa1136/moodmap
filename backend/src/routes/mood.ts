@@ -3,22 +3,18 @@ import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
 
-// In-memory storage for demo purposes (replace with database later)
 let moods: any[] = [];
 
-// POST /api/mood - Save user mood
 router.post('/', (req, res) => {
   try {
     const { mood, isCustom, timestamp } = req.body;
 
-    // Validate required fields
     if (!mood || typeof mood !== 'string') {
       return res.status(400).json({ 
         error: 'Mood is required and must be a string' 
       });
     }
 
-    // Create mood object
     const moodEntry = {
       id: uuidv4(),
       mood: mood.trim(),
@@ -27,7 +23,6 @@ router.post('/', (req, res) => {
       createdAt: new Date().toISOString()
     };
 
-    // Add to moods array
     moods.push(moodEntry);
 
     res.status(201).json({

@@ -1,80 +1,56 @@
 import { Router } from "express";
 import { generatePersonalizedRecommendations, generateRecommendationExplanation, Place, UserContext } from "../services/aiService";
 import { vectorStore } from "../services/vectorStore";
-import { fetchPlacesFromFoursquare, fetchPlacesFromGoogle } from "../services/placesApi";
+import { fetchPlacesFromOpenStreetMap } from "../services/placesApi";
 
 const router = Router();
 
-// Get places based on mood and location using AI
 router.get("/", async (req, res) => {
   try {
     const { mood, city, lat, lng } = req.query;
     
-    // Validate mood is provided
     if (!mood) {
       return res.status(400).json({ 
         error: 'Mood parameter is required' 
       });
     }
 
-    // Try to fetch real places from APIs, fallback to mock data
     let allPlaces: Place[] = [];
     
-    // Try Foursquare API first
-    if (process.env.FOURSQUARE_API_KEY && process.env.FOURSQUARE_API_SECRET) {
-      const foursquarePlaces = await fetchPlacesFromFoursquare(
-        city as string,
-        lat ? parseFloat(lat as string) : undefined,
-        lng ? parseFloat(lng as string) : undefined,
-        mood as string
-      );
-      if (foursquarePlaces.length > 0) {
-        allPlaces = foursquarePlaces;
-        console.log(`Fetched ${allPlaces.length} places from Foursquare`);
-      }
+    let cityName = (city as string) || 'your city';
+    if (cityName.includes(',')) {
+      cityName = cityName.split(',')[0].trim();
+    }
+    console.log(`[Places API] Request - mood: ${mood}, city: ${cityName}, lat: ${lat}, lng: ${lng}`);
+    
+    const osmPlaces = await fetchPlacesFromOpenStreetMap(
+      cityName,
+      lat ? parseFloat(lat as string) : undefined,
+      lng ? parseFloat(lng as string) : undefined,
+      mood as string
+    );
+    
+    if (osmPlaces.length > 0) {
+      allPlaces = osmPlaces;
+      console.log(`✅ Successfully fetched ${allPlaces.length} places from OpenStreetMap`);
+    } else {
+      console.warn(`⚠️  No OpenStreetMap results found for "${cityName}" with mood "${mood}", using mock data`);
+      allPlaces = getAllMockPlaces(cityName);
     }
     
-    // Try Google Places API if Foursquare didn't return results
-    if (allPlaces.length === 0 && process.env.GOOGLE_PLACES_API_KEY) {
-      const googlePlaces = await fetchPlacesFromGoogle(
-        city as string,
-        lat ? parseFloat(lat as string) : undefined,
-        lng ? parseFloat(lng as string) : undefined,
-        mood as string
-      );
-      if (googlePlaces.length > 0) {
-        allPlaces = googlePlaces;
-        console.log(`Fetched ${allPlaces.length} places from Google Places`);
-      }
-    }
-    
-    // Fallback to mock data if no API returned results
-    if (allPlaces.length === 0) {
-      console.log('No API configured or no results found, using mock data');
-      allPlaces = getAllMockPlaces(city as string);
-    }
-    
-    // Initialize vector store if not already done
     if (!vectorStore.getStats().initialized) {
       await vectorStore.initialize(allPlaces, mood as string);
     }
 
-    // Create user context
     const userContext: UserContext = {
       mood: mood as string,
-      city: city as string,
-      lat: lat ? parseFloat(lat as string) : undefined,
-      lng: lng ? parseFloat(lng as string) : undefined,
+      city: cityName,
     };
 
-    // Use AI to generate personalized recommendations
     let recommendedPlaces: Place[];
     
     if (process.env.OPENAI_API_KEY) {
-      // Use AI-powered RAG recommendations
       recommendedPlaces = await generatePersonalizedRecommendations(allPlaces, userContext);
-      
-      // Generate explanation for recommendations
       const explanation = await generateRecommendationExplanation(recommendedPlaces, userContext);
       
       return res.json({
@@ -85,32 +61,34 @@ router.get("/", async (req, res) => {
         city: city || 'your location'
       });
     } else {
-      // Fallback to mock data if OpenAI API key is not configured
       console.warn('OPENAI_API_KEY not found. Using fallback mock data.');
-      recommendedPlaces = getMockPlaces(mood as string, city as string);
+      recommendedPlaces = getMockPlaces(mood as string, cityName);
       
       return res.json({
         places: recommendedPlaces,
-        explanation: `Based on your ${mood} mood, here are some places we think you'll enjoy!`,
+        explanation: `Based on your ${mood} mood, here are some places we think you'll enjoy in ${cityName}!`,
         aiPowered: false,
         mood: mood,
-        city: city || 'your location'
+        city: cityName
       });
     }
   } catch (error) {
     console.error('Error in places route:', error);
     
-    // Fallback to mock data on error
     const { mood, city } = req.query;
-    const fallbackPlaces = getMockPlaces(mood as string, city as string);
+    let fallbackCityName = (city as string) || 'your city';
+    if (fallbackCityName.includes(',')) {
+      fallbackCityName = fallbackCityName.split(',')[0].trim();
+    }
+    const fallbackPlaces = getMockPlaces(mood as string, fallbackCityName);
     
     return res.json({
       places: fallbackPlaces,
-      explanation: `Based on your ${mood || 'current'} mood, here are some places we think you'll enjoy!`,
+      explanation: `Based on your ${mood || 'current'} mood, here are some places we think you'll enjoy in ${fallbackCityName}!`,
       aiPowered: false,
-      error: 'AI service temporarily unavailable, showing fallback recommendations',
+      error: 'Service temporarily unavailable, showing fallback recommendations',
       mood: mood,
-      city: city || 'your location'
+      city: fallbackCityName
     });
   }
 });
@@ -122,7 +100,6 @@ function getAllMockPlaces(city?: string): Place[] {
   const cityName = city || "your city";
   const allPlaces: Place[] = [];
   
-  // Flatten all mood categories into a single array
   const moodCategories = ['happy', 'excited', 'relaxed', 'creative', 'adventurous', 'social', 'peaceful', 'energetic', 'curious', 'romantic'];
   
   moodCategories.forEach(mood => {
@@ -130,7 +107,6 @@ function getAllMockPlaces(city?: string): Place[] {
     allPlaces.push(...places);
   });
   
-  // Remove duplicates based on ID
   const uniquePlaces = Array.from(
     new Map(allPlaces.map(place => [place.id, place])).values()
   );
@@ -143,13 +119,32 @@ function getAllMockPlaces(city?: string): Place[] {
  */
 function getMockPlaces(mood?: string, city?: string): Place[] {
   const cityName = city || "your city";
-  const normalizedMood = mood?.toLowerCase();
-  const places = getMockPlacesByMood(normalizedMood || '', cityName);
+  let normalizedMood = mood?.toLowerCase().trim() || '';
+  
+  const moodMap: Record<string, string> = {
+    'relaxed': 'relaxed',
+    'energetic': 'energetic',
+    'adventurous': 'adventurous',
+    'social': 'social',
+    'creative': 'creative',
+    'focused': 'relaxed', // Map focused to relaxed (library, quiet spaces)
+    'happy': 'happy',
+    'excited': 'excited',
+    'peaceful': 'peaceful',
+    'curious': 'curious',
+    'romantic': 'romantic',
+  };
+  
+  normalizedMood = moodMap[normalizedMood] || normalizedMood;
+  console.log(`[Mock Data] Looking for mood: "${mood}" -> normalized: "${normalizedMood}"`);
+  
+  const places = getMockPlacesByMood(normalizedMood, cityName);
   
   if (places.length > 0) {
+    console.log(`[Mock Data] Found ${places.length} places for mood "${normalizedMood}"`);
     return places;
   } else {
-    // Default fallback places
+    console.log(`[Mock Data] No places found for mood "${normalizedMood}", using default fallback`);
     return [
       { 
         id: 31, 
@@ -206,7 +201,6 @@ function getMockPlaces(mood?: string, city?: string): Place[] {
 function getMockPlacesByMood(mood?: string, city?: string): Place[] {
   const cityName = city || "your city";
   
-  // Normalize mood to lowercase for matching
   const normalizedMood = mood?.toLowerCase();
   
   const mockPlaces = {
@@ -686,9 +680,8 @@ function getMockPlacesByMood(mood?: string, city?: string): Place[] {
   
   if (selectedPlaces) {
     return selectedPlaces;
-  } else {
-    // Default fallback places
-    return [
+      } else {
+        return [
       { 
         id: 31, 
         name: "Local Cafe", 

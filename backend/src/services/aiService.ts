@@ -1,6 +1,5 @@
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
 });
@@ -25,8 +24,6 @@ export interface UserContext {
   mood: string;
   city?: string;
   preferences?: string[];
-  lat?: number;
-  lng?: number;
 }
 
 /**
@@ -74,20 +71,17 @@ export async function generatePersonalizedRecommendations(
   userContext: UserContext
 ): Promise<Place[]> {
   try {
-    // Create context string from available places
     const placesContext = places
-      .slice(0, 20) // Limit to top 20 for context
+      .slice(0, 20)
       .map(
         (place) =>
           `- ${place.name} (${place.type}): ${place.description}. Rating: ${place.rating}, Price: ${place.price}`
       )
       .join('\n');
 
-    // Build user context string
     const preferencesText = userContext.preferences?.join(', ') || 'general interests';
     const locationText = userContext.city ? `in ${userContext.city}` : 'nearby';
 
-    // Create prompt for LLM
     const prompt = `You are a personalized location recommendation assistant for MoodMap. 
 Based on the user's mood, preferences, and available places, recommend the most suitable locations.
 
@@ -129,14 +123,12 @@ Format: ["Place Name 1", "Place Name 2", ...]`;
     const responseContent = completion.choices[0]?.message?.content || '{}';
     const parsedResponse = JSON.parse(responseContent);
 
-    // Extract recommended place names
     const recommendedNames =
       parsedResponse.recommendations || 
       parsedResponse.places || 
       (Array.isArray(parsedResponse) ? parsedResponse : []) ||
       (typeof parsedResponse === 'object' ? Object.values(parsedResponse).flat() : []);
 
-    // Map recommended names back to place objects
     const recommendedPlaces: Place[] = [];
     const nameMap = new Map(places.map((p) => [p.name.toLowerCase(), p]));
 
@@ -147,7 +139,6 @@ Format: ["Place Name 1", "Place Name 2", ...]`;
       }
     }
 
-    // If LLM didn't return enough recommendations, fill with top-rated places
     if (recommendedPlaces.length < 5) {
       const remaining = places
         .filter((p) => !recommendedPlaces.some((rp) => rp.id === p.id))
@@ -159,7 +150,6 @@ Format: ["Place Name 1", "Place Name 2", ...]`;
     return recommendedPlaces.slice(0, 8);
   } catch (error) {
     console.error('Error generating personalized recommendations:', error);
-    // Fallback to simple filtering by mood
     return filterPlacesByMood(places, userContext.mood);
   }
 }
@@ -169,12 +159,10 @@ Format: ["Place Name 1", "Place Name 2", ...]`;
  */
 async function filterPlacesByMood(places: Place[], mood: string): Promise<Place[]> {
   try {
-    // Generate embedding for mood
     const moodEmbedding = await generateEmbedding(
       `I'm feeling ${mood}. I want to visit places that match this mood.`
     );
 
-    // Generate embeddings for all places and calculate similarity
     const placeScores = await Promise.all(
       places.map(async (place) => {
         const placeText = `${place.name} ${place.type} ${place.description}`;
@@ -184,14 +172,12 @@ async function filterPlacesByMood(places: Place[], mood: string): Promise<Place[
       })
     );
 
-    // Sort by similarity and return top matches
     return placeScores
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, 8)
       .map((item) => item.place);
   } catch (error) {
     console.error('Error in semantic filtering:', error);
-    // Ultimate fallback: return places sorted by rating
     return places.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating)).slice(0, 8);
   }
 }

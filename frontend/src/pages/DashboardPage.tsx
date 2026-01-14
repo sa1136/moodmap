@@ -10,13 +10,11 @@ const DashboardPage: React.FC = () => {
   const [aiPowered, setAiPowered] = useState<boolean>(false);
 
   useEffect(() => {
-    // Get mood and location data from localStorage
     const savedMood = localStorage.getItem('currentMood');
     const userCity = localStorage.getItem('userCity');
     const userLat = localStorage.getItem('userLat');
     const userLng = localStorage.getItem('userLng');
     
-    // Build API URL with mood, city, and coordinates parameters
     const params = new URLSearchParams();
     if (savedMood) params.append('mood', savedMood);
     if (userCity) params.append('city', userCity);
@@ -27,20 +25,22 @@ const DashboardPage: React.FC = () => {
     
     const apiUrl = `http://localhost:5001/api/places${params.toString() ? `?${params.toString()}` : ''}`;
     
+    console.log('[Dashboard] Fetching places from:', apiUrl);
     axios.get(apiUrl)
       .then(res => {
-        // Handle new API response format with AI features
+        console.log('[Dashboard] Received response:', res.data);
         if (res.data.places && Array.isArray(res.data.places)) {
-          // New format: { places: [], explanation: '', aiPowered: boolean }
+          console.log(`[Dashboard] Found ${res.data.places.length} places in response`);
           setPlaces(res.data.places);
           setExplanation(res.data.explanation || '');
           setAiPowered(res.data.aiPowered || false);
         } else if (Array.isArray(res.data)) {
-          // Legacy format: direct array (fallback)
+          console.log(`[Dashboard] Legacy format - Found ${res.data.length} places`);
           setPlaces(res.data);
           setExplanation('');
           setAiPowered(false);
         } else {
+          console.warn('[Dashboard] Unexpected response format:', res.data);
           setPlaces([]);
           setExplanation('');
           setAiPowered(false);
@@ -68,7 +68,6 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-white/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
@@ -85,7 +84,6 @@ const DashboardPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
@@ -112,7 +110,7 @@ const DashboardPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {places.length > 0 ? (
+            {places && places.length > 0 ? (
               places.map((place) => (
                 <div key={place.id} className="card hover:scale-105 transition-transform duration-300">
                   <h3 className="text-xl font-semibold text-neutral-800 mb-1">{place.name}</h3>
@@ -155,12 +153,10 @@ const DashboardPage: React.FC = () => {
 
       </main>
 
-      {/* Place Details Modal */}
       {showDetails && selectedPlace && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-              {/* Header */}
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h2 className="text-2xl font-bold text-neutral-800 mb-1">{selectedPlace.name}</h2>
@@ -179,7 +175,6 @@ const DashboardPage: React.FC = () => {
                 </button>
               </div>
 
-              {/* Photos */}
               {selectedPlace.photos && selectedPlace.photos.length > 0 && (
                 <div className="mb-6">
                   <div className="grid grid-cols-2 gap-4">
@@ -195,7 +190,6 @@ const DashboardPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Description */}
               {selectedPlace.description && (
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-neutral-800 mb-2">About</h3>
@@ -203,9 +197,7 @@ const DashboardPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Details Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {/* Hours */}
                 {selectedPlace.hours && (
                   <div>
                     <h3 className="text-lg font-semibold text-neutral-800 mb-2">🕒 Hours</h3>
@@ -213,7 +205,6 @@ const DashboardPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Price */}
                 {selectedPlace.price && (
                   <div>
                     <h3 className="text-lg font-semibold text-neutral-800 mb-2">💰 Price Range</h3>
@@ -221,7 +212,6 @@ const DashboardPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Phone */}
                 {selectedPlace.phone && (
                   <div>
                     <h3 className="text-lg font-semibold text-neutral-800 mb-2">📞 Phone</h3>
@@ -229,7 +219,6 @@ const DashboardPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Website */}
                 {selectedPlace.website && (
                   <div>
                     <h3 className="text-lg font-semibold text-neutral-800 mb-2">🌐 Website</h3>
@@ -245,7 +234,6 @@ const DashboardPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Address */}
               {selectedPlace.address && (
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-neutral-800 mb-2">📍 Address</h3>
@@ -253,7 +241,6 @@ const DashboardPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Amenities */}
               {selectedPlace.amenities && selectedPlace.amenities.length > 0 && (
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-neutral-800 mb-3">✨ Amenities</h3>
@@ -270,7 +257,6 @@ const DashboardPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Action Buttons */}
               <div className="flex space-x-4 pt-4 border-t border-neutral-200">
                 <button className="btn-primary flex-1">
                   Save Place

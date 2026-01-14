@@ -11,15 +11,16 @@ app.get("/", (req, res) => {
   res.json({ message: "MoodMap backend running 🚀" });
 });
 
-// Import routes
 import placesRouter from "./routes/places";
 import userRouter from "./routes/user";
 import moodRouter from "./routes/mood";
+import locationsRouter from "./routes/locations";
 
 app.use("/api/places", placesRouter);
 app.use("/api/user", userRouter);
 app.use("/api/mood", moodRouter);
+app.use("/api/locations", locationsRouter);
 
-const PORT = process.env.PORT || 5001; // change from 5000
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 

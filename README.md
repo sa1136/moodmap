@@ -13,9 +13,9 @@ MoodMap is a web application that provides personalized location recommendations
   - Provides natural-language explanations for recommendations  
   - Falls back to rule-based matching if AI service is unavailable  
 
-- **Smart Filters & Context Awareness**  
-  - Filters by distance, rating, cost, and activity type  
-  - Adjusts suggestions in real time based on weather, time of day, and crowd level  
+- **Smart Mood-Based Filtering**  
+  - Filters places based on user's current mood  
+  - Provides personalized recommendations tailored to emotional state  
 
 - **Mood Analyzer**  
   - User selects mood: Relaxed, Energetic, Adventurous, or Social  
@@ -28,8 +28,8 @@ MoodMap is a web application that provides personalized location recommendations
 **Frontend:** React.js + TypeScript + Tailwind CSS  
 **Backend:** Node.js + Express.js + TypeScript  
 **AI/ML:** OpenAI GPT-4o-mini, Text Embeddings (text-embedding-3-small), RAG (Retrieval-Augmented Generation)  
-**APIs:** Foursquare Places API, Google Places API (optional), OpenWeatherMap, Nominatim  
-**Location Services:** Geolocation API, BigDataCloud Reverse Geocoding  
+**APIs:** OpenStreetMap/Nominatim (100% FREE, no API key required)  
+**Location Services:** Browser Geolocation API  
 **Vector Storage:** In-memory vector store (production-ready for Pinecone/Weaviate integration)  
 
 ---
@@ -39,8 +39,7 @@ MoodMap is a web application that provides personalized location recommendations
 ### Prerequisites
 - Node.js (v16 or higher)
 - npm or yarn
-- OpenAI API key (required for AI-powered recommendations)
-- API keys for Foursquare and OpenWeatherMap (optional, for future features)
+- OpenAI API key (optional - for AI-powered recommendations)
 
 ### Environment Setup
 
@@ -61,24 +60,17 @@ MoodMap is a web application that provides personalized location recommendations
    cp .env.example .env
    ```
 
-4. **Add your API keys to `.env`:**
+4. **Add your API keys to `.env` (optional):**
    ```env
-   # OpenAI API (REQUIRED for AI-powered recommendations)
+   # OpenAI API (optional - for AI-powered recommendations)
    # Get your API key from: https://platform.openai.com/api-keys
    OPENAI_API_KEY=your_openai_api_key_here
-   
-   # Foursquare API (optional, for future features)
-   # Get your API keys from: https://developer.foursquare.com/
-   FOURSQUARE_API_KEY=your_foursquare_api_key_here
-   FOURSQUARE_API_SECRET=your_foursquare_api_secret_here
-   
-   # OpenWeatherMap API (optional, for future features)
-   # Get your API key from: https://openweathermap.org/api
-   OPENWEATHER_API_KEY=your_openweather_api_key_here
    
    PORT=5001
    NODE_ENV=development
    ```
+   
+   **Note:** The app works without OpenAI API key, but will use rule-based matching instead of AI recommendations.
 
 5. **Frontend Setup:**
    ```bash
@@ -116,39 +108,14 @@ MoodMap is a web application that provides personalized location recommendations
 5. Add it to your `.env` file as `OPENAI_API_KEY`
 6. **Note:** The app will work without this key but will use fallback mock data instead of AI recommendations
 
-### Places Data Sources
-The app fetches real places in this priority order:
-1. **Foursquare Places API** (if configured) - Primary source for real location data
-2. **Google Places API** (if configured) - Alternative source if Foursquare is unavailable
-3. **Mock Data** (fallback) - Hardcoded sample places if no API is configured
+### Places Data Source
+The app uses **OpenStreetMap/Nominatim** to fetch real places:
+- **100% FREE** - No API key required!
+- **Works immediately** - No setup or registration needed
+- **No limits** - OpenStreetMap is completely free and open source
+- **Mock Data** (fallback) - Hardcoded sample places if OpenStreetMap doesn't return results
 
-**Note:** Without API keys, the app uses mock/demo data. To get real places, configure at least one of the above APIs.
-
-### Foursquare Places API (Recommended for real places)
-1. Visit [Foursquare Developer Console](https://developer.foursquare.com/)
-2. Create a new project
-3. Get your API Key (Client ID) and Client Secret
-4. Add them to your `.env` file:
-   ```env
-   FOURSQUARE_API_KEY=your_client_id_here
-   FOURSQUARE_API_SECRET=your_client_secret_here
-   ```
-
-### Google Places API (Alternative to Foursquare)
-1. Visit [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select an existing one
-3. Enable the Places API
-4. Create credentials (API Key)
-5. Add it to your `.env` file:
-   ```env
-   GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
-   ```
-
-### OpenWeatherMap API (Optional)
-1. Visit [OpenWeatherMap API](https://openweathermap.org/api)
-2. Sign up for a free account
-3. Get your API key
-4. Add it to your `.env` file
+**🎉 Good News:** The app automatically uses OpenStreetMap to fetch real places - just run it and it works!
 
 ---
 

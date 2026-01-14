@@ -62,7 +62,7 @@ const MoodInputPage: React.FC = () => {
   const handleCustomMoodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCustomMood(e.target.value);
     if (e.target.value) {
-      setSelectedMood(''); // Clear preset when typing custom
+      setSelectedMood('');
     }
   };
 
@@ -83,7 +83,6 @@ const MoodInputPage: React.FC = () => {
 
       await axios.post('http://localhost:5001/api/mood', moodData);
       
-      // Save mood to localStorage for dashboard to use
       const moodLabel = selectedMood ? moodOptions.find(m => m.id === selectedMood)?.label : customMood;
       localStorage.setItem('currentMood', moodLabel || '');
       
@@ -109,7 +108,6 @@ const MoodInputPage: React.FC = () => {
         </div>
 
         <div className="mood-content">
-          {/* Preset Mood Options */}
           <div className="mood-section">
             <h2 className="mood-section-title">Choose your mood:</h2>
             <div className="mood-grid">
@@ -129,7 +127,6 @@ const MoodInputPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Divider */}
           <div className="mood-divider">
             <div className="mood-divider-line"></div>
             <div className="mood-divider-text">
@@ -137,7 +134,6 @@ const MoodInputPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Custom Mood Input */}
           <div className="mood-custom-section">
             <label htmlFor="customMood" className="mood-custom-label">
               Describe your mood in your own words:
@@ -152,7 +148,6 @@ const MoodInputPage: React.FC = () => {
             />
           </div>
 
-          {/* Submit Button */}
           <button
             onClick={handleSubmit}
             disabled={isSubmitting || (!selectedMood && !customMood.trim())}
@@ -162,7 +157,6 @@ const MoodInputPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Current Selection Display */}
         {(selectedMood || customMood) && (
           <div className="mood-selection-display">
             <p className="mood-selection-text">
