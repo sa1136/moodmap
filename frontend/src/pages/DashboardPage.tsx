@@ -6,6 +6,8 @@ const DashboardPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [explanation, setExplanation] = useState<string>('');
+  const [aiPowered, setAiPowered] = useState<boolean>(false);
 
   useEffect(() => {
     // Get mood and location data from localStorage
@@ -27,11 +29,29 @@ const DashboardPage: React.FC = () => {
     
     axios.get(apiUrl)
       .then(res => {
-        setPlaces(res.data);
+        // Handle new API response format with AI features
+        if (res.data.places && Array.isArray(res.data.places)) {
+          // New format: { places: [], explanation: '', aiPowered: boolean }
+          setPlaces(res.data.places);
+          setExplanation(res.data.explanation || '');
+          setAiPowered(res.data.aiPowered || false);
+        } else if (Array.isArray(res.data)) {
+          // Legacy format: direct array (fallback)
+          setPlaces(res.data);
+          setExplanation('');
+          setAiPowered(false);
+        } else {
+          setPlaces([]);
+          setExplanation('');
+          setAiPowered(false);
+        }
         setIsLoading(false);
       })
       .catch(err => {
         console.error('Error fetching places:', err);
+        setPlaces([]);
+        setExplanation('');
+        setAiPowered(false);
         setIsLoading(false);
       });
   }, []);
@@ -68,8 +88,22 @@ const DashboardPage: React.FC = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h2 className="text-2xl font-display font-bold text-neutral-800 mb-2">Recommended Places</h2>
-          <p className="text-neutral-600 text-lg">Based on your current mood and preferences</p>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-2xl font-display font-bold text-neutral-800">Recommended Places</h2>
+            {aiPowered && (
+              <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                ✨ AI-Powered
+              </span>
+            )}
+          </div>
+          <p className="text-neutral-600 text-lg mb-3">Based on your current mood and preferences</p>
+          {explanation && (
+            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg mb-4">
+              <p className="text-blue-800 text-sm leading-relaxed">
+                <span className="font-semibold">💡 Why these places?</span> {explanation}
+              </p>
+            </div>
+          )}
         </div>
 
         {isLoading ? (

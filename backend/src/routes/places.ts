@@ -1,20 +1,174 @@
 import { Router } from "express";
+import { generatePersonalizedRecommendations, generateRecommendationExplanation, Place, UserContext } from "../services/aiService";
+import { vectorStore } from "../services/vectorStore";
 
 const router = Router();
 
-// Get places based on mood and location
+// Get places based on mood and location using AI
 router.get("/", async (req, res) => {
   try {
-    const { mood, city } = req.query;
-    const mockData = getMockPlaces(mood as string, city as string);
-    return res.json(mockData);
+    const { mood, city, lat, lng } = req.query;
+    
+    // Validate mood is provided
+    if (!mood) {
+      return res.status(400).json({ 
+        error: 'Mood parameter is required' 
+      });
+    }
+
+    // Get all available places from mock data
+    const allPlaces = getAllMockPlaces(city as string);
+    
+    // Initialize vector store if not already done
+    if (!vectorStore.getStats().initialized) {
+      await vectorStore.initialize(allPlaces, mood as string);
+    }
+
+    // Create user context
+    const userContext: UserContext = {
+      mood: mood as string,
+      city: city as string,
+      lat: lat ? parseFloat(lat as string) : undefined,
+      lng: lng ? parseFloat(lng as string) : undefined,
+    };
+
+    // Use AI to generate personalized recommendations
+    let recommendedPlaces: Place[];
+    
+    if (process.env.OPENAI_API_KEY) {
+      // Use AI-powered RAG recommendations
+      recommendedPlaces = await generatePersonalizedRecommendations(allPlaces, userContext);
+      
+      // Generate explanation for recommendations
+      const explanation = await generateRecommendationExplanation(recommendedPlaces, userContext);
+      
+      return res.json({
+        places: recommendedPlaces,
+        explanation,
+        aiPowered: true,
+        mood: mood,
+        city: city || 'your location'
+      });
+    } else {
+      // Fallback to mock data if OpenAI API key is not configured
+      console.warn('OPENAI_API_KEY not found. Using fallback mock data.');
+      recommendedPlaces = getMockPlaces(mood as string, city as string);
+      
+      return res.json({
+        places: recommendedPlaces,
+        explanation: `Based on your ${mood} mood, here are some places we think you'll enjoy!`,
+        aiPowered: false,
+        mood: mood,
+        city: city || 'your location'
+      });
+    }
   } catch (error) {
-    res.json(getMockPlaces(req.query.mood as string, req.query.city as string));
+    console.error('Error in places route:', error);
+    
+    // Fallback to mock data on error
+    const { mood, city } = req.query;
+    const fallbackPlaces = getMockPlaces(mood as string, city as string);
+    
+    return res.json({
+      places: fallbackPlaces,
+      explanation: `Based on your ${mood || 'current'} mood, here are some places we think you'll enjoy!`,
+      aiPowered: false,
+      error: 'AI service temporarily unavailable, showing fallback recommendations',
+      mood: mood,
+      city: city || 'your location'
+    });
   }
 });
 
-// Mock data fallback with location awareness
-function getMockPlaces(mood?: string, city?: string) {
+/**
+ * Get all mock places (used for AI processing)
+ */
+function getAllMockPlaces(city?: string): Place[] {
+  const cityName = city || "your city";
+  const allPlaces: Place[] = [];
+  
+  // Flatten all mood categories into a single array
+  const moodCategories = ['happy', 'excited', 'relaxed', 'creative', 'adventurous', 'social', 'peaceful', 'energetic', 'curious', 'romantic'];
+  
+  moodCategories.forEach(mood => {
+    const places = getMockPlacesByMood(mood, cityName);
+    allPlaces.push(...places);
+  });
+  
+  // Remove duplicates based on ID
+  const uniquePlaces = Array.from(
+    new Map(allPlaces.map(place => [place.id, place])).values()
+  );
+  
+  return uniquePlaces;
+}
+
+/**
+ * Get mock places for a specific mood (fallback function)
+ */
+function getMockPlaces(mood?: string, city?: string): Place[] {
+  const cityName = city || "your city";
+  const normalizedMood = mood?.toLowerCase();
+  const places = getMockPlacesByMood(normalizedMood || '', cityName);
+  
+  if (places.length > 0) {
+    return places;
+  } else {
+    // Default fallback places
+    return [
+      { 
+        id: 31, 
+        name: "Local Cafe", 
+        type: "Cafe", 
+        rating: "4.2", 
+        address: `123 Main Street, ${cityName}`, 
+        city: cityName,
+        description: "Cozy neighborhood cafe serving fresh coffee, pastries, and light meals. A perfect spot to relax and enjoy good company.",
+        hours: "Daily: 6AM-8PM",
+        price: "$",
+        phone: "+1 (555) 111-2222",
+        website: "www.localcafe.com",
+        amenities: ["Free WiFi", "Outdoor Seating", "Pastries", "Laptop Friendly"],
+        photos: ["https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400", "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400"]
+      },
+      { 
+        id: 32, 
+        name: "City Park", 
+        type: "Park", 
+        rating: "4.1", 
+        address: `456 Park Avenue, ${cityName}`, 
+        city: cityName,
+        description: "Beautiful urban park with walking paths, playground, and green spaces. Great for outdoor activities and family fun.",
+        hours: "Daily: 6AM-10PM",
+        price: "Free",
+        phone: "+1 (555) 222-3333",
+        website: "www.citypark.com",
+        amenities: ["Walking Paths", "Playground", "Picnic Areas", "Public Restrooms"],
+        photos: ["https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400", "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"]
+      },
+      { 
+        id: 33, 
+        name: "Shopping Mall", 
+        type: "Shopping", 
+        rating: "4.0", 
+        address: `789 Commerce Blvd, ${cityName}`, 
+        city: cityName,
+        description: "Modern shopping center with diverse retail stores, restaurants, and entertainment options. One-stop destination for shopping and dining.",
+        hours: "Mon-Sat: 10AM-9PM, Sun: 11AM-7PM",
+        price: "$$",
+        phone: "+1 (555) 333-4444",
+        website: "www.shoppingmall.com",
+        amenities: ["Multiple Stores", "Food Court", "Parking", "Entertainment"],
+        photos: ["https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400", "https://images.unsplash.com/photo-1571266028243-e68f8574c9b2?w=400"]
+      }
+    ];
+  }
+}
+
+/**
+ * Get mock places by specific mood category
+ */
+function getMockPlacesByMood(mood?: string, city?: string): Place[] {
   const cityName = city || "your city";
   
   // Normalize mood to lowercase for matching
@@ -498,6 +652,7 @@ function getMockPlaces(mood?: string, city?: string) {
   if (selectedPlaces) {
     return selectedPlaces;
   } else {
+    // Default fallback places
     return [
       { 
         id: 31, 
