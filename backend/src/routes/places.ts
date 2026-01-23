@@ -66,15 +66,13 @@ router.get("/", async (req, res) => {
 
     let recommendedPlaces: Place[];
     
-    // Check if any AI provider is available (Groq or OpenAI)
+    // Check if Groq is available
     const hasGroq = !!process.env.GROQ_API_KEY;
-    const hasOpenAI = !!process.env.OPENAI_API_KEY;
     
-    console.log(`[Places API] AI Provider Check - Groq: ${hasGroq ? '✅' : '❌'}, OpenAI: ${hasOpenAI ? '✅' : '❌'}`);
+    console.log(`[Places API] AI Provider Check - Groq: ${hasGroq ? '✅' : '❌'}`);
     
-    if (hasGroq || hasOpenAI) {
-      const provider = hasGroq ? 'Groq' : 'OpenAI';
-      console.log(`[Places API] Using ${provider} for AI-powered recommendations`);
+    if (hasGroq) {
+      console.log(`[Places API] Using Groq for AI-powered recommendations`);
       
       // Only use AI if we have places to work with
       if (allPlaces.length > 0) {
@@ -86,7 +84,7 @@ router.get("/", async (req, res) => {
             places: recommendedPlaces.length > 0 ? recommendedPlaces : allPlaces.slice(0, 8),
             explanation,
             aiPowered: true,
-            provider: provider.toLowerCase(),
+            provider: 'groq',
             mood: mood,
             city: city || 'your location'
           });
@@ -108,7 +106,7 @@ router.get("/", async (req, res) => {
           places: [],
           explanation: `No places found for "${cityName}" with mood "${mood}". Please try a different location or mood.`,
           aiPowered: true,
-          provider: provider.toLowerCase(),
+          provider: 'groq',
           mood: mood,
           city: cityName
         });
@@ -116,10 +114,10 @@ router.get("/", async (req, res) => {
     } else {
       // No AI available, but still return the OpenStreetMap places (if any)
       if (allPlaces.length > 0) {
-        console.warn('No AI API key found (GROQ_API_KEY or OPENAI_API_KEY). Returning OpenStreetMap places without AI ranking.');
+        console.warn('No GROQ_API_KEY found. Returning OpenStreetMap places without AI ranking.');
         recommendedPlaces = allPlaces.slice(0, 8); // Return top 8 places from OpenStreetMap
       } else {
-        console.warn('No AI API key found and no OpenStreetMap results. Returning empty results.');
+        console.warn('No GROQ_API_KEY found and no OpenStreetMap results. Returning empty results.');
         recommendedPlaces = [];
       }
       

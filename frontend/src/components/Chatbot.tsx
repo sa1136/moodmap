@@ -114,21 +114,20 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
       {/* Chatbot Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-800 to-purple-800 text-white p-5 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-gradient-to-r from-blue-500 to-purple-500 text-white p-3 sm:p-4 md:p-5 transition-all duration-300 hover:scale-110"
         style={{ 
           borderRadius: '50%',
-          border: '4px solid #2d3436',
-          boxShadow: '6px 6px 0px rgba(45, 52, 54, 0.3)',
+          border: 'none',
           fontFamily: "'Inter', sans-serif"
         }}
         aria-label="Open chatbot"
       >
         {isOpen ? (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         ) : (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         )}
@@ -137,23 +136,22 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
       {/* Chatbot Window */}
       {isOpen && (
         <div 
-          className="fixed bottom-24 right-6 z-50 w-96 h-[600px] bg-white shadow-2xl flex flex-col"
+          className="fixed bottom-20 sm:bottom-24 right-2 sm:right-6 z-50 w-[calc(100vw-1rem)] sm:w-96 h-[calc(100vh-6rem)] sm:h-[600px] max-h-[600px] bg-white flex flex-col"
           style={{
             borderRadius: '16px',
-            border: '4px solid #2d3436',
-            boxShadow: '8px 8px 0px rgba(45, 52, 54, 0.3)',
+            border: '2px solid #e2e8f0',
             fontFamily: "'Inter', sans-serif"
           }}
         >
           {/* Header */}
           <div 
-            className="bg-gradient-to-r from-blue-800 via-purple-800 to-teal-800 text-white p-4"
-            style={{ borderRadius: '16px' }}
+            className="bg-gradient-to-r from-blue-500 via-purple-500 to-teal-500 text-white p-4"
+            style={{ borderRadius: '16px 16px 0 0' }}
           >
             <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-xl" style={{ fontFamily: "'Poppins', sans-serif" }}>MoodMap Assistant</h3>
-                <p className="text-sm font-semibold" style={{ color: '#cbd5e1' }}>✨ AI-Powered Recommendations</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-base sm:text-lg md:text-xl truncate" style={{ fontFamily: "'Poppins', sans-serif" }}>MoodMap Assistant</h3>
+                <p className="text-xs sm:text-sm font-semibold" style={{ color: '#cbd5e1' }}>✨ AI-Powered</p>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
@@ -167,25 +165,23 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-900">
+          <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 sm:space-y-4 bg-gray-50">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] px-4 py-3 font-semibold ${
+                  className={`max-w-[85%] sm:max-w-[80%] px-3 sm:px-4 py-2 sm:py-3 font-semibold ${
                     message.sender === 'user'
-                      ? 'bg-gradient-to-r from-blue-800 to-purple-800 text-white'
-                      : 'bg-slate-700 text-white'
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+                      : 'bg-white text-gray-800 border border-gray-200'
                   }`}
                   style={{
-                    borderRadius: '12px',
-                    border: '3px solid #2d3436',
-                    boxShadow: '3px 3px 0px rgba(45, 52, 54, 0.2)'
+                    borderRadius: '12px'
                   }}
                 >
-                  <p className="text-sm">{message.text}</p>
+                  <p className="text-xs sm:text-sm break-words">{message.text}</p>
                   <p className={`text-xs mt-1 ${message.sender === 'user' ? 'text-blue-200' : 'text-gray-400'}`}>
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
@@ -215,13 +211,14 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
                       setInputValue(q);
                       setTimeout(() => handleSend(), 100);
                     }}
-                    className="w-full text-left text-sm bg-white hover:bg-yellow-100 font-bold border-3 border-gray-800 px-4 py-2 transition-all"
+                    className="w-full text-left text-xs sm:text-sm px-3 sm:px-4 py-2 transition-all hover:bg-slate-600 font-semibold"
                     style={{
                       borderRadius: '10px',
                       boxShadow: '2px 2px 0px rgba(0, 0, 0, 0.3)',
                       fontFamily: "'Inter', sans-serif",
                       backgroundColor: '#1e293b',
-                      color: 'white'
+                      color: 'white',
+                      border: '3px solid #1a1a1a'
                     }}
                   >
                     {q}
@@ -234,7 +231,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
           </div>
 
           {/* Input */}
-          <div className="p-4 border-t-4 border-slate-900 bg-slate-800" style={{ borderRadius: '0 0 16px 4px' }}>
+          <div className="p-2 sm:p-4 border-t border-gray-200 bg-white" style={{ borderRadius: '0 0 16px 16px' }}>
             <div className="flex space-x-2">
               <input
                 type="text"
@@ -242,24 +239,24 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask me anything... ✨"
-                className="flex-1 px-4 py-2 font-semibold"
+                className="flex-1 px-3 sm:px-4 py-2 font-semibold text-sm sm:text-base"
                 style={{
                   borderRadius: '10px',
-                  border: '3px solid #1a1a1a',
-                  boxShadow: '3px 3px 0px rgba(0, 0, 0, 0.2)',
+                  border: '2px solid #e2e8f0',
                   fontFamily: "'Inter', sans-serif",
-                  backgroundColor: '#1e293b',
-                  color: 'white'
+                  backgroundColor: 'white',
+                  color: '#1e293b'
                 }}
               />
               <button
                 onClick={handleSend}
                 disabled={!inputValue.trim() || isTyping}
-                className="doodle-button bg-gradient-to-r from-blue-800 to-purple-800 text-white px-4 py-2 font-semibold disabled:opacity-50 transition-all"
-                style={{ fontFamily: "'Inter', sans-serif" }}
+                className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 sm:px-4 py-2 font-semibold disabled:opacity-50 transition-all flex-shrink-0 rounded-lg"
+                style={{ fontFamily: "'Inter', sans-serif", border: 'none' }}
+                aria-label="Send message"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                 </svg>
               </button>
             </div>

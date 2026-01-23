@@ -21,33 +21,31 @@ const Filters: React.FC<FiltersProps> = ({ onFilterChange, currentFilters }) => 
 
   return (
     <div 
-      className="bg-slate-800 p-5 mb-6 text-white"
+      className="bg-white p-5 mb-6 border border-gray-200"
       style={{
-        borderRadius: '20px 8px 18px 6px',
-        border: '4px solid #1a1a1a',
-        boxShadow: '6px 6px 0px rgba(0, 0, 0, 0.3)',
+        borderRadius: '16px',
         fontFamily: "'Inter', sans-serif"
       }}
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-2xl font-bold text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>🔍 Filters</h3>
+        <h3 className="text-xl sm:text-2xl font-bold text-gray-900" style={{ fontFamily: "'Poppins', sans-serif" }}>🔍 Filters</h3>
         <button
           onClick={() => onFilterChange({ rating: '', price: '', activityType: '' })}
-          className="doodle-button text-sm bg-slate-700 text-white font-semibold px-3 py-1"
+          className="doodle-button text-xs sm:text-sm bg-gray-100 text-gray-700 font-semibold px-2 sm:px-3 py-1 hover:bg-gray-200"
           style={{ fontFamily: "'Inter', sans-serif" }}
         >
-          Clear All
+          Clear
         </button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {/* Rating Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Min Rating</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Min Rating</label>
           <select
             value={currentFilters.rating}
             onChange={(e) => handleChange('rating', e.target.value)}
-            className="doodle-input w-full px-3 py-2 font-medium text-sm bg-slate-700 text-white border-slate-900"
+            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
             <option value="">Any rating</option>
@@ -60,11 +58,11 @@ const Filters: React.FC<FiltersProps> = ({ onFilterChange, currentFilters }) => 
 
         {/* Price Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Price Range</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
           <select
             value={currentFilters.price}
             onChange={(e) => handleChange('price', e.target.value)}
-            className="doodle-input w-full px-3 py-2 font-medium text-sm bg-slate-700 text-white border-slate-900"
+            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
             <option value="">Any price</option>
@@ -77,11 +75,11 @@ const Filters: React.FC<FiltersProps> = ({ onFilterChange, currentFilters }) => 
 
         {/* Activity Type Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Activity Type</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Activity Type</label>
           <select
             value={currentFilters.activityType}
             onChange={(e) => handleChange('activityType', e.target.value)}
-            className="doodle-input w-full px-3 py-2 font-medium text-sm bg-slate-700 text-white border-slate-900"
+            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
             <option value="">All types</option>

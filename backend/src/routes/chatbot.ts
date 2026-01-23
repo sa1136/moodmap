@@ -2,7 +2,6 @@ import { Router } from "express";
 import { generatePersonalizedRecommendations, generateRecommendationExplanation, UserContext } from "../services/aiService";
 import { fetchPlacesFromOpenStreetMap } from "../services/placesApi";
 import Groq from 'groq-sdk';
-import OpenAI from 'openai';
 
 const router = Router();
 
@@ -16,19 +15,16 @@ router.post("/", async (req, res) => {
 
     const userMessage = message.toLowerCase();
     const hasGroq = !!process.env.GROQ_API_KEY;
-    const hasOpenAI = !!process.env.OPENAI_API_KEY;
 
-    if (!hasGroq && !hasOpenAI) {
+    if (!hasGroq) {
       return res.json({
-        response: "I'm sorry, but AI services are not currently available. Please check your API configuration."
+        response: "I'm sorry, but AI services are not currently available. Please check your GROQ_API_KEY configuration."
       });
     }
 
-    // Initialize AI providers
-    const groq = hasGroq ? new Groq({ apiKey: process.env.GROQ_API_KEY! }) : null;
-    const openai = hasOpenAI ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY! }) : null;
-    const provider = hasGroq ? groq : openai;
-    const model = hasGroq ? 'llama-3.3-70b-versatile' : 'gpt-4o-mini';
+    // Initialize Groq
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+    const model = 'llama-3.3-70b-versatile';
 
     // Build context-aware prompt
     const systemPrompt = `You are a friendly and helpful assistant for MoodMap, an AI-powered location recommendation app. 
@@ -118,7 +114,7 @@ Be conversational, helpful, and encouraging. If the user asks about places, you 
           { role: 'user', content: message }
         ];
 
-        const completion = await provider.chat.completions.create({
+        const completion = await groq.chat.completions.create({
           model,
           messages,
           temperature: 0.7,

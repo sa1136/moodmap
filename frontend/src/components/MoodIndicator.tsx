@@ -45,8 +45,7 @@ const MoodIndicator: React.FC<MoodIndicatorProps> = ({ mood, size = 'md' }) => {
       className={`inline-flex items-center space-x-2 ${sizeClasses[size]}`}
       style={{
         borderRadius: '20px',
-        border: '3px solid #2d3436',
-        boxShadow: '3px 3px 0px rgba(45, 52, 54, 0.2)',
+        border: '2px solid #e2e8f0',
         fontFamily: "'Inter', sans-serif",
         backgroundColor: bgColorMap[config.bgColor] || 'rgba(243, 244, 246, 0.9)'
       }}

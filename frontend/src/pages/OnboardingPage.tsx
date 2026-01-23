@@ -407,13 +407,14 @@ const OnboardingPage: React.FC = () => {
                       top: '100%',
                       left: 0,
                       right: 0,
-                      backgroundColor: 'white',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                      backgroundColor: '#1e293b',
+                      border: '3px solid #1a1a1a',
+                      borderRadius: '10px',
+                      boxShadow: '4px 4px 0px rgba(0, 0, 0, 0.3)',
                       zIndex: 1000,
                       maxHeight: '200px',
-                      overflowY: 'auto'
+                      overflowY: 'auto',
+                      marginTop: '4px'
                     }}>
                       {locationSuggestions.map((suggestion, index) => (
                         <div
@@ -422,25 +423,26 @@ const OnboardingPage: React.FC = () => {
                           style={{
                             padding: '12px 16px',
                             cursor: 'pointer',
-                            borderBottom: index < locationSuggestions.length - 1 ? '1px solid #f3f4f6' : 'none',
+                            borderBottom: index < locationSuggestions.length - 1 ? '1px solid #334155' : 'none',
                             transition: 'background-color 0.2s',
-                            backgroundColor: selectedSuggestionIndex === index ? '#dbeafe' : 'white'
+                            backgroundColor: selectedSuggestionIndex === index ? '#334155' : '#1e293b',
+                            minHeight: '44px'
                           }}
                           onMouseEnter={(e) => {
                             if (selectedSuggestionIndex !== index) {
-                              e.currentTarget.style.backgroundColor = '#f3f4f6';
+                              e.currentTarget.style.backgroundColor = '#334155';
                             }
                           }}
                           onMouseLeave={(e) => {
                             if (selectedSuggestionIndex !== index) {
-                              e.currentTarget.style.backgroundColor = 'white';
+                              e.currentTarget.style.backgroundColor = '#1e293b';
                             }
                           }}
                         >
-                          <div style={{ fontWeight: '500', color: '#1f2937', marginBottom: '4px' }}>
+                          <div style={{ fontWeight: '600', color: '#1e293b', marginBottom: '4px', fontSize: '14px' }}>
                             {suggestion.city}
                           </div>
-                          <div style={{ fontSize: '13px', color: '#6b7280' }}>
+                          <div style={{ fontSize: '12px', color: '#cbd5e1' }}>
                             {suggestion.fullLocation || 
                               (suggestion.state && suggestion.country 
                                 ? `${suggestion.state}, ${suggestion.country}`
@@ -456,25 +458,27 @@ const OnboardingPage: React.FC = () => {
                   type="button"
                   onClick={handleGetCurrentLocation}
                   disabled={isGettingLocation}
+                  className="onboarding-location-button"
                   style={{ 
-                    padding: '8px 12px', 
+                    padding: '10px 14px', 
                     fontSize: '12px',
                     whiteSpace: 'nowrap',
                     background: isGettingLocation 
-                      ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)'
-                      : 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
+                      ? 'linear-gradient(135deg, #475569 0%, #334155 100%)'
+                      : 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)',
                     color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
+                    border: '3px solid #1a1a1a',
+                    borderRadius: '8px',
                     cursor: isGettingLocation ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s ease',
-                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                    boxShadow: '3px 3px 0px rgba(0, 0, 0, 0.2)',
                     minWidth: 'auto',
                     flexShrink: 0,
                     opacity: isGettingLocation ? 0.7 : 1,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px'
+                    gap: '6px',
+                    minHeight: '44px'
                   }}
                   onMouseEnter={(e) => {
                     if (!isGettingLocation) {

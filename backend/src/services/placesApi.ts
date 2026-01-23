@@ -2,6 +2,47 @@ import axios from 'axios';
 import { Place } from './aiService';
 
 /**
+ * Get real images for a place using Unsplash Source API (free, no auth required)
+ * Falls back to a generic image if specific search fails
+ */
+async function getPlaceImages(placeName: string, city: string, placeType?: string): Promise<string[]> {
+  try {
+    // Clean up the place name and city for better search results
+    const cleanPlaceName = placeName.replace(/[^\w\s]/g, '').trim();
+    const cleanCity = city.replace(/[^\w\s]/g, '').trim();
+    const cleanType = placeType ? placeType.replace(/[^\w\s]/g, '').trim() : '';
+    
+    // Build search terms - prioritize place name + city, then city + type
+    const primarySearch = `${cleanPlaceName} ${cleanCity}`.trim();
+    const secondarySearch = cleanType ? `${cleanCity} ${cleanType}` : cleanCity;
+    
+    // Use Unsplash Source API (free, no authentication needed)
+    // This provides random images based on search terms
+    // We'll return 2 images with different search terms for variety
+    const images: string[] = [];
+    
+    if (primarySearch) {
+      images.push(`https://source.unsplash.com/800x600/?${encodeURIComponent(primarySearch)}`);
+    }
+    
+    if (secondarySearch && secondarySearch !== primarySearch) {
+      images.push(`https://source.unsplash.com/800x600/?${encodeURIComponent(secondarySearch)}`);
+    }
+    
+    // If we still don't have images, add a generic city image
+    if (images.length === 0 && cleanCity) {
+      images.push(`https://source.unsplash.com/800x600/?${encodeURIComponent(cleanCity + ' attraction')}`);
+    }
+    
+    return images.length > 0 ? images : [];
+  } catch (error) {
+    console.warn(`[Images] Could not generate image URLs for ${placeName}:`, error);
+    // Return empty array if image URL generation fails
+    return [];
+  }
+}
+
+/**
  * Fetch places from OpenStreetMap/Nominatim (100% FREE, no API key required!)
  * This is a great free alternative that doesn't require any registration.
  */
@@ -13,6 +54,42 @@ function extractCityName(fullAddress: string): string {
 // Helper function to add delay (rate limiting for Nominatim)
 function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Helper function to retry API calls with exponential backoff
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 2000
+): Promise<T | null> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+      const isRateLimit = error.response?.status === 418 || error.response?.status === 429;
+      
+      if (attempt === maxRetries - 1) {
+        // Last attempt failed
+        if (isTimeout) {
+          console.warn(`[OpenStreetMap] Request timed out after ${maxRetries} attempts`);
+        } else if (isRateLimit) {
+          console.warn(`[OpenStreetMap] Rate limited after ${maxRetries} attempts`);
+        }
+        return null;
+      }
+      
+      // Exponential backoff: 2s, 4s, 8s
+      const delayMs = baseDelay * Math.pow(2, attempt);
+      if (isRateLimit) {
+        // Longer delay for rate limits
+        await delay(delayMs * 2);
+      } else {
+        await delay(delayMs);
+      }
+    }
+  }
+  return null;
 }
 
 export async function fetchPlacesFromOpenStreetMap(
@@ -37,29 +114,43 @@ export async function fetchPlacesFromOpenStreetMap(
       await delay(2000);
       
       try {
-        const geocodeResponse = await axios.get('https://nominatim.openstreetmap.org/search', {
-          params: {
-            q: cityName,
-            format: 'json',
-            limit: 1,
-          },
-          headers: {
-            'User-Agent': 'MoodMap/1.0',
-          },
+        const geocodeResponse = await retryWithBackoff(async () => {
+          return await axios.get('https://nominatim.openstreetmap.org/search', {
+            params: {
+              q: cityName,
+              format: 'json',
+              limit: 1,
+            },
+            headers: {
+              'User-Agent': 'MoodMap/1.0',
+            },
+            timeout: 30000, // Increased to 30 seconds
+          });
         });
+        
+        if (!geocodeResponse) {
+          console.warn(`[OpenStreetMap] Could not geocode city: ${cityName} (request failed)`);
+          return [];
+        }
 
         if (geocodeResponse.data && geocodeResponse.data.length > 0) {
           searchLat = parseFloat(geocodeResponse.data[0].lat);
           searchLng = parseFloat(geocodeResponse.data[0].lon);
           console.log(`[OpenStreetMap] Geocoded "${cityName}" to: ${searchLat}, ${searchLng}`);
         } else {
-          console.warn(`[OpenStreetMap] Could not geocode city: ${cityName}`);
+          console.warn(`[OpenStreetMap] Could not geocode city: ${cityName} (no results)`);
           return [];
         }
       } catch (error: any) {
-        if (error.response?.status === 418) {
+        const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+        const isRateLimit = error.response?.status === 418 || error.response?.status === 429;
+        
+        if (isRateLimit) {
           console.warn(`[OpenStreetMap] Rate limited during geocoding. Waiting longer...`);
-          await delay(5000);
+          await delay(10000);
+          return [];
+        } else if (isTimeout) {
+          console.warn(`[OpenStreetMap] Timeout during geocoding for: ${cityName}`);
           return [];
         }
         console.error(`[OpenStreetMap] Error geocoding city: ${cityName}`, error.message);
@@ -97,18 +188,25 @@ export async function fetchPlacesFromOpenStreetMap(
           searchParams.radius = 5000; // 5km radius
         }
         
-        const searchResponse = await axios.get(searchUrl, {
-          params: searchParams,
-          headers: {
-            'User-Agent': 'MoodMap/1.0',
-          },
-          timeout: 10000,
+        const searchResponse = await retryWithBackoff(async () => {
+          return await axios.get(searchUrl, {
+            params: searchParams,
+            headers: {
+              'User-Agent': 'MoodMap/1.0',
+            },
+            timeout: 30000, // Increased to 30 seconds
+          });
         });
+        
+        if (!searchResponse) {
+          console.log(`[OpenStreetMap] Request failed for "${query}", trying next search term...`);
+          continue; // Skip to next search term
+        }
 
         const results = searchResponse.data || [];
         console.log(`[OpenStreetMap] Found ${results.length} results for "${query}"`);
         
-        if (results.length > 0) {
+        if (results && results.length > 0) {
           for (const result of results) {
           const address = result.address || {};
           const name = result.name || result.display_name?.split(',')[0] || 'Place';
@@ -171,6 +269,8 @@ export async function fetchPlacesFromOpenStreetMap(
             extractedCity = address.city || address.town || address.village || address.municipality || address.county || cityName;
           }
           
+          const placeImages = await getPlaceImages(name, extractedCity || cityName, result.type || result.class || searchTerm);
+          
           places.push({
             id: parseInt(result.place_id || `${Math.random() * 1000000}`, 10),
             name,
@@ -184,10 +284,7 @@ export async function fetchPlacesFromOpenStreetMap(
             phone: result.tags?.phone || '',
             website: result.tags?.website || '',
             amenities: amenities.filter(Boolean),
-            photos: [
-              'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
-              'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=800&h=600&fit=crop',
-            ],
+            photos: placeImages,
           });
           
           if (places.length >= 15) break;
@@ -196,10 +293,18 @@ export async function fetchPlacesFromOpenStreetMap(
           console.log(`[OpenStreetMap] No results for "${query}", trying next search term...`);
         }
       } catch (error: any) {
-        if (error.response?.status === 418) {
-          console.warn(`[OpenStreetMap] Rate limited (418) for "${searchTerm}". Waiting...`);
-          await delay(5000);
-          break; // Stop trying if rate limited
+        const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+        const isRateLimit = error.response?.status === 418 || error.response?.status === 429;
+        
+        if (isRateLimit) {
+          console.warn(`[OpenStreetMap] Rate limited for "${searchTerm}". Waiting longer...`);
+          await delay(10000); // Wait 10 seconds for rate limits
+          if (searchTerm === searchTerms[searchTerms.length - 1]) {
+            break; // Stop if this is the last search term
+          }
+        } else if (isTimeout) {
+          console.warn(`[OpenStreetMap] Timeout for "${searchTerm}", skipping to next term...`);
+          // Continue to next search term
         } else {
           console.error(`[OpenStreetMap] Error searching for "${searchTerm}":`, error.message);
           // Continue to next search term
@@ -230,16 +335,23 @@ export async function fetchPlacesFromOpenStreetMap(
           if (places.length >= 15) break;
           try {
             await delay(2000);
-            const searchResponse = await axios.get('https://nominatim.openstreetmap.org/search', {
-              params: {
-                q: `${beachQuery}, Los Angeles`,
-                format: 'json',
-                limit: 3,
-                addressdetails: 1,
-              },
-              headers: { 'User-Agent': 'MoodMap/1.0' },
-              timeout: 10000,
+            const searchResponse = await retryWithBackoff(async () => {
+              return await axios.get('https://nominatim.openstreetmap.org/search', {
+                params: {
+                  q: `${beachQuery}, Los Angeles`,
+                  format: 'json',
+                  limit: 3,
+                  addressdetails: 1,
+                },
+                headers: { 'User-Agent': 'MoodMap/1.0' },
+                timeout: 30000, // Increased to 30 seconds
+              });
             });
+            
+            if (!searchResponse) {
+              console.warn(`[OpenStreetMap] Request failed for ${beachQuery}, skipping...`);
+              continue;
+            }
             
             const results = searchResponse.data || [];
             if (results.length > 0) {
@@ -272,30 +384,57 @@ export async function fetchPlacesFromOpenStreetMap(
                   if (result.tags.leisure) amenities.push(result.tags.leisure);
                   if (result.tags.tourism) amenities.push(result.tags.tourism);
                 }
-                if (amenities.length === 0) amenities.push('beach' || 'pier' || 'attraction');
+                if (amenities.length === 0) {
+                  // Determine type based on query
+                  if (beachQuery.toLowerCase().includes('pier')) {
+                    amenities.push('pier');
+                  } else if (beachQuery.toLowerCase().includes('canal')) {
+                    amenities.push('canal');
+                  } else {
+                    amenities.push('beach');
+                  }
+                }
+                
+                // Determine type for the place
+                let placeType = result.type || 'Place';
+                if (beachQuery.toLowerCase().includes('pier')) {
+                  placeType = 'Pier';
+                } else if (beachQuery.toLowerCase().includes('canal')) {
+                  placeType = 'Canal';
+                } else if (beachQuery.toLowerCase().includes('beach')) {
+                  placeType = 'Beach';
+                }
+                
+                // Extract city dynamically
+                const extractedCity = address.city || address.town || address.village || address.municipality || 'Los Angeles';
+                
+                // Get images dynamically based on place name, city, and type
+                const placeImages = await getPlaceImages(name, extractedCity, placeType);
                 
                 places.push({
                   id: parseInt(result.place_id || `${Math.random() * 1000000}`, 10),
                   name,
-                  type: 'Beach' || 'Pier' || result.type || 'Place',
+                  type: placeType,
                   rating: '4.5',
                   address: formattedAddress,
-                  city: address.city || address.town || 'Los Angeles',
-                  description: `${name} in Los Angeles. A popular beach destination.`,
+                  city: extractedCity,
+                  description: `${name} in ${extractedCity}. A popular beach destination.`,
                   hours: result.tags?.opening_hours || 'Open 24/7',
                   price: 'Free',
                   phone: result.tags?.phone || '',
                   website: result.tags?.website || '',
                   amenities: amenities.filter(Boolean),
-                  photos: [
-                    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=600&fit=crop',
-                    'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800&h=600&fit=crop',
-                  ],
+                  photos: placeImages,
                 });
               }
             }
           } catch (error: any) {
-            console.error(`[OpenStreetMap] Error searching for ${beachQuery}:`, error.message);
+            const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+            if (isTimeout) {
+              console.warn(`[OpenStreetMap] Timeout for ${beachQuery}, skipping...`);
+            } else {
+              console.error(`[OpenStreetMap] Error searching for ${beachQuery}:`, error.message);
+            }
           }
         }
       }
@@ -321,14 +460,26 @@ export async function fetchPlacesFromOpenStreetMap(
           searchParams.radius = 5000;
         }
         
-        const generalResponse = await axios.get(searchUrl, {
-          params: searchParams,
-          headers: { 'User-Agent': 'MoodMap/1.0' },
-          timeout: 10000,
+        const generalResponse = await retryWithBackoff(async () => {
+          return await axios.get(searchUrl, {
+            params: searchParams,
+            headers: { 'User-Agent': 'MoodMap/1.0' },
+            timeout: 30000, // Increased to 30 seconds
+          });
         });
+        
+        if (!generalResponse) {
+          console.warn('[OpenStreetMap] General search request failed');
+          return places; // Return whatever places we have
+        }
         
         const generalResults = generalResponse.data || [];
         console.log(`[OpenStreetMap] Found ${generalResults.length} general results`);
+        
+        if (!generalResults || generalResults.length === 0) {
+          console.log('[OpenStreetMap] No general results found');
+          return places;
+        }
         
         // Process general results (same logic as above)
         for (const result of generalResults.slice(0, 10)) {
@@ -375,6 +526,8 @@ export async function fetchPlacesFromOpenStreetMap(
             extractedCity = address.city || address.town || address.village || address.municipality || address.county || cityName;
           }
           
+          const generalImages = await getPlaceImages(name, extractedCity || cityName, result.type || result.class);
+          
           places.push({
             id: parseInt(result.place_id || `${Math.random() * 1000000}`, 10),
             name,
@@ -388,14 +541,16 @@ export async function fetchPlacesFromOpenStreetMap(
             phone: result.tags?.phone || '',
             website: result.tags?.website || '',
             amenities: amenities.filter(Boolean),
-            photos: [
-              'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
-              'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=800&h=600&fit=crop',
-            ],
+            photos: generalImages,
           });
         }
       } catch (error: any) {
-        console.error('[OpenStreetMap] Error in general search:', error.message);
+        const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+        if (isTimeout) {
+          console.warn('[OpenStreetMap] Timeout in general search');
+        } else {
+          console.error('[OpenStreetMap] Error in general search:', error.message);
+        }
       }
     }
 

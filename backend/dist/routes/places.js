@@ -11,12 +11,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const aiService_1 = require("../services/aiService");
-const vectorStore_1 = require("../services/vectorStore");
 const placesApi_1 = require("../services/placesApi");
 const router = (0, express_1.Router)();
 router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { mood, city, lat, lng } = req.query;
+        const { mood, city, lat, lng, preferences } = req.query;
         if (!mood) {
             return res.status(400).json({
                 error: 'Mood parameter is required'
@@ -27,8 +26,30 @@ router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (cityName.includes(',')) {
             cityName = cityName.split(',')[0].trim();
         }
-        console.log(`[Places API] Request - mood: ${mood}, city: ${cityName}, lat: ${lat}, lng: ${lng}`);
-        const osmPlaces = yield (0, placesApi_1.fetchPlacesFromOpenStreetMap)(cityName, lat ? parseFloat(lat) : undefined, lng ? parseFloat(lng) : undefined, mood);
+        // Parse preferences if provided (can be comma-separated string or array)
+        let preferencesArray = [];
+        if (preferences) {
+            if (typeof preferences === 'string') {
+                try {
+                    const parsed = JSON.parse(preferences);
+                    preferencesArray = Array.isArray(parsed)
+                        ? parsed.map((p) => String(p)).filter((p) => p.length > 0)
+                        : [String(parsed)].filter((p) => p.length > 0);
+                }
+                catch (_a) {
+                    // If not JSON, treat as comma-separated string
+                    preferencesArray = preferences.split(',').map(p => p.trim()).filter(p => p.length > 0);
+                }
+            }
+            else if (Array.isArray(preferences)) {
+                preferencesArray = preferences.map((p) => String(p)).filter((p) => p.length > 0);
+            }
+            else {
+                preferencesArray = [String(preferences)].filter((p) => p.length > 0);
+            }
+        }
+        console.log(`[Places API] Request - mood: ${mood}, city: ${cityName}, lat: ${lat}, lng: ${lng}, preferences:`, preferencesArray);
+        const osmPlaces = yield (0, placesApi_1.fetchPlacesFromOpenStreetMap)(cityName, lat ? parseFloat(lat) : undefined, lng ? parseFloat(lng) : undefined, mood, preferencesArray);
         if (osmPlaces.length > 0) {
             allPlaces = osmPlaces;
             console.log(`✅ Successfully fetched ${allPlaces.length} places from OpenStreetMap`);
@@ -36,9 +57,6 @@ router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         else {
             console.warn(`⚠️  No OpenStreetMap results found for "${cityName}" with mood "${mood}"`);
             allPlaces = [];
-        }
-        if (!vectorStore_1.vectorStore.getStats().initialized) {
-            yield vectorStore_1.vectorStore.initialize(allPlaces, mood);
         }
         const userContext = {
             mood: mood,
@@ -52,16 +70,44 @@ router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (hasGroq || hasOpenAI) {
             const provider = hasGroq ? 'Groq' : 'OpenAI';
             console.log(`[Places API] Using ${provider} for AI-powered recommendations`);
-            recommendedPlaces = yield (0, aiService_1.generatePersonalizedRecommendations)(allPlaces, userContext);
-            const explanation = yield (0, aiService_1.generateRecommendationExplanation)(recommendedPlaces, userContext);
-            return res.json({
-                places: recommendedPlaces,
-                explanation,
-                aiPowered: true,
-                provider: provider.toLowerCase(),
-                mood: mood,
-                city: city || 'your location'
-            });
+            // Only use AI if we have places to work with
+            if (allPlaces.length > 0) {
+                try {
+                    recommendedPlaces = yield (0, aiService_1.generatePersonalizedRecommendations)(allPlaces, userContext);
+                    const explanation = yield (0, aiService_1.generateRecommendationExplanation)(recommendedPlaces, userContext);
+                    return res.json({
+                        places: recommendedPlaces.length > 0 ? recommendedPlaces : allPlaces.slice(0, 8),
+                        explanation,
+                        aiPowered: true,
+                        provider: provider.toLowerCase(),
+                        mood: mood,
+                        city: city || 'your location'
+                    });
+                }
+                catch (error) {
+                    console.error('[Places API] AI error, returning places without AI ranking:', error);
+                    // If AI fails, still return the places
+                    return res.json({
+                        places: allPlaces.slice(0, 8),
+                        explanation: `Based on your ${mood} mood, here are some places in ${cityName}!`,
+                        aiPowered: false,
+                        mood: mood,
+                        city: cityName
+                    });
+                }
+            }
+            else {
+                // No places found, but AI is available - return empty with helpful message
+                console.warn(`[Places API] AI available but no places found from OpenStreetMap`);
+                return res.json({
+                    places: [],
+                    explanation: `No places found for "${cityName}" with mood "${mood}". Please try a different location or mood.`,
+                    aiPowered: true,
+                    provider: provider.toLowerCase(),
+                    mood: mood,
+                    city: cityName
+                });
+            }
         }
         else {
             // No AI available, but still return the OpenStreetMap places (if any)

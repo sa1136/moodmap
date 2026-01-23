@@ -23,6 +23,7 @@ router.post('/', (req, res) => {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
+        // Store user data (for potential future use like analytics)
         const existingUserIndex = users.findIndex(u => u.name.toLowerCase() === user.name.toLowerCase() &&
             u.city.toLowerCase() === user.city.toLowerCase());
         if (existingUserIndex >= 0) {
@@ -30,6 +31,10 @@ router.post('/', (req, res) => {
         }
         else {
             users.push(user);
+        }
+        // Keep only last 100 users to prevent memory issues
+        if (users.length > 100) {
+            users = users.slice(-100);
         }
         res.status(201).json({
             message: 'User preferences saved successfully',
