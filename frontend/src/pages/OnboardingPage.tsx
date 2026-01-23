@@ -311,6 +311,7 @@ const OnboardingPage: React.FC = () => {
       await axios.post('http://localhost:5001/api/user', formData);
       
       localStorage.setItem('userCity', formData.city);
+      localStorage.setItem('userPreferences', JSON.stringify(formData.preferences));
       
       alert('Preferences saved successfully!');
       navigate('/mood');

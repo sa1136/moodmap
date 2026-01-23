@@ -1,19 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom CSS Variables for MoodMap Theme */
+/* Custom CSS Variables for MoodMap Doodle Theme */
 :root {
-  --color-primary: #0ea5e9;
-  --color-secondary: #d946ef;
-  --color-accent: #eab308;
-  --color-mood-relaxed: #10b981;
-  --color-mood-energetic: #f59e0b;
-  --color-mood-adventurous: #8b5cf6;
-  --color-mood-social: #ef4444;
-  --color-mood-creative: #06b6d4;
-  --color-mood-focused: #6366f1;
+  --color-primary: #1e3a8a;
+  --color-secondary: #4c1d95;
+  --color-accent: #0f766e;
+  --color-mood-relaxed: #1e40af;
+  --color-mood-energetic: #92400e;
+  --color-mood-adventurous: #1e3a8a;
+  --color-mood-social: #4c1d95;
+  --color-mood-creative: #0f766e;
+  --color-mood-focused: #3730a3;
+  --doodle-border-color: #1a1a1a;
 }
 
 /* Global Styles */
@@ -23,83 +25,218 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #dbeafe 0%, #60a5fa 50%, #3b82f6 100%);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 25%, #1e3a8a 50%, #312e81 75%, #164e63 100%);
   background-attachment: fixed;
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
   min-height: 100vh;
+  position: relative;
+}
+
+/* Animated gradient background */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Doodle pattern overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px);
+  background-size: 100px 100px, 150px 150px, 80px 80px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Doodle Border Styles */
+.doodle-border {
+  border: 3px solid var(--doodle-border-color);
+  border-radius: 20px 5px 15px 8px;
+  position: relative;
+  background: #1e293b;
+  box-shadow: 
+    8px 8px 0px rgba(0, 0, 0, 0.3),
+    4px 4px 0px rgba(0, 0, 0, 0.2);
+}
+
+.doodle-border::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border: 2px dashed rgba(45, 52, 54, 0.3);
+  border-radius: 25px 10px 20px 12px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.doodle-button {
+  border: 3px solid var(--doodle-border-color);
+  border-radius: 12px;
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.3);
+}
+
+.doodle-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.4);
+}
+
+.doodle-button:active {
+  transform: translateY(0px);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+}
+
+.doodle-card {
+  border: 3px solid var(--doodle-border-color);
+  border-radius: 16px;
+  background: #1e293b;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.3);
+}
+
+.doodle-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.4);
+}
+
+.doodle-input {
+  border: 3px solid var(--doodle-border-color);
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.2);
+  background: #1e293b;
+  color: white;
+}
+
+.doodle-input:focus {
+  outline: none;
+  border-color: #1e3a8a;
+  box-shadow: 4px 4px 0px rgba(30, 58, 138, 0.3);
 }
 
 /* Custom Components */
 @layer components {
   .btn-primary {
-    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md;
+    @apply doodle-button bg-gradient-to-r from-blue-800 to-purple-800 text-white font-bold py-3 px-6;
   }
   
   .btn-secondary {
-    @apply bg-secondary-500 hover:bg-secondary-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md;
+    @apply doodle-button bg-gradient-to-r from-teal-800 to-blue-800 text-white font-bold py-3 px-6;
   }
   
   .card {
-    @apply bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6 hover:shadow-xl transition-all duration-300;
+    @apply doodle-card p-6;
   }
   
   .form-card {
-    @apply relative rounded-xl shadow-lg border border-primary-800/20 p-6 hover:shadow-xl transition-all duration-300;
-    background-color: #1e40af; /* Dark blue solid matte color */
-    box-shadow: 0 10px 25px -3px rgba(30, 64, 175, 0.3), 0 4px 6px -2px rgba(30, 64, 175, 0.2);
-  }
-  
-  .form-card:hover {
-    box-shadow: 0 20px 40px -3px rgba(30, 64, 175, 0.4), 0 8px 12px -2px rgba(30, 64, 175, 0.3);
-    background-color: #1e3a8a; /* Slightly darker on hover */
+    @apply doodle-border p-8 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800;
   }
   
   .mood-card {
-    @apply bg-blue-900/40 backdrop-blur-sm rounded-xl shadow-md border border-blue-300/40 p-4 hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer;
+    @apply doodle-card p-6 cursor-pointer;
   }
   
   .gradient-bg {
-    @apply bg-gradient-to-br from-primary-50 via-white to-secondary-50;
+    @apply bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800;
   }
   
   .text-gradient {
-    @apply bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-800 via-purple-800 to-teal-800 bg-clip-text text-transparent;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
   }
   
   .form-input {
-    @apply w-full px-4 py-3 border border-blue-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-200 transition-all duration-200 bg-white/95 backdrop-blur-sm text-gray-900;
-  }
-  
-  .form-input:focus {
-    box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+    @apply doodle-input w-full px-4 py-3 bg-white/95 backdrop-blur-sm text-gray-900;
   }
   
   .form-input::placeholder {
     color: #9ca3af;
+    font-style: italic;
   }
 }
 
-/* Animations */
+/* Doodle Animations */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%, 100% { transform: translateY(0px) rotate(-1deg); }
+  50% { transform: translateY(-15px) rotate(1deg); }
 }
 
 @keyframes bounce-gentle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-8px) rotate(-2deg); }
+  75% { transform: translateY(-8px) rotate(2deg); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@keyframes doodle-draw {
+  0% { stroke-dashoffset: 1000; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes pulse-doodle {
+  0%, 100% { transform: scale(1) rotate(-1deg); }
+  50% { transform: scale(1.05) rotate(1deg); }
 }
 
 .floating {
-  animation: float 3s ease-in-out infinite;
+  animation: float 4s ease-in-out infinite;
 }
 
 .bounce-gentle {
-  animation: bounce-gentle 2s ease-in-out infinite;
+  animation: bounce-gentle 2.5s ease-in-out infinite;
+}
+
+.wiggle {
+  animation: wiggle 0.5s ease-in-out infinite;
+}
+
+.pulse-doodle {
+  animation: pulse-doodle 2s ease-in-out infinite;
+}
+
+/* Hand-drawn underline effect */
+.doodle-underline {
+  position: relative;
+  display: inline-block;
+}
+
+.doodle-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--doodle-border-color);
+  border-radius: 2px;
+  transform: rotate(-1deg) skewX(-5deg);
+  animation: wiggle 3s ease-in-out infinite;
 }
 
 /* Scrollbar Styling */

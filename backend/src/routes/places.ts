@@ -1,13 +1,12 @@
 import { Router } from "express";
 import { generatePersonalizedRecommendations, generateRecommendationExplanation, Place, UserContext } from "../services/aiService";
-import { vectorStore } from "../services/vectorStore";
 import { fetchPlacesFromOpenStreetMap } from "../services/placesApi";
 
 const router = Router();
 
 router.get("/", async (req, res) => {
   try {
-    const { mood, city, lat, lng } = req.query;
+    const { mood, city, lat, lng, preferences } = req.query;
     
     if (!mood) {
       return res.status(400).json({ 
@@ -21,13 +20,35 @@ router.get("/", async (req, res) => {
     if (cityName.includes(',')) {
       cityName = cityName.split(',')[0].trim();
     }
-    console.log(`[Places API] Request - mood: ${mood}, city: ${cityName}, lat: ${lat}, lng: ${lng}`);
+    
+    // Parse preferences if provided (can be comma-separated string or array)
+    let preferencesArray: string[] = [];
+    if (preferences) {
+      if (typeof preferences === 'string') {
+        try {
+          const parsed = JSON.parse(preferences);
+          preferencesArray = Array.isArray(parsed) 
+            ? parsed.map((p: any) => String(p)).filter((p: string) => p.length > 0)
+            : [String(parsed)].filter((p: string) => p.length > 0);
+        } catch {
+          // If not JSON, treat as comma-separated string
+          preferencesArray = preferences.split(',').map(p => p.trim()).filter(p => p.length > 0);
+        }
+      } else if (Array.isArray(preferences)) {
+        preferencesArray = preferences.map((p: any) => String(p)).filter((p: string) => p.length > 0);
+      } else {
+        preferencesArray = [String(preferences)].filter((p: string) => p.length > 0);
+      }
+    }
+    
+    console.log(`[Places API] Request - mood: ${mood}, city: ${cityName}, lat: ${lat}, lng: ${lng}, preferences:`, preferencesArray);
     
     const osmPlaces = await fetchPlacesFromOpenStreetMap(
       cityName,
       lat ? parseFloat(lat as string) : undefined,
       lng ? parseFloat(lng as string) : undefined,
-      mood as string
+      mood as string,
+      preferencesArray
     );
     
     if (osmPlaces.length > 0) {
@@ -36,10 +57,6 @@ router.get("/", async (req, res) => {
     } else {
       console.warn(`⚠️  No OpenStreetMap results found for "${cityName}" with mood "${mood}"`);
       allPlaces = [];
-    }
-    
-    if (!vectorStore.getStats().initialized) {
-      await vectorStore.initialize(allPlaces, mood as string);
     }
 
     const userContext: UserContext = {
@@ -61,17 +78,29 @@ router.get("/", async (req, res) => {
       
       // Only use AI if we have places to work with
       if (allPlaces.length > 0) {
-        recommendedPlaces = await generatePersonalizedRecommendations(allPlaces, userContext);
-        const explanation = await generateRecommendationExplanation(recommendedPlaces, userContext);
-        
-        return res.json({
-          places: recommendedPlaces,
-          explanation,
-          aiPowered: true,
-          provider: provider.toLowerCase(),
-          mood: mood,
-          city: city || 'your location'
-        });
+        try {
+          recommendedPlaces = await generatePersonalizedRecommendations(allPlaces, userContext);
+          const explanation = await generateRecommendationExplanation(recommendedPlaces, userContext);
+          
+          return res.json({
+            places: recommendedPlaces.length > 0 ? recommendedPlaces : allPlaces.slice(0, 8),
+            explanation,
+            aiPowered: true,
+            provider: provider.toLowerCase(),
+            mood: mood,
+            city: city || 'your location'
+          });
+        } catch (error) {
+          console.error('[Places API] AI error, returning places without AI ranking:', error);
+          // If AI fails, still return the places
+          return res.json({
+            places: allPlaces.slice(0, 8),
+            explanation: `Based on your ${mood} mood, here are some places in ${cityName}!`,
+            aiPowered: false,
+            mood: mood,
+            city: cityName
+          });
+        }
       } else {
         // No places found, but AI is available - return empty with helpful message
         console.warn(`[Places API] AI available but no places found from OpenStreetMap`);

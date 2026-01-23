@@ -13,17 +13,6 @@ const groq = process.env.GROQ_API_KEY
     })
   : null;
 
-// Determine which provider to use for chat completions
-// Priority: Groq (if available) > OpenAI (if available)
-const getChatProvider = () => {
-  if (groq && process.env.GROQ_API_KEY) {
-    return 'groq';
-  }
-  if (process.env.OPENAI_API_KEY) {
-    return 'openai';
-  }
-  return null;
-};
 
 export interface Place {
   id: number;
@@ -137,7 +126,7 @@ Format: ["Place Name 1", "Place Name 2", ...]`;
       // Use Groq for faster inference
       console.log('[AI Service] Using Groq for recommendations');
       completion = await groq.chat.completions.create({
-        model: 'llama-3.1-70b-versatile', // Groq's fast model
+        model: 'llama-3.3-70b-versatile', // Groq's current model
         messages: [
           {
             role: 'system',
@@ -267,7 +256,7 @@ Provide a brief, friendly explanation (2-3 sentences) about why these places mat
       // Use Groq for faster inference
       console.log('[AI Service] Using Groq for explanation');
       completion = await groq.chat.completions.create({
-        model: 'llama-3.1-70b-versatile', // Groq's fast model
+        model: 'llama-3.3-70b-versatile', // Groq's current model
         messages: [
           {
             role: 'system',

@@ -24,6 +24,7 @@ router.post('/', (req, res) => {
       updatedAt: new Date().toISOString()
     };
 
+    // Store user data (for potential future use like analytics)
     const existingUserIndex = users.findIndex(u => 
       u.name.toLowerCase() === user.name.toLowerCase() && 
       u.city.toLowerCase() === user.city.toLowerCase()
@@ -33,6 +34,11 @@ router.post('/', (req, res) => {
       users[existingUserIndex] = { ...user, id: users[existingUserIndex].id };
     } else {
       users.push(user);
+    }
+    
+    // Keep only last 100 users to prevent memory issues
+    if (users.length > 100) {
+      users = users.slice(-100);
     }
 
     res.status(201).json({

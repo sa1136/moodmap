@@ -24,6 +24,11 @@ router.post('/', (req, res) => {
     };
 
     moods.push(moodEntry);
+    
+    // Keep only last 100 moods to prevent memory issues
+    if (moods.length > 100) {
+      moods = moods.slice(-100);
+    }
 
     res.status(201).json({
       message: 'Mood saved successfully',
