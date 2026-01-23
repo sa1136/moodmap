@@ -1,8 +1,29 @@
 import OpenAI from 'openai';
+import Groq from 'groq-sdk';
 
+// Initialize OpenAI (for embeddings and fallback)
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
 });
+
+// Initialize Groq (for fast LLM inference)
+const groq = process.env.GROQ_API_KEY 
+  ? new Groq({
+      apiKey: process.env.GROQ_API_KEY,
+    })
+  : null;
+
+// Determine which provider to use for chat completions
+// Priority: Groq (if available) > OpenAI (if available)
+const getChatProvider = () => {
+  if (groq && process.env.GROQ_API_KEY) {
+    return 'groq';
+  }
+  if (process.env.OPENAI_API_KEY) {
+    return 'openai';
+  }
+  return null;
+};
 
 export interface Place {
   id: number;
@@ -71,6 +92,12 @@ export async function generatePersonalizedRecommendations(
   userContext: UserContext
 ): Promise<Place[]> {
   try {
+    // If no places available, return empty array
+    if (!places || places.length === 0) {
+      console.warn('[AI Service] No places available for recommendations');
+      return [];
+    }
+
     const placesContext = places
       .slice(0, 20)
       .map(
@@ -103,22 +130,50 @@ Consider:
 Return your response as a JSON array of place names that you recommend, in order of relevance.
 Format: ["Place Name 1", "Place Name 2", ...]`;
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a helpful assistant that provides personalized location recommendations. Always respond with valid JSON in the format: {"recommendations": ["Place Name 1", "Place Name 2", ...]}',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      temperature: 0.7,
-      response_format: { type: 'json_object' },
-    });
+    const provider = getChatProvider();
+    let completion;
+
+    if (provider === 'groq' && groq) {
+      // Use Groq for faster inference
+      console.log('[AI Service] Using Groq for recommendations');
+      completion = await groq.chat.completions.create({
+        model: 'llama-3.1-70b-versatile', // Groq's fast model
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are a helpful assistant that provides personalized location recommendations. Always respond with valid JSON in the format: {"recommendations": ["Place Name 1", "Place Name 2", ...]}',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.7,
+        response_format: { type: 'json_object' },
+      });
+    } else if (provider === 'openai') {
+      // Fallback to OpenAI
+      console.log('[AI Service] Using OpenAI for recommendations');
+      completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are a helpful assistant that provides personalized location recommendations. Always respond with valid JSON in the format: {"recommendations": ["Place Name 1", "Place Name 2", ...]}',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.7,
+        response_format: { type: 'json_object' },
+      });
+    } else {
+      throw new Error('No AI provider available');
+    }
 
     const responseContent = completion.choices[0]?.message?.content || '{}';
     const parsedResponse = JSON.parse(responseContent);
@@ -190,6 +245,11 @@ export async function generateRecommendationExplanation(
   userContext: UserContext
 ): Promise<string> {
   try {
+    // If no places, return a helpful message
+    if (!recommendedPlaces || recommendedPlaces.length === 0) {
+      return `No places found for your ${userContext.mood} mood in ${userContext.city || 'this location'}. Please try a different location or mood.`;
+    }
+
     const placesSummary = recommendedPlaces
       .map((p) => `${p.name} (${p.type})`)
       .join(', ');
@@ -200,21 +260,48 @@ Recommended places: ${placesSummary}
 
 Provide a brief, friendly explanation (2-3 sentences) about why these places match the user's mood.`;
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a friendly assistant that explains location recommendations in a warm, conversational tone.',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      temperature: 0.8,
-      max_tokens: 150,
-    });
+    const provider = getChatProvider();
+    let completion;
+
+    if (provider === 'groq' && groq) {
+      // Use Groq for faster inference
+      console.log('[AI Service] Using Groq for explanation');
+      completion = await groq.chat.completions.create({
+        model: 'llama-3.1-70b-versatile', // Groq's fast model
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a friendly assistant that explains location recommendations in a warm, conversational tone.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.8,
+        max_tokens: 150,
+      });
+    } else if (provider === 'openai') {
+      // Fallback to OpenAI
+      console.log('[AI Service] Using OpenAI for explanation');
+      completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a friendly assistant that explains location recommendations in a warm, conversational tone.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.8,
+        max_tokens: 150,
+      });
+    } else {
+      throw new Error('No AI provider available');
+    }
 
     return completion.choices[0]?.message?.content || 'These places are recommended based on your current mood and preferences.';
   } catch (error) {

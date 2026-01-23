@@ -26,8 +26,9 @@ class VectorStore {
       return;
     }
 
+    // Embeddings require OpenAI (Groq doesn't provide embeddings API)
     if (!process.env.OPENAI_API_KEY) {
-      console.log('Skipping vector store initialization - OpenAI API key not configured');
+      console.log('Skipping vector store initialization - OpenAI API key not configured (required for embeddings)');
       this.initialized = true;
       return;
     }

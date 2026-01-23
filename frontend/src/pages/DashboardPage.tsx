@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const DashboardPage: React.FC = () => {
+  const navigate = useNavigate();
   const [places, setPlaces] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
@@ -73,7 +75,10 @@ const DashboardPage: React.FC = () => {
           <div className="flex justify-between items-center py-4">
             <h1 className="text-3xl font-display font-bold text-gradient">MoodMap</h1>
             <nav className="flex space-x-4">
-              <button className="btn-primary">
+              <button 
+                onClick={() => navigate('/mood')}
+                className="btn-primary"
+              >
                 New Mood
               </button>
               <button className="text-neutral-600 hover:text-neutral-800 font-medium transition-colors duration-200">
@@ -143,7 +148,10 @@ const DashboardPage: React.FC = () => {
                 </div>
                 <h3 className="text-xl font-semibold text-neutral-800 mb-2">No places found</h3>
                 <p className="text-neutral-600 mb-6">Try selecting a mood to get personalized recommendations!</p>
-                <button className="btn-primary">
+                <button 
+                  onClick={() => navigate('/mood')}
+                  className="btn-primary"
+                >
                   Start Exploring
                 </button>
               </div>

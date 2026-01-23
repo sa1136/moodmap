@@ -100,19 +100,73 @@ export async function fetchPlacesFromOpenStreetMap(
             continue;
           }
           
+          // Build a cleaner address from address components
+          const addressParts: string[] = [];
+          if (address.road) addressParts.push(address.road);
+          if (address.house_number) addressParts.unshift(address.house_number);
+          if (addressParts.length === 0 && address.amenity) {
+            // If no street address, use amenity name
+            addressParts.push(address.amenity);
+          }
+          
+          // Add city/state/zip
+          const cityState: string[] = [];
+          if (address.city || address.town || address.village) {
+            cityState.push(address.city || address.town || address.village);
+          }
+          if (address.state) {
+            cityState.push(address.state);
+          }
+          if (address.postcode) {
+            cityState.push(address.postcode);
+          }
+          
+          // Format address: "123 Main St, City, State ZIP" or fallback to shorter display_name
+          let formattedAddress = '';
+          if (addressParts.length > 0) {
+            formattedAddress = addressParts.join(' ');
+            if (cityState.length > 0) {
+              formattedAddress += ', ' + cityState.join(', ');
+            }
+          } else {
+            // Fallback: use first 2-3 parts of display_name (more readable)
+            const displayParts = result.display_name?.split(',').slice(0, 3) || [];
+            formattedAddress = displayParts.join(',').trim() || cityName;
+          }
+          
+          // Extract amenities from OpenStreetMap tags if available
+          const amenities: string[] = [];
+          if (result.tags) {
+            if (result.tags.amenity) amenities.push(result.tags.amenity);
+            if (result.tags.shop) amenities.push(result.tags.shop);
+            if (result.tags.leisure) amenities.push(result.tags.leisure);
+            if (result.tags.tourism) amenities.push(result.tags.tourism);
+          }
+          // Fallback to type/class if no tags
+          if (amenities.length === 0) {
+            amenities.push(result.type || result.class || primaryTerm || 'place');
+          }
+          
+          // Extract city more accurately (prefer actual city over mall/shopping center names)
+          let extractedCity = address.city || address.town || address.village || address.municipality;
+          // If city is a shopping center/mall name, try to get the actual city from address
+          if (!extractedCity || extractedCity.toLowerCase().includes('mall') || extractedCity.toLowerCase().includes('field')) {
+            extractedCity = address.city || address.town || address.village || address.municipality || address.county || cityName;
+          }
+          
           places.push({
             id: parseInt(result.place_id || `${Math.random() * 1000000}`, 10),
             name,
             type: result.type || result.class || primaryTerm || 'Place',
             rating: '4.0',
-            address: result.display_name || `${cityName}`,
-            city: address.city || address.town || address.village || address.municipality || cityName,
+            address: formattedAddress,
+            city: extractedCity || cityName,
             description: `A ${primaryTerm || 'place'} in ${cityName}. Discovered via OpenStreetMap.`,
-            hours: 'Hours vary',
+            hours: result.tags?.opening_hours || 'Hours vary',
             price: '$$',
-            phone: '',
-            website: '',
-            amenities: [result.type || result.class || primaryTerm].filter(Boolean),
+            phone: result.tags?.phone || '',
+            website: result.tags?.website || '',
+            amenities: amenities.filter(Boolean),
             photos: [
               'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
               'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=800&h=600&fit=crop',
@@ -125,7 +179,6 @@ export async function fetchPlacesFromOpenStreetMap(
     } catch (error: any) {
       if (error.response?.status === 418) {
         console.warn(`[OpenStreetMap] Rate limited (418) for "${primaryTerm}". OpenStreetMap has strict rate limits.`);
-        console.warn(`[OpenStreetMap] Will use mock data instead.`);
       } else {
         console.error(`[OpenStreetMap] Error searching for "${primaryTerm}":`, error.message);
       }
