@@ -32,7 +32,7 @@
   font-weight: 800;
   color: #1e293b;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%);
+  color: #6b4423;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -81,21 +81,24 @@
 .mood-card {
   background-color: white;
   border-radius: 12px;
-  border: 3px solid #2d3436;
+  border: 1px solid #e5e7eb;
   padding: 1.5rem;
-  transition: all 0.3s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   font-family: 'Inter', sans-serif;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
 .mood-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-color: #d1d5db;
 }
 
 .mood-card.selected {
-  border: 4px solid #2d3436;
-  box-shadow: 6px 6px 0px rgba(45, 52, 54, 0.4);
-  background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%);
+  border: 2px solid #6b4423;
+  box-shadow: 0 4px 6px -1px rgba(107, 68, 35, 0.2), 0 2px 4px -1px rgba(107, 68, 35, 0.1);
+  background: #fef3c7;
   transform: translateY(-2px);
 }
 
@@ -140,7 +143,7 @@
 .mood-divider-line::before {
   content: '';
   width: 100%;
-  border-top: 1px solid rgba(59, 130, 246, 0.5);
+  border-top: 1px solid rgba(180, 83, 9, 0.5);
 }
 
 .mood-divider-text {
@@ -152,8 +155,8 @@
 
 .mood-divider-text span {
   padding: 0 1rem;
-  background-color: #1e3a8a;
-  color: #bfdbfe;
+  background-color: #6b4423;
+  color: #fef3c7;
   font-weight: 500;
 }
 
@@ -173,9 +176,9 @@
 .mood-custom-input {
   width: 100%;
   padding: 0.875rem 1.25rem;
-  border: 3px solid #2d3436;
-  border-radius: 10px;
-  transition: all 0.3s ease;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  transition: all 0.2s ease;
   background-color: white;
   color: #2d3436;
   font-size: 1.125rem;
@@ -185,7 +188,7 @@
 
 .mood-custom-input:focus {
   outline: none;
-  border-color: #1e3a8a;
+  border-color: #6b4423;
 }
 
 .mood-custom-input::placeholder {
@@ -194,25 +197,27 @@
 
 .mood-button {
   width: 100%;
-  padding: 1.25rem;
-  font-size: 1.5rem;
-  font-weight: 600;
+  padding: 1rem 1.5rem;
+  font-size: 1.125rem;
+  font-weight: 500;
   font-family: 'Inter', sans-serif;
-  border-radius: 12px;
-  border: 4px solid #2d3436;
-  transition: all 0.3s ease;
-  background: linear-gradient(135deg, #ff6b9d 0%, #c44569 50%, #feca57 100%);
+  border-radius: 8px;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #92400e;
   color: white;
   cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .mood-button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  background: #b45309;
 }
 
 .mood-button:active {
   transform: translateY(0px);
-  box-shadow: 3px 3px 0px rgba(45, 52, 54, 0.3);
 }
 
 .mood-button:disabled {
@@ -223,19 +228,19 @@
 .mood-selection-display {
   margin-top: 1.5rem;
   padding: 1rem;
-  background-color: rgba(30, 58, 138, 0.3);
+  background-color: rgba(180, 83, 9, 0.2);
   border-radius: 0.5rem;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  border: 1px solid rgba(217, 119, 6, 0.3);
 }
 
 .mood-selection-text {
-  color: #dbeafe;
+  color: #78350f;
   font-weight: 500;
 }
 
 .mood-selection-value {
   font-weight: 600;
-  color: white;
+  color: #92400e;
 }
 
 @keyframes float {

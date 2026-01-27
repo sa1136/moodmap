@@ -24,12 +24,8 @@
   font-size: 5rem;
   font-family: 'Poppins', sans-serif;
   font-weight: 800;
-  color: #1e293b;
+  color: #6b4423;
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .homepage-subtitle {
@@ -39,30 +35,25 @@
   font-weight: 600;
 }
 
-.homepage-map-container {
-  margin-top: 1.5rem;
-  animation: float 4s ease-in-out infinite;
-}
-
-.homepage-map {
-  font-size: 8rem;
-}
 
 .homepage-button {
-  padding: 1.25rem 2.5rem;
-  font-size: 1.5rem;
-  font-weight: 600;
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+  font-weight: 500;
   font-family: 'Inter', sans-serif;
-  border-radius: 12px;
+  border-radius: 8px;
   border: none;
-  transition: all 0.3s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   color: white;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%);
+  background: #92400e;
   cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .homepage-button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  background: #b45309;
 }
 
 .homepage-button:active {

@@ -387,13 +387,13 @@ const OnboardingPage: React.FC = () => {
                       right: '10px',
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      color: '#3b82f6'
+                      color: '#b45309'
                     }}>
                       <div style={{
                         width: '16px',
                         height: '16px',
                         border: '2px solid #e5e7eb',
-                        borderTop: '2px solid #3b82f6',
+                        borderTop: '2px solid #b45309',
                         borderRadius: '50%',
                         animation: 'spin 1s linear infinite'
                       }}></div>
@@ -439,7 +439,7 @@ const OnboardingPage: React.FC = () => {
                             }
                           }}
                         >
-                          <div style={{ fontWeight: '600', color: '#1e293b', marginBottom: '4px', fontSize: '14px' }}>
+                          <div style={{ fontWeight: '600', color: '#fef3c7', marginBottom: '4px', fontSize: '14px' }}>
                             {suggestion.city}
                           </div>
                           <div style={{ fontSize: '12px', color: '#cbd5e1' }}>
@@ -464,8 +464,8 @@ const OnboardingPage: React.FC = () => {
                     fontSize: '12px',
                     whiteSpace: 'nowrap',
                     background: isGettingLocation 
-                      ? 'linear-gradient(135deg, #475569 0%, #334155 100%)'
-                      : 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)',
+                      ? '#78716c'
+                      : '#92400e',
                     color: 'white',
                     border: '3px solid #1a1a1a',
                     borderRadius: '8px',
@@ -482,13 +482,13 @@ const OnboardingPage: React.FC = () => {
                   }}
                   onMouseEnter={(e) => {
                     if (!isGettingLocation) {
-                      e.currentTarget.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                      e.currentTarget.style.background = '#b45309';
                       e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!isGettingLocation) {
-                      e.currentTarget.style.background = 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
+                      e.currentTarget.style.background = '#92400e';
                       e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
                     }
                   }}

@@ -6,7 +6,7 @@ interface MoodIndicatorProps {
 }
 
 const moodConfig: Record<string, { emoji: string; color: string; bgColor: string }> = {
-  relaxed: { emoji: '😌', color: 'text-blue-600', bgColor: 'bg-blue-100' },
+  relaxed: { emoji: '😌', color: 'text-amber-700', bgColor: 'bg-amber-100' },
   energetic: { emoji: '⚡', color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
   adventurous: { emoji: '🏔️', color: 'text-green-600', bgColor: 'bg-green-100' },
   social: { emoji: '👥', color: 'text-purple-600', bgColor: 'bg-purple-100' },
@@ -29,7 +29,7 @@ const MoodIndicator: React.FC<MoodIndicatorProps> = ({ mood, size = 'md' }) => {
   };
 
   const bgColorMap: Record<string, string> = {
-    'bg-blue-100': 'rgba(219, 234, 254, 0.9)',
+    'bg-amber-100': 'rgba(254, 243, 199, 0.9)',
     'bg-yellow-100': 'rgba(254, 243, 199, 0.9)',
     'bg-green-100': 'rgba(209, 250, 229, 0.9)',
     'bg-purple-100': 'rgba(243, 232, 255, 0.9)',

@@ -45,7 +45,7 @@ const Filters: React.FC<FiltersProps> = ({ onFilterChange, currentFilters }) => 
           <select
             value={currentFilters.rating}
             onChange={(e) => handleChange('rating', e.target.value)}
-            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
             <option value="">Any rating</option>
@@ -62,7 +62,7 @@ const Filters: React.FC<FiltersProps> = ({ onFilterChange, currentFilters }) => 
           <select
             value={currentFilters.price}
             onChange={(e) => handleChange('price', e.target.value)}
-            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
             <option value="">Any price</option>
@@ -79,7 +79,7 @@ const Filters: React.FC<FiltersProps> = ({ onFilterChange, currentFilters }) => 
           <select
             value={currentFilters.activityType}
             onChange={(e) => handleChange('activityType', e.target.value)}
-            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
             <option value="">All types</option>

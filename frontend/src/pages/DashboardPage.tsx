@@ -132,16 +132,9 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen relative" style={{ fontFamily: "'Kalam', cursive" }}>
-      {/* Doodle background decorations - hidden on mobile */}
-      <div className="hidden sm:block fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-20 left-10 text-6xl opacity-10 transform rotate-12 animate-float" style={{ fontFamily: "'Caveat', cursive" }}>✨</div>
-        <div className="absolute top-40 right-20 text-5xl opacity-10 transform -rotate-12 animate-bounce-gentle" style={{ fontFamily: "'Caveat', cursive" }}>🎨</div>
-        <div className="absolute bottom-40 left-20 text-4xl opacity-10 transform rotate-6 animate-pulse-doodle" style={{ fontFamily: "'Caveat', cursive" }}>🌟</div>
-        <div className="absolute bottom-20 right-10 text-5xl opacity-10 transform -rotate-6 animate-float" style={{ fontFamily: "'Caveat', cursive" }}>💫</div>
-      </div>
 
       {/* Enhanced Header */}
-      <header className="bg-white/95 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200" style={{ borderRadius: '0 0 20px 20px' }}>
+      <header className="bg-white sticky top-0 z-40 border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 sm:py-4 gap-3 sm:gap-0">
             <div className="flex items-center space-x-2 sm:space-x-4 flex-1">
@@ -162,17 +155,17 @@ const DashboardPage: React.FC = () => {
             <nav className="flex space-x-2 sm:space-x-3 w-full sm:w-auto">
               <button 
                 onClick={() => navigate('/mood')}
-                className="flex-1 sm:flex-none px-3 sm:px-5 py-2 bg-gradient-to-r from-blue-500 via-purple-500 to-teal-500 text-white font-semibold text-sm sm:text-base rounded-lg"
+                className="flex-1 sm:flex-none px-3 sm:px-5 py-2 bg-amber-800 text-white font-semibold text-sm sm:text-base rounded-lg hover:bg-amber-700 transition-colors"
                 style={{ fontFamily: "'Inter', sans-serif", border: 'none' }}
               >
-                <span className="hidden sm:inline">🎭 </span>New Mood
+                <span className="hidden sm:inline">New Mood</span>
               </button>
               <button 
                 onClick={() => navigate('/onboarding')}
                 className="doodle-button flex-1 sm:flex-none px-3 sm:px-5 py-2 bg-gray-100 text-gray-700 font-semibold text-sm sm:text-base hover:bg-gray-200"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
-                <span className="hidden sm:inline">⚙️ </span>Settings
+                <span className="hidden sm:inline">Settings</span>
               </button>
             </nav>
           </div>
@@ -189,22 +182,25 @@ const DashboardPage: React.FC = () => {
               </h2>
               {currentCity && (
                 <p className="text-gray-900 flex items-center text-lg font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  <span className="text-2xl mr-2">📍</span>
+                  <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
                   {currentCity}
                 </p>
               )}
             </div>
             <div className="flex items-center space-x-3 flex-wrap">
               {aiPowered && (
-                <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-sm font-semibold px-4 py-2 rounded-lg" style={{ fontFamily: "'Inter', sans-serif", border: 'none' }}>
-                  ✨ AI-Powered
+                <span className="bg-amber-800 text-white text-xs font-medium px-3 py-1.5 rounded-md" style={{ fontFamily: "'Inter', sans-serif", border: 'none' }}>
+                  AI-Powered
                 </span>
               )}
               {/* View Toggle */}
               <div className="flex overflow-hidden ml-auto sm:ml-0 bg-white border border-gray-200 rounded-lg" style={{ borderRadius: '12px' }}>
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`px-2 sm:px-4 py-2 font-bold transition-all ${viewMode === 'grid' ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                  className={`px-2 sm:px-4 py-2 font-bold transition-all ${viewMode === 'grid' ? 'bg-amber-800 text-white hover:bg-amber-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
                   style={{ fontFamily: "'Inter', sans-serif" }}
                   aria-label="Grid view"
                 >
@@ -214,7 +210,7 @@ const DashboardPage: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`px-2 sm:px-4 py-2 font-bold transition-all ${viewMode === 'list' ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                  className={`px-2 sm:px-4 py-2 font-bold transition-all ${viewMode === 'list' ? 'bg-amber-800 text-white hover:bg-amber-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
                   style={{ fontFamily: "'Inter', sans-serif" }}
                   aria-label="List view"
                 >
@@ -228,12 +224,14 @@ const DashboardPage: React.FC = () => {
 
           {/* AI Explanation */}
           {explanation && (
-            <div className="doodle-card bg-gradient-to-r from-blue-50 via-purple-50 to-teal-50 p-4 sm:p-6 mb-4 sm:mb-6 border-2 border-blue-100">
+            <div className="doodle-card bg-amber-50 p-4 sm:p-6 mb-4 sm:mb-6">
               <div className="flex items-start">
-                <div className="flex-shrink-0 text-2xl sm:text-3xl md:text-4xl animate-bounce-gentle">💡</div>
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
                 <div className="ml-2 sm:ml-4">
-                  <p className="text-gray-900 text-sm sm:text-base leading-relaxed font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    <span className="text-xl sm:text-2xl">✨</span> <span className="font-bold text-gray-900">Why these places?</span> <span className="block sm:inline mt-1 sm:mt-0 text-gray-900">{explanation}</span>
+                  <p className="text-gray-900 text-sm sm:text-base leading-relaxed font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <span className="font-semibold text-gray-900">Why these places?</span> <span className="block sm:inline mt-1 sm:mt-0 text-gray-700">{explanation}</span>
                   </p>
                 </div>
               </div>
@@ -252,7 +250,7 @@ const DashboardPage: React.FC = () => {
             <div className="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4 animate-bounce-gentle">🔍</div>
             <p className="text-gray-900 font-semibold text-base sm:text-lg md:text-xl px-4 text-center" style={{ fontFamily: "'Inter', sans-serif" }}>Finding perfect places for you...</p>
             <div className="mt-3 sm:mt-4 flex space-x-2">
-              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-amber-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
               <div className="w-2 h-2 sm:w-3 sm:h-3 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
               <div className="w-2 h-2 sm:w-3 sm:h-3 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
             </div>
@@ -262,7 +260,7 @@ const DashboardPage: React.FC = () => {
             {/* Results Count */}
             {filteredPlaces.length > 0 && (
               <div className="mb-3 sm:mb-4 text-xs sm:text-sm text-gray-900">
-                Showing <span className="font-semibold text-blue-600">{filteredPlaces.length}</span> of <span className="font-semibold">{places.length}</span> places
+                Showing <span className="font-semibold text-amber-700">{filteredPlaces.length}</span> of <span className="font-semibold">{places.length}</span> places
               </div>
             )}
 
@@ -298,13 +296,16 @@ const DashboardPage: React.FC = () => {
                     <div className={`p-4 sm:p-5 ${viewMode === 'list' ? 'flex-1' : ''}`} style={{ fontFamily: "'Inter', sans-serif" }}>
                       <div className="flex items-start justify-between mb-2 gap-2">
                         <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-1 flex-1 break-words" style={{ fontFamily: "'Poppins', sans-serif" }}>{place.name}</h3>
-                        <span className="text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-2 sm:px-3 py-1 font-semibold flex-shrink-0 rounded-lg" style={{ border: 'none' }}>
+                        <span className="text-xs bg-amber-800 text-white px-2 sm:px-3 py-1 font-medium flex-shrink-0 rounded-md" style={{ border: 'none' }}>
                           {place.type}
                         </span>
                       </div>
                       
                       <p className="text-sm sm:text-base text-gray-900 mb-2 sm:mb-3 flex items-center font-medium">
-                        <span className="text-lg sm:text-xl mr-1 sm:mr-2">📍</span>
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
                         <span className="truncate">{place.city}</span>
                       </p>
 
@@ -315,7 +316,9 @@ const DashboardPage: React.FC = () => {
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-4">
                           <div className="flex items-center">
-                            <span className="text-yellow-500 text-lg">⭐</span>
+                            <svg className="w-4 h-4 sm:w-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
                             <span className="ml-1 text-sm font-semibold text-gray-900">{place.rating}</span>
                           </div>
                           {place.price && (
@@ -330,7 +333,7 @@ const DashboardPage: React.FC = () => {
                           {place.amenities.slice(0, 3).map((amenity: string, idx: number) => (
                             <span
                               key={idx}
-                              className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full"
+                              className="text-xs bg-amber-50 text-amber-800 px-2 py-1 rounded-full"
                             >
                               {amenity}
                             </span>
@@ -344,13 +347,15 @@ const DashboardPage: React.FC = () => {
                       <div className="flex space-x-2">
                         <button 
                           onClick={() => handleShowDetails(place)}
-                          className="flex-1 px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold text-xs sm:text-sm rounded-lg"
+                          className="flex-1 px-3 sm:px-4 py-2 bg-amber-800 text-white font-medium text-xs sm:text-sm rounded-md hover:bg-amber-700 transition-colors"
                           style={{ fontFamily: "'Inter', sans-serif", border: 'none' }}
                         >
-                          <span className="hidden sm:inline">👀 </span>Details
+                          <span className="hidden sm:inline">Details</span>
                         </button>
-                        <button className="doodle-button px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200" style={{ fontFamily: "'Inter', sans-serif" }} aria-label="Save place">
-                          <span className="text-base sm:text-lg">💾</span>
+                        <button className="doodle-button px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 font-medium hover:bg-gray-200" style={{ fontFamily: "'Inter', sans-serif" }} aria-label="Save place">
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                          </svg>
                         </button>
                       </div>
                     </div>
@@ -369,7 +374,7 @@ const DashboardPage: React.FC = () => {
                 {places.length === 0 && (
                   <button 
                     onClick={() => navigate('/mood')}
-                    className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-teal-500 text-white font-semibold text-base sm:text-lg rounded-lg"
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-amber-800 text-white font-medium text-base sm:text-lg rounded-md hover:bg-amber-700 transition-colors"
                     style={{ fontFamily: "'Inter', sans-serif", border: 'none' }}
                   >
                     🚀 Start Exploring
@@ -392,14 +397,19 @@ const DashboardPage: React.FC = () => {
                   <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 break-words">{selectedPlace.name}</h2>
                   <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-900">
                     <span className="flex items-center">
-                      <span className="text-base sm:text-lg mr-1">📍</span>
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
                       <span className="truncate">{selectedPlace.city}</span>
                     </span>
-                    <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-2 sm:px-3 py-1 rounded-full text-xs font-medium">
+                    <span className="bg-amber-800 text-white px-2 sm:px-3 py-1 rounded-full text-xs font-medium">
                       {selectedPlace.type}
                     </span>
                     <div className="flex items-center">
-                      <span className="text-yellow-500 text-base sm:text-lg">⭐</span>
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
                       <span className="ml-1 font-semibold text-gray-900">{selectedPlace.rating}</span>
                     </div>
                   </div>
@@ -466,7 +476,7 @@ const DashboardPage: React.FC = () => {
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 flex items-center">
                       📞 Phone
                     </h3>
-                    <a href={`tel:${selectedPlace.phone}`} className="text-blue-600 hover:text-blue-700 text-sm sm:text-base break-all">
+                    <a href={`tel:${selectedPlace.phone}`} className="text-amber-700 hover:text-amber-800 text-sm sm:text-base break-all">
                       {selectedPlace.phone}
                     </a>
                   </div>
@@ -481,7 +491,7 @@ const DashboardPage: React.FC = () => {
                       href={`https://${selectedPlace.website}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-700 underline text-sm sm:text-base break-all"
+                      className="text-amber-700 hover:text-amber-800 underline text-sm sm:text-base break-all"
                     >
                       {selectedPlace.website}
                     </a>
@@ -507,7 +517,7 @@ const DashboardPage: React.FC = () => {
                     {selectedPlace.amenities.map((amenity: string, index: number) => (
                       <span
                         key={index}
-                        className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium"
+                        className="bg-amber-800 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium"
                       >
                         {amenity}
                       </span>
@@ -518,8 +528,8 @@ const DashboardPage: React.FC = () => {
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6 border-t border-gray-200">
-                <button className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 font-semibold text-sm sm:text-base">
-                  💾 Save Place
+                <button className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-amber-800 text-white rounded-md hover:bg-amber-700 transition-colors duration-200 font-medium text-sm sm:text-base">
+                  Save Place
                 </button>
                 <button 
                   onClick={handleCloseDetails}

@@ -32,7 +32,7 @@
   font-weight: 800;
   color: #1e293b;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%);
+  color: #6b4423;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -77,9 +77,9 @@
 .onboarding-input {
   width: 100%;
   padding: 0.875rem 1.25rem;
-  border: 3px solid #2d3436;
-  border-radius: 10px;
-  transition: all 0.3s ease;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  transition: all 0.2s ease;
   background-color: white;
   color: #2d3436;
   font-family: 'Inter', sans-serif;
@@ -88,7 +88,7 @@
 
 .onboarding-input:focus {
   outline: none;
-  border-color: #1e3a8a;
+  border-color: #6b4423;
 }
 
 .onboarding-input::placeholder {
@@ -119,16 +119,17 @@
   display: flex;
   align-items: center;
   padding: 0.75rem;
-  border-radius: 10px;
-  border: 3px solid #2d3436;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
   background: white;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   cursor: pointer;
   font-family: 'Inter', sans-serif;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .onboarding-preference-item:hover {
-  background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%);
+  background: #fef3c7;
   transform: translateY(-2px);
 }
 
@@ -155,25 +156,27 @@
 
 .onboarding-button {
   width: 100%;
-  padding: 1.25rem;
-  font-size: 1.5rem;
-  font-weight: 600;
+  padding: 1rem 1.5rem;
+  font-size: 1.125rem;
+  font-weight: 500;
   font-family: 'Inter', sans-serif;
-  border-radius: 12px;
-  border: 4px solid #2d3436;
-  transition: all 0.3s ease;
-  background: linear-gradient(135deg, #ff6b9d 0%, #c44569 50%, #feca57 100%);
+  border-radius: 8px;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #92400e;
   color: white;
   cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .onboarding-button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  background: #b45309;
 }
 
 .onboarding-button:active {
   transform: translateY(0px);
-  box-shadow: 3px 3px 0px rgba(45, 52, 54, 0.3);
 }
 
 .onboarding-button:disabled {

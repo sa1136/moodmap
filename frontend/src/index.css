@@ -4,18 +4,18 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom CSS Variables for MoodMap Doodle Theme */
+/* Custom CSS Variables for MoodMap Brown Theme */
 :root {
-  --color-primary: #1e3a8a;
-  --color-secondary: #4c1d95;
-  --color-accent: #0f766e;
-  --color-mood-relaxed: #1e40af;
+  --color-primary: #6b4423;
+  --color-secondary: #8b6f47;
+  --color-accent: #a0826d;
+  --color-mood-relaxed: #6b4423;
   --color-mood-energetic: #92400e;
-  --color-mood-adventurous: #1e3a8a;
-  --color-mood-social: #4c1d95;
-  --color-mood-creative: #0f766e;
-  --color-mood-focused: #3730a3;
-  --doodle-border-color: #1a1a1a;
+  --color-mood-adventurous: #8b6f47;
+  --color-mood-social: #a0826d;
+  --color-mood-creative: #c9a961;
+  --color-mood-focused: #4a3728;
+  --doodle-border-color: #6b4423;
 }
 
 /* Global Styles */
@@ -30,14 +30,11 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 25%, #e2e8f0 50%, #f0f4f8 75%, #f8fafc 100%);
-  background-attachment: fixed;
-  background-size: 400% 400%;
-  animation: gradientShift 20s ease infinite;
+  background: #f5f1eb;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
-  color: #1e293b;
+  color: #291b0f;
 }
 
 /* Mobile optimizations */
@@ -51,51 +48,28 @@ body {
   }
 }
 
-/* Animated gradient background */
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
 
-/* Subtle pattern overlay */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.03) 2px, transparent 2px),
-    radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.03) 1px, transparent 1px),
-    radial-gradient(circle at 40% 60%, rgba(6, 182, 212, 0.03) 1.5px, transparent 1.5px);
-  background-size: 100px 100px, 150px 150px, 80px 80px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Doodle Border Styles */
+/* Professional Component Styles */
 .doodle-border {
-  border: 2px solid #e2e8f0;
-  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
   position: relative;
   background: white;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
 .doodle-button {
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
   position: relative;
   font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  transition: all 0.3s ease;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .doodle-button:hover {
   transform: translateY(-1px);
-  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .doodle-button:active {
@@ -108,42 +82,43 @@ body::before {
 }
 
 .doodle-card {
-  border: 2px solid #e2e8f0;
-  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
   background: white;
   position: relative;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
 .doodle-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-color: #cbd5e1;
+  border-color: #d1d5db;
 }
 
 .doodle-input {
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
   font-family: 'Inter', sans-serif;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   background: white;
   color: #1e293b;
+  transition: all 0.2s ease;
 }
 
 .doodle-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: #6b4423;
+  box-shadow: 0 0 0 3px rgba(107, 68, 35, 0.1);
 }
 
 /* Custom Components */
 @layer components {
   .btn-primary {
-    @apply doodle-button bg-gradient-to-r from-blue-800 to-purple-800 text-white font-bold py-3 px-6;
+    @apply doodle-button bg-amber-800 text-white font-bold py-3 px-6;
   }
   
   .btn-secondary {
-    @apply doodle-button bg-gradient-to-r from-teal-800 to-blue-800 text-white font-bold py-3 px-6;
+    @apply doodle-button bg-amber-700 text-white font-bold py-3 px-6;
   }
   
   .card {
@@ -151,7 +126,7 @@ body::before {
   }
   
   .form-card {
-    @apply doodle-border p-8 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800;
+    @apply doodle-border p-8 bg-white;
   }
   
   .mood-card {
@@ -159,66 +134,32 @@ body::before {
   }
   
   .gradient-bg {
-    @apply bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800;
+    @apply bg-amber-800;
   }
   
   .text-gradient {
-    @apply bg-gradient-to-r from-blue-800 via-purple-800 to-teal-800 bg-clip-text text-transparent;
+    @apply text-amber-800;
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
   }
   
   .form-input {
-    @apply doodle-input w-full px-4 py-3 bg-white/95 backdrop-blur-sm text-gray-900;
+    @apply doodle-input w-full px-4 py-3 bg-white text-gray-900;
   }
   
   .form-input::placeholder {
     color: #9ca3af;
-    font-style: italic;
   }
 }
 
-/* Doodle Animations */
+/* Professional Animations */
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(-1deg); }
-  50% { transform: translateY(-15px) rotate(1deg); }
-}
-
-@keyframes bounce-gentle {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-8px) rotate(-2deg); }
-  75% { transform: translateY(-8px) rotate(2deg); }
-}
-
-@keyframes wiggle {
-  0%, 100% { transform: rotate(-2deg); }
-  50% { transform: rotate(2deg); }
-}
-
-@keyframes doodle-draw {
-  0% { stroke-dashoffset: 1000; }
-  100% { stroke-dashoffset: 0; }
-}
-
-@keyframes pulse-doodle {
-  0%, 100% { transform: scale(1) rotate(-1deg); }
-  50% { transform: scale(1.05) rotate(1deg); }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
 }
 
 .floating {
-  animation: float 4s ease-in-out infinite;
-}
-
-.bounce-gentle {
-  animation: bounce-gentle 2.5s ease-in-out infinite;
-}
-
-.wiggle {
-  animation: wiggle 0.5s ease-in-out infinite;
-}
-
-.pulse-doodle {
-  animation: pulse-doodle 2s ease-in-out infinite;
+  animation: float 3s ease-in-out infinite;
 }
 
 /* Hand-drawn underline effect */
@@ -246,16 +187,16 @@ body::before {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #f5f1eb;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #6b4423;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #8b6f47;
 }
 
 /* Mobile optimizations */
