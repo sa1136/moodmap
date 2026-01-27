@@ -45,8 +45,10 @@ const Filters: React.FC<FiltersProps> = ({ onFilterChange, currentFilters }) => 
           <select
             value={currentFilters.rating}
             onChange={(e) => handleChange('rating', e.target.value)}
-            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none"
             style={{ fontFamily: "'Inter', sans-serif" }}
+            onFocus={(e) => e.currentTarget.style.boxShadow = '0 0 0 2px rgba(61, 40, 23, 0.2)'}
+            onBlur={(e) => e.currentTarget.style.boxShadow = ''}
           >
             <option value="">Any rating</option>
             <option value="4.5">4.5+ ⭐</option>
@@ -62,8 +64,10 @@ const Filters: React.FC<FiltersProps> = ({ onFilterChange, currentFilters }) => 
           <select
             value={currentFilters.price}
             onChange={(e) => handleChange('price', e.target.value)}
-            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none"
             style={{ fontFamily: "'Inter', sans-serif" }}
+            onFocus={(e) => e.currentTarget.style.boxShadow = '0 0 0 2px rgba(61, 40, 23, 0.2)'}
+            onBlur={(e) => e.currentTarget.style.boxShadow = ''}
           >
             <option value="">Any price</option>
             <option value="$">$ - Budget</option>
@@ -79,8 +83,10 @@ const Filters: React.FC<FiltersProps> = ({ onFilterChange, currentFilters }) => 
           <select
             value={currentFilters.activityType}
             onChange={(e) => handleChange('activityType', e.target.value)}
-            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+            className="w-full px-3 py-2 font-medium text-sm bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none"
             style={{ fontFamily: "'Inter', sans-serif" }}
+            onFocus={(e) => e.currentTarget.style.boxShadow = '0 0 0 2px rgba(61, 40, 23, 0.2)'}
+            onBlur={(e) => e.currentTarget.style.boxShadow = ''}
           >
             <option value="">All types</option>
             <option value="restaurant">Restaurant</option>

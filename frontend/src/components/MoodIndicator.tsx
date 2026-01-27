@@ -6,7 +6,7 @@ interface MoodIndicatorProps {
 }
 
 const moodConfig: Record<string, { emoji: string; color: string; bgColor: string }> = {
-  relaxed: { emoji: '😌', color: 'text-amber-700', bgColor: 'bg-amber-100' },
+  relaxed: { emoji: '😌', color: 'text-gray-700', bgColor: 'bg-amber-100' },
   energetic: { emoji: '⚡', color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
   adventurous: { emoji: '🏔️', color: 'text-green-600', bgColor: 'bg-green-100' },
   social: { emoji: '👥', color: 'text-purple-600', bgColor: 'bg-purple-100' },

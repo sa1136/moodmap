@@ -32,7 +32,7 @@
   font-weight: 800;
   color: #1e293b;
   margin-bottom: 0.5rem;
-  color: #6b4423;
+  color: #3d2817;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -96,7 +96,7 @@
 }
 
 .mood-card.selected {
-  border: 2px solid #6b4423;
+  border: 2px solid #3d2817;
   box-shadow: 0 4px 6px -1px rgba(107, 68, 35, 0.2), 0 2px 4px -1px rgba(107, 68, 35, 0.1);
   background: #fef3c7;
   transform: translateY(-2px);
@@ -155,7 +155,7 @@
 
 .mood-divider-text span {
   padding: 0 1rem;
-  background-color: #6b4423;
+  background-color: #3d2817;
   color: #fef3c7;
   font-weight: 500;
 }
@@ -188,7 +188,7 @@
 
 .mood-custom-input:focus {
   outline: none;
-  border-color: #6b4423;
+  border-color: #3d2817;
 }
 
 .mood-custom-input::placeholder {
@@ -204,7 +204,7 @@
   border-radius: 8px;
   border: none;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  background: #92400e;
+  background: #3d2817;
   color: white;
   cursor: pointer;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -213,7 +213,7 @@
 .mood-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  background: #b45309;
+  background: #4a3728;
 }
 
 .mood-button:active {
@@ -240,7 +240,7 @@
 
 .mood-selection-value {
   font-weight: 600;
-  color: #92400e;
+  color: #3d2817;
 }
 
 @keyframes float {

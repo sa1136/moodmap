@@ -387,13 +387,13 @@ const OnboardingPage: React.FC = () => {
                       right: '10px',
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      color: '#b45309'
+                      color: '#4a3728'
                     }}>
                       <div style={{
                         width: '16px',
                         height: '16px',
                         border: '2px solid #e5e7eb',
-                        borderTop: '2px solid #b45309',
+                        borderTop: '2px solid #4a3728',
                         borderRadius: '50%',
                         animation: 'spin 1s linear infinite'
                       }}></div>
@@ -465,7 +465,7 @@ const OnboardingPage: React.FC = () => {
                     whiteSpace: 'nowrap',
                     background: isGettingLocation 
                       ? '#78716c'
-                      : '#92400e',
+                      : '#3d2817',
                     color: 'white',
                     border: '3px solid #1a1a1a',
                     borderRadius: '8px',
@@ -482,13 +482,13 @@ const OnboardingPage: React.FC = () => {
                   }}
                   onMouseEnter={(e) => {
                     if (!isGettingLocation) {
-                      e.currentTarget.style.background = '#b45309';
+                      e.currentTarget.style.background = '#4a3728';
                       e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!isGettingLocation) {
-                      e.currentTarget.style.background = '#92400e';
+                      e.currentTarget.style.background = '#3d2817';
                       e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
                     }
                   }}

@@ -4,18 +4,18 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom CSS Variables for MoodMap Brown Theme */
+/* Custom CSS Variables for MoodMap Dark Chocolate Theme */
 :root {
-  --color-primary: #6b4423;
-  --color-secondary: #8b6f47;
-  --color-accent: #a0826d;
-  --color-mood-relaxed: #6b4423;
-  --color-mood-energetic: #92400e;
-  --color-mood-adventurous: #8b6f47;
-  --color-mood-social: #a0826d;
-  --color-mood-creative: #c9a961;
-  --color-mood-focused: #4a3728;
-  --doodle-border-color: #6b4423;
+  --color-primary: #3d2817;
+  --color-secondary: #4a3728;
+  --color-accent: #5c4033;
+  --color-mood-relaxed: #3d2817;
+  --color-mood-energetic: #4a3728;
+  --color-mood-adventurous: #4a3728;
+  --color-mood-social: #5c4033;
+  --color-mood-creative: #4a3728;
+  --color-mood-focused: #2c1810;
+  --doodle-border-color: #3d2817;
 }
 
 /* Global Styles */
@@ -70,6 +70,7 @@ body {
 .doodle-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-color: #3d2817;
 }
 
 .doodle-button:active {
@@ -93,7 +94,7 @@ body {
 .doodle-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-color: #d1d5db;
+  border-color: #3d2817;
 }
 
 .doodle-input {
@@ -107,18 +108,20 @@ body {
 
 .doodle-input:focus {
   outline: none;
-  border-color: #6b4423;
-  box-shadow: 0 0 0 3px rgba(107, 68, 35, 0.1);
+  border-color: #3d2817;
+  box-shadow: 0 0 0 3px rgba(61, 40, 23, 0.1);
 }
 
 /* Custom Components */
 @layer components {
   .btn-primary {
-    @apply doodle-button bg-amber-800 text-white font-bold py-3 px-6;
+    @apply doodle-button text-white font-bold py-3 px-6;
+    background-color: #3d2817;
   }
   
   .btn-secondary {
-    @apply doodle-button bg-amber-700 text-white font-bold py-3 px-6;
+    @apply doodle-button text-white font-bold py-3 px-6;
+    background-color: #4a3728;
   }
   
   .card {
@@ -134,11 +137,11 @@ body {
   }
   
   .gradient-bg {
-    @apply bg-amber-800;
+    background-color: #3d2817;
   }
   
   .text-gradient {
-    @apply text-amber-800;
+    color: #3d2817;
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
   }
@@ -191,12 +194,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #6b4423;
+  background: #3d2817;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8b6f47;
+  background: #4a3728;
 }
 
 /* Mobile optimizations */
