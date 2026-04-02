@@ -5,39 +5,36 @@ import { Place } from './aiService';
  * Get real images for a place using Unsplash Source API (free, no auth required)
  * Falls back to a generic image if specific search fails
  */
+/**
+ * Generate a deterministic numeric seed from a string so the same place
+ * always gets the same image from Picsum Photos.
+ */
+function stringToSeed(s: string): number {
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) {
+    hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+  }
+  return (hash % 1000) + 1; // 1..1000
+}
+
 async function getPlaceImages(placeName: string, city: string, placeType?: string): Promise<string[]> {
   try {
-    // Clean up the place name and city for better search results
-    const cleanPlaceName = placeName.replace(/[^\w\s]/g, '').trim();
-    const cleanCity = city.replace(/[^\w\s]/g, '').trim();
-    const cleanType = placeType ? placeType.replace(/[^\w\s]/g, '').trim() : '';
-    
-    // Build search terms - prioritize place name + city, then city + type
-    const primarySearch = `${cleanPlaceName} ${cleanCity}`.trim();
-    const secondarySearch = cleanType ? `${cleanCity} ${cleanType}` : cleanCity;
-    
-    // Use Unsplash Source API (free, no authentication needed)
-    // This provides random images based on search terms
-    // We'll return 2 images with different search terms for variety
-    const images: string[] = [];
-    
-    if (primarySearch) {
-      images.push(`https://source.unsplash.com/800x600/?${encodeURIComponent(primarySearch)}`);
+    // Use picsum.photos with a deterministic seed so the same place
+    // always resolves to the same image (no API key or auth required).
+    const seed1 = stringToSeed(`${placeName}${city}`);
+    const seed2 = stringToSeed(`${city}${placeType ?? ''}${placeName}`);
+
+    const images = [
+      `https://picsum.photos/seed/${seed1}/800/600`,
+    ];
+
+    if (seed2 !== seed1) {
+      images.push(`https://picsum.photos/seed/${seed2}/800/600`);
     }
-    
-    if (secondarySearch && secondarySearch !== primarySearch) {
-      images.push(`https://source.unsplash.com/800x600/?${encodeURIComponent(secondarySearch)}`);
-    }
-    
-    // If we still don't have images, add a generic city image
-    if (images.length === 0 && cleanCity) {
-      images.push(`https://source.unsplash.com/800x600/?${encodeURIComponent(cleanCity + ' attraction')}`);
-    }
-    
-    return images.length > 0 ? images : [];
+
+    return images;
   } catch (error) {
     console.warn(`[Images] Could not generate image URLs for ${placeName}:`, error);
-    // Return empty array if image URL generation fails
     return [];
   }
 }
@@ -102,8 +99,6 @@ export async function fetchPlacesFromOpenStreetMap(
   try {
     const cityName = extractCityName(city);
     console.log(`[OpenStreetMap] Fetching places for city: ${cityName}, mood: ${mood}`);
-    
-    console.log(`[OpenStreetMap] Fetching places for city: ${cityName}`);
     
     // Use provided lat/lng if available, otherwise geocode the city
     let searchLat = lat;
@@ -578,6 +573,7 @@ function mapMoodToSearchTerms(mood?: string, preferences?: string[]): string[] {
   const termMap: Record<string, string[]> = {
     happy: ['art gallery', 'comedy club', 'entertainment'],
     excited: ['nightclub', 'adventure park', 'escape room'],
+    focused: ['library', 'cafe', 'coworking space', 'study cafe'],
     relaxed: hasBeachPreference 
       ? ['beach', 'pier', 'beachfront', 'waterfront', 'coastal', 'marina', 'beach walk', 'oceanfront', 'canal']
       : ['spa', 'park', 'library', 'beach', 'pier'],

@@ -12,11 +12,11 @@ const OnboardingPage: React.FC = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const preferenceOptions = [
@@ -169,132 +169,6 @@ const OnboardingPage: React.FC = () => {
     }));
   };
 
-  const handleGetCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not supported by this browser. Please enter your city manually.');
-      return;
-    }
-
-    setIsGettingLocation(true);
-
-    // Configure geolocation options
-    const geoOptions = {
-      enableHighAccuracy: true,
-      timeout: 10000, // 10 seconds timeout
-      maximumAge: 300000 // Accept cached position if less than 5 minutes old
-    };
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        
-        try {
-          let cityName = 'Current Location';
-          let reverseGeocodeSuccess = false;
-
-          try {
-            const response = await fetch(
-              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
-              { 
-                method: 'GET',
-                headers: {
-                  'Accept': 'application/json'
-                }
-              }
-            );
-            
-            if (response.ok) {
-              const data = await response.json();
-              cityName = data.city || data.locality || data.principalSubdivision || data.countryName || 'Current Location';
-              if (cityName !== 'Current Location') {
-                reverseGeocodeSuccess = true;
-              }
-            }
-          } catch (error) {
-          }
-
-          if (!reverseGeocodeSuccess) {
-            try {
-              const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`,
-                {
-                  headers: {
-                    'User-Agent': 'MoodMap/1.0'
-                  }
-                }
-              );
-              
-              if (response.ok) {
-                const data = await response.json();
-                const address = data.address || {};
-                cityName = address.city || address.town || address.village || address.municipality || address.county || 'Current Location';
-                if (cityName !== 'Current Location') {
-                  reverseGeocodeSuccess = true;
-                }
-              }
-            } catch (error) {
-            }
-          }
-
-          if (!reverseGeocodeSuccess) {
-            cityName = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-          }
-          
-          setFormData(prev => ({
-            ...prev,
-            city: cityName
-          }));
-          
-          localStorage.setItem('userLat', latitude.toString());
-          localStorage.setItem('userLng', longitude.toString());
-          localStorage.setItem('userCity', cityName);
-          
-          setIsGettingLocation(false);
-          
-          if (reverseGeocodeSuccess) {
-            alert(`Location detected: ${cityName}`);
-          } else {
-            alert(`Location coordinates saved. Please enter your city name manually for better results.`);
-          }
-        } catch (error) {
-          console.error('Error getting location name:', error);
-          setFormData(prev => ({
-            ...prev,
-            city: 'Current Location'
-          }));
-          localStorage.setItem('userLat', latitude.toString());
-          localStorage.setItem('userLng', longitude.toString());
-          setIsGettingLocation(false);
-          alert('Got your coordinates but couldn\'t determine city name. Please enter your city manually.');
-        }
-      },
-      (error) => {
-        setIsGettingLocation(false);
-        console.error('Geolocation error:', error);
-        
-        let errorMessage = 'Unable to get your location. ';
-        
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage += 'Location access was denied. Please enable location permissions in your browser settings or enter your city manually.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage += 'Location information is unavailable. Please enter your city manually.';
-            break;
-          case error.TIMEOUT:
-            errorMessage += 'Location request timed out. Please try again or enter your city manually.';
-            break;
-          default:
-            errorMessage += 'An unknown error occurred. Please enter your city manually.';
-            break;
-        }
-        
-        alert(errorMessage);
-      },
-      geoOptions
-    );
-  };
-
   useEffect(() => {
     return () => {
       if (searchTimeout) {
@@ -306,18 +180,18 @@ const OnboardingPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage('');
 
     try {
       await axios.post('http://localhost:5001/api/user', formData);
-      
+
       localStorage.setItem('userCity', formData.city);
       localStorage.setItem('userPreferences', JSON.stringify(formData.preferences));
-      
-      alert('Preferences saved successfully!');
+
       navigate('/mood');
     } catch (error) {
       console.error('Error saving preferences:', error);
-      alert('Error saving preferences. Please try again.');
+      setErrorMessage('Error saving preferences. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -356,160 +230,100 @@ const OnboardingPage: React.FC = () => {
               What city are you in?
             </label>
             <div style={{ position: 'relative' }}>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                <div style={{ position: 'relative', flex: 1, minWidth: '0' }}>
-                  <input
-                    type="text"
-                    id="city"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    onFocus={() => {
-                      if (locationSuggestions.length > 0) {
-                        setShowSuggestions(true);
-                      }
-                    }}
-                    onBlur={() => {
-                      setTimeout(() => setShowSuggestions(false), 200);
-                    }}
-                    required
-                    className="onboarding-input"
-                    placeholder="Type your city name..."
-                    style={{ width: '100%' }}
-                    autoComplete="off"
-                  />
-                  
-                  {/* Loading indicator */}
-                  {isLoadingSuggestions && (
-                    <div style={{
-                      position: 'absolute',
-                      right: '10px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      color: '#4a3728'
-                    }}>
-                      <div style={{
-                        width: '16px',
-                        height: '16px',
-                        border: '2px solid #e5e7eb',
-                        borderTop: '2px solid #4a3728',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                      }}></div>
-                    </div>
-                  )}
-                  
-                  {/* Autocomplete dropdown */}
-                  {showSuggestions && locationSuggestions.length > 0 && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '100%',
-                      left: 0,
-                      right: 0,
-                      backgroundColor: '#1e293b',
-                      border: '3px solid #1a1a1a',
-                      borderRadius: '10px',
-                      boxShadow: '4px 4px 0px rgba(0, 0, 0, 0.3)',
-                      zIndex: 1000,
-                      maxHeight: '200px',
-                      overflowY: 'auto',
-                      marginTop: '4px'
-                    }}>
-                      {locationSuggestions.map((suggestion, index) => (
-                        <div
-                          key={index}
-                          onClick={() => handleLocationSelect(suggestion)}
-                          style={{
-                            padding: '12px 16px',
-                            cursor: 'pointer',
-                            borderBottom: index < locationSuggestions.length - 1 ? '1px solid #334155' : 'none',
-                            transition: 'background-color 0.2s',
-                            backgroundColor: selectedSuggestionIndex === index ? '#334155' : '#1e293b',
-                            minHeight: '44px'
-                          }}
-                          onMouseEnter={(e) => {
-                            if (selectedSuggestionIndex !== index) {
-                              e.currentTarget.style.backgroundColor = '#334155';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (selectedSuggestionIndex !== index) {
-                              e.currentTarget.style.backgroundColor = '#1e293b';
-                            }
-                          }}
-                        >
-                          <div style={{ fontWeight: '600', color: '#fef3c7', marginBottom: '4px', fontSize: '14px' }}>
-                            {suggestion.city}
-                          </div>
-                          <div style={{ fontSize: '12px', color: '#cbd5e1' }}>
-                            {suggestion.fullLocation || 
-                              (suggestion.state && suggestion.country 
-                                ? `${suggestion.state}, ${suggestion.country}`
-                                : suggestion.country || suggestion.state || '')}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+              <input
+                type="text"
+                id="city"
+                name="city"
+                value={formData.city}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                onFocus={() => {
+                  if (locationSuggestions.length > 0) {
+                    setShowSuggestions(true);
+                  }
+                }}
+                onBlur={() => {
+                  setTimeout(() => setShowSuggestions(false), 200);
+                }}
+                required
+                className="onboarding-input"
+                placeholder="Type your city name..."
+                style={{ width: '100%' }}
+                autoComplete="off"
+              />
+
+              {/* Loading indicator */}
+              {isLoadingSuggestions && (
+                <div style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#4a3728'
+                }}>
+                  <div style={{
+                    width: '16px',
+                    height: '16px',
+                    border: '2px solid #e5e7eb',
+                    borderTop: '2px solid #4a3728',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }}></div>
                 </div>
-                
-                <button
-                  type="button"
-                  onClick={handleGetCurrentLocation}
-                  disabled={isGettingLocation}
-                  className="onboarding-location-button"
-                  style={{ 
-                    padding: '10px 14px', 
-                    fontSize: '12px',
-                    whiteSpace: 'nowrap',
-                    background: isGettingLocation 
-                      ? '#78716c'
-                      : '#3d2817',
-                    color: 'white',
-                    border: '3px solid #1a1a1a',
-                    borderRadius: '8px',
-                    cursor: isGettingLocation ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.2s ease',
-                    boxShadow: '3px 3px 0px rgba(0, 0, 0, 0.2)',
-                    minWidth: 'auto',
-                    flexShrink: 0,
-                    opacity: isGettingLocation ? 0.7 : 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    minHeight: '44px'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isGettingLocation) {
-                      e.currentTarget.style.background = '#4a3728';
-                      e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isGettingLocation) {
-                      e.currentTarget.style.background = '#3d2817';
-                      e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-                    }
-                  }}
-                >
-                  {isGettingLocation ? (
-                    <>
-                      <div style={{
-                        width: '12px',
-                        height: '12px',
-                        border: '2px solid rgba(255,255,255,0.3)',
-                        borderTop: '2px solid white',
-                        borderRadius: '50%',
-                        animation: 'spin 0.8s linear infinite'
-                      }}></div>
-                      <span>Locating...</span>
-                    </>
-                  ) : (
-                    <span>📍 Current</span>
-                  )}
-                </button>
-              </div>
+              )}
+
+              {/* Autocomplete dropdown */}
+              {showSuggestions && locationSuggestions.length > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  backgroundColor: '#1e293b',
+                  border: '3px solid #1a1a1a',
+                  borderRadius: '10px',
+                  boxShadow: '4px 4px 0px rgba(0, 0, 0, 0.3)',
+                  zIndex: 1000,
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                  marginTop: '4px'
+                }}>
+                  {locationSuggestions.map((suggestion, index) => (
+                    <div
+                      key={index}
+                      onClick={() => handleLocationSelect(suggestion)}
+                      style={{
+                        padding: '12px 16px',
+                        cursor: 'pointer',
+                        borderBottom: index < locationSuggestions.length - 1 ? '1px solid #334155' : 'none',
+                        transition: 'background-color 0.2s',
+                        backgroundColor: selectedSuggestionIndex === index ? '#334155' : '#1e293b',
+                        minHeight: '44px'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (selectedSuggestionIndex !== index) {
+                          e.currentTarget.style.backgroundColor = '#334155';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (selectedSuggestionIndex !== index) {
+                          e.currentTarget.style.backgroundColor = '#1e293b';
+                        }
+                      }}
+                    >
+                      <div style={{ fontWeight: '600', color: '#fef3c7', marginBottom: '4px', fontSize: '14px' }}>
+                        {suggestion.city}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#cbd5e1' }}>
+                        {suggestion.fullLocation ||
+                          (suggestion.state && suggestion.country
+                            ? `${suggestion.state}, ${suggestion.country}`
+                            : suggestion.country || suggestion.state || '')}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -532,6 +346,21 @@ const OnboardingPage: React.FC = () => {
               ))}
             </div>
           </div>
+
+          {errorMessage && (
+            <div style={{
+              color: '#b91c1c',
+              backgroundColor: '#fee2e2',
+              border: '1px solid #fca5a5',
+              borderRadius: '8px',
+              padding: '10px 14px',
+              marginBottom: '12px',
+              fontSize: '14px',
+              fontFamily: "'Inter', sans-serif"
+            }}>
+              {errorMessage}
+            </div>
+          )}
 
           {/* Submit Button */}
           <button

@@ -8,6 +8,7 @@ const MoodInputPage: React.FC = () => {
   const [selectedMood, setSelectedMood] = useState<string>('');
   const [customMood, setCustomMood] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const moodOptions = [
     {
@@ -68,11 +69,12 @@ const MoodInputPage: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!selectedMood && !customMood.trim()) {
-      alert('Please select a mood or enter your own!');
+      setErrorMessage('Please select a mood or enter your own!');
       return;
     }
 
     setIsSubmitting(true);
+    setErrorMessage('');
 
     try {
       const moodData = {
@@ -82,15 +84,14 @@ const MoodInputPage: React.FC = () => {
       };
 
       await axios.post('http://localhost:5001/api/mood', moodData);
-      
+
       const moodLabel = selectedMood ? moodOptions.find(m => m.id === selectedMood)?.label : customMood;
       localStorage.setItem('currentMood', moodLabel || '');
-      
-      alert('Mood recorded! Let\'s find some great places for you.');
+
       navigate('/dashboard');
     } catch (error) {
       console.error('Error saving mood:', error);
-      alert('Error saving mood. Please try again.');
+      setErrorMessage('Error saving mood. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -147,6 +148,21 @@ const MoodInputPage: React.FC = () => {
               className="mood-custom-input"
             />
           </div>
+
+          {errorMessage && (
+            <div className="mood-error" style={{
+              color: '#b91c1c',
+              backgroundColor: '#fee2e2',
+              border: '1px solid #fca5a5',
+              borderRadius: '8px',
+              padding: '10px 14px',
+              marginBottom: '12px',
+              fontSize: '14px',
+              fontFamily: "'Inter', sans-serif"
+            }}>
+              {errorMessage}
+            </div>
+          )}
 
           <button
             onClick={handleSubmit}

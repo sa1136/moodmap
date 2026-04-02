@@ -153,21 +153,30 @@ const DashboardPage: React.FC = () => {
               </div>
             )}
             <nav className="flex space-x-2 sm:space-x-3 w-full sm:w-auto">
-              <button 
+              <button
                 onClick={() => navigate('/mood')}
-                className="flex-1 sm:flex-none px-3 sm:px-5 py-2 text-white font-semibold text-sm sm:text-base rounded-lg transition-colors"
+                className="flex-1 sm:flex-none px-3 sm:px-5 py-2 text-white font-semibold text-sm sm:text-base rounded-lg transition-colors flex items-center justify-center gap-1.5"
                 style={{ backgroundColor: '#3d2817', fontFamily: "'Inter', sans-serif", border: 'none' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a3728'} 
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a3728'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3d2817'}
               >
+                <svg className="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 <span className="hidden sm:inline">New Mood</span>
+                <span className="sm:hidden text-xs">Mood</span>
               </button>
-              <button 
+              <button
                 onClick={() => navigate('/onboarding')}
-                className="doodle-button flex-1 sm:flex-none px-3 sm:px-5 py-2 bg-gray-100 text-gray-700 font-semibold text-sm sm:text-base hover:bg-gray-200"
+                className="doodle-button flex-1 sm:flex-none px-3 sm:px-5 py-2 bg-gray-100 text-gray-700 font-semibold text-sm sm:text-base hover:bg-gray-200 flex items-center justify-center gap-1.5"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
+                <svg className="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
                 <span className="hidden sm:inline">Settings</span>
+                <span className="sm:hidden text-xs">Settings</span>
               </button>
             </nav>
           </div>
@@ -351,14 +360,14 @@ const DashboardPage: React.FC = () => {
                       )}
 
                       <div className="flex space-x-2">
-                        <button 
+                        <button
                           onClick={() => handleShowDetails(place)}
                           className="flex-1 px-3 sm:px-4 py-2 text-white font-medium text-xs sm:text-sm rounded-md transition-colors"
                           style={{ backgroundColor: '#3d2817', fontFamily: "'Inter', sans-serif", border: 'none' }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a3728'} 
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a3728'}
                           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3d2817'}
                         >
-                          <span className="hidden sm:inline">Details</span>
+                          Details
                         </button>
                         <button className="doodle-button px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 font-medium hover:bg-gray-200" style={{ fontFamily: "'Inter', sans-serif" }} aria-label="Save place">
                           <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -503,9 +512,9 @@ const DashboardPage: React.FC = () => {
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 flex items-center">
                       🌐 Website
                     </h3>
-                    <a 
-                      href={`https://${selectedPlace.website}`} 
-                      target="_blank" 
+                    <a
+                      href={selectedPlace.website.startsWith('http') ? selectedPlace.website : `https://${selectedPlace.website}`}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="underline text-sm sm:text-base break-all" style={{ color: '#4a3728' }} onMouseEnter={(e) => e.currentTarget.style.color = '#3d2817'} onMouseLeave={(e) => e.currentTarget.style.color = '#4a3728'}
                     >

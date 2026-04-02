@@ -31,10 +31,9 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!inputValue.trim()) return;
-
-    const messageToSend = inputValue.trim(); // Save message before clearing
+  const handleSend = async (messageOverride?: string) => {
+    const messageToSend = messageOverride ?? inputValue.trim();
+    if (!messageToSend) return;
     const userMessage: Message = {
       id: Date.now().toString(),
       text: messageToSend,
@@ -98,7 +97,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      handleSend(); // no override — uses inputValue
     }
   };
 
@@ -211,10 +210,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
                 {quickQuestions.map((q, idx) => (
                   <button
                     key={idx}
-                    onClick={() => {
-                      setInputValue(q);
-                      setTimeout(() => handleSend(), 100);
-                    }}
+                    onClick={() => handleSend(q)}
                     className="w-full text-left text-xs sm:text-sm px-3 sm:px-4 py-2 transition-all hover:bg-slate-600 font-semibold"
                     style={{
                       borderRadius: '10px',
@@ -253,7 +249,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
                 }}
               />
               <button
-                onClick={handleSend}
+                onClick={() => handleSend()}
                 disabled={!inputValue.trim() || isTyping}
                 className="text-white px-3 sm:px-4 py-2 font-semibold disabled:opacity-50 transition-all flex-shrink-0 rounded-lg"
                 style={{ backgroundColor: '#3d2817', fontFamily: "'Inter', sans-serif", border: 'none' }}
