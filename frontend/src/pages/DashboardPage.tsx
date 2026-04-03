@@ -4,7 +4,7 @@ import axios from "axios";
 import Chatbot from "../components/Chatbot";
 import MoodIndicator from "../components/MoodIndicator";
 
-const DashboardPage: React.FC = () => {
+export default function DashboardPage() {
   const navigate = useNavigate();
   const [places, setPlaces] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,30 +48,25 @@ const DashboardPage: React.FC = () => {
     }
     
     const apiUrl = `http://localhost:5001/api/places${params.toString() ? `?${params.toString()}` : ''}`;
-    
-    console.log('[Dashboard] Fetching places from:', apiUrl);
+
     axios.get(apiUrl)
       .then(res => {
-        console.log('[Dashboard] Received response:', res.data);
         if (res.data.places && Array.isArray(res.data.places)) {
-          console.log(`[Dashboard] Found ${res.data.places.length} places in response`);
           setPlaces(res.data.places);
           setExplanation(res.data.explanation || '');
           setAiPowered(res.data.aiPowered || false);
         } else if (Array.isArray(res.data)) {
-          console.log(`[Dashboard] Legacy format - Found ${res.data.length} places`);
           setPlaces(res.data);
           setExplanation('');
           setAiPowered(false);
         } else {
-          console.warn('[Dashboard] Unexpected response format:', res.data);
           setPlaces([]);
           setExplanation('');
           setAiPowered(false);
         }
         setIsLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('Error fetching places:', err);
         setPlaces([]);
         setExplanation('');
@@ -91,7 +86,7 @@ const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative" style={{ fontFamily: "'Kalam', cursive" }}>
+    <div className="min-h-screen relative">
 
       {/* Enhanced Header */}
       <header
@@ -495,6 +490,4 @@ const DashboardPage: React.FC = () => {
       <Chatbot currentMood={currentMood} currentCity={currentCity} />
     </div>
   );
-};
-
-export default DashboardPage;
+}

@@ -1,8 +1,7 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/HomePage.css';
 
-const HomePage: React.FC = () => {
+export default function HomePage() {
   const navigate = useNavigate();
 
   const handleGetStarted = () => {
@@ -34,6 +33,4 @@ const HomePage: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default HomePage;
+}

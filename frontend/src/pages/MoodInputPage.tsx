@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/MoodInputPage.css';
 
-const MoodInputPage: React.FC = () => {
+export default function MoodInputPage() {
   const navigate = useNavigate();
   const [selectedMood, setSelectedMood] = useState<string>('');
   const [customMood, setCustomMood] = useState<string>('');
@@ -267,6 +267,4 @@ const MoodInputPage: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default MoodInputPage;
+}

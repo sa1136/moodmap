@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface MoodIndicatorProps {
   mood: string;
   size?: 'sm' | 'md' | 'lg';
@@ -18,7 +16,7 @@ const moodConfig: Record<string, { emoji: string; color: string; bgColor: string
   romantic: { emoji: '💕', color: 'text-red-600', bgColor: 'bg-red-100' },
 };
 
-const MoodIndicator: React.FC<MoodIndicatorProps> = ({ mood, size = 'md' }) => {
+function MoodIndicator({ mood, size = 'md' }: MoodIndicatorProps) {
   const moodLower = mood?.toLowerCase() || '';
   const config = moodConfig[moodLower] || { emoji: '😊', color: 'text-gray-600', bgColor: 'bg-gray-100' };
   
@@ -54,6 +52,6 @@ const MoodIndicator: React.FC<MoodIndicatorProps> = ({ mood, size = 'md' }) => {
       <span className={`font-semibold ${config.color} capitalize`} style={{ fontFamily: "'Poppins', sans-serif" }}>{mood}</span>
     </div>
   );
-};
+}
 
 export default MoodIndicator;

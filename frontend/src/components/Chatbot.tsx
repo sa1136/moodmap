@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
 interface Message {
@@ -35,7 +35,7 @@ function formatBotMessage(text: string): string {
   return t.trim();
 }
 
-const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
+function Chatbot({ currentMood, currentCity }: ChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -294,6 +294,6 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
       )}
     </>
   );
-};
+}
 
 export default Chatbot;

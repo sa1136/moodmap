@@ -135,23 +135,9 @@
   margin-right: auto;
 }
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
 @media (max-width: 640px) {
   .homepage-subtitle {
     font-size: 1.0625rem;
-  }
-
-  .homepage-map {
-    font-size: 3.5rem;
   }
 
   .homepage-button {

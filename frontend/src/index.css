@@ -40,18 +40,6 @@ body {
   color: #0f172a;
 }
 
-/* Mobile optimizations */
-@media (max-width: 640px) {
-  body {
-    font-size: 14px;
-  }
-  
-  * {
-    -webkit-tap-highlight-color: transparent;
-  }
-}
-
-
 /* Professional Component Styles */
 .doodle-border {
   border: 1px solid #e5e7eb;
@@ -184,7 +172,6 @@ body {
   background: var(--doodle-border-color);
   border-radius: 2px;
   transform: rotate(-1deg) skewX(-5deg);
-  animation: wiggle 3s ease-in-out infinite;
 }
 
 /* Scrollbar Styling */
@@ -205,32 +192,30 @@ body {
   background: var(--color-secondary);
 }
 
-/* Mobile optimizations */
 @media (max-width: 640px) {
   body {
     font-size: 14px;
   }
-  
+
   * {
     -webkit-tap-highlight-color: transparent;
   }
-  
-  button, a {
-    touch-action: manipulation;
-  }
-  
-  .doodle-button, .doodle-card {
-    touch-action: manipulation;
-  }
-}
 
-/* Ensure proper viewport handling */
-@media (max-width: 640px) {
+  button,
+  a {
+    touch-action: manipulation;
+  }
+
+  .doodle-button,
+  .doodle-card {
+    touch-action: manipulation;
+  }
+
   .doodle-card {
     margin: 0.5rem;
   }
-  
+
   .doodle-button {
-    min-height: 44px; /* iOS touch target size */
+    min-height: 44px;
   }
 }

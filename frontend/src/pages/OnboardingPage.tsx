@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/OnboardingPage.css';
 
-const OnboardingPage: React.FC = () => {
+export default function OnboardingPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
@@ -329,6 +329,4 @@ const OnboardingPage: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default OnboardingPage;
+}
