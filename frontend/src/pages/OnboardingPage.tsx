@@ -234,13 +234,13 @@ const OnboardingPage: React.FC = () => {
                   right: '10px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#4a3728'
+                  color: '#7c3aed'
                 }}>
                   <div style={{
                     width: '16px',
                     height: '16px',
                     border: '2px solid #e5e7eb',
-                    borderTop: '2px solid #4a3728',
+                    borderTop: '2px solid #7c3aed',
                     borderRadius: '50%',
                     animation: 'spin 1s linear infinite'
                   }}></div>
@@ -286,7 +286,7 @@ const OnboardingPage: React.FC = () => {
                         }
                       }}
                     >
-                      <div style={{ fontWeight: '600', color: '#fef3c7', marginBottom: '4px', fontSize: '14px' }}>
+                      <div style={{ fontWeight: '600', color: 'rgba(255, 255, 255, 0.95)', marginBottom: '4px', fontSize: '14px' }}>
                         {suggestion.city}
                       </div>
                       <div style={{ fontSize: '12px', color: '#cbd5e1' }}>

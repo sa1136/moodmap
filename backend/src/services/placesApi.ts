@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Place } from './aiService';
+import { photonGeocode } from './geocoding';
 
 /**
  * Get real images for a place using Unsplash Source API (free, no auth required)
@@ -161,7 +162,9 @@ export async function fetchPlacesFromOpenStreetMap(
 
     if (!searchLat || !searchLng) {
       console.log(`[OpenStreetMap] Geocoding: ${locationQuery}`);
-      await delay(2000);
+      await delay(1000);
+
+      let geocoded: { lat: number; lng: number } | null = null;
 
       try {
         const runGeocode = async (useCountryFilter: boolean) => {
@@ -177,49 +180,47 @@ export async function fetchPlacesFromOpenStreetMap(
           }
           return axios.get('https://nominatim.openstreetmap.org/search', {
             params,
-            headers: { 'User-Agent': 'MoodMap/1.0' },
+            headers: { 'User-Agent': 'MoodMap/1.0 (contact: dev@localhost)' },
             timeout: 30000,
           });
         };
 
         let geocodeResponse = await retryWithBackoff(async () => runGeocode(!!countryCodes));
 
-        if (
-          geocodeResponse?.data?.length === 0 &&
-          countryCodes
-        ) {
+        if (geocodeResponse?.data?.length === 0 && countryCodes) {
           await delay(1500);
           geocodeResponse = await retryWithBackoff(async () => runGeocode(false));
         }
 
-        if (!geocodeResponse) {
-          console.warn(`[OpenStreetMap] Could not geocode: ${locationQuery} (request failed)`);
-          return [];
+        if (geocodeResponse?.data?.length) {
+          geocoded = {
+            lat: parseFloat(geocodeResponse.data[0].lat),
+            lng: parseFloat(geocodeResponse.data[0].lon),
+          };
         }
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : String(error);
+        console.warn(`[OpenStreetMap] Nominatim geocode failed for "${locationQuery}": ${msg}`);
+      }
 
-        if (geocodeResponse.data && geocodeResponse.data.length > 0) {
-          searchLat = parseFloat(geocodeResponse.data[0].lat);
-          searchLng = parseFloat(geocodeResponse.data[0].lon);
-          console.log(`[OpenStreetMap] Geocoded "${locationQuery}" to: ${searchLat}, ${searchLng}`);
-        } else {
-          console.warn(`[OpenStreetMap] Could not geocode: ${locationQuery} (no results)`);
-          return [];
+      if (!geocoded) {
+        const photon = await photonGeocode(locationQuery);
+        if (photon) {
+          geocoded = { lat: photon.lat, lng: photon.lon };
+          console.log(
+            `[OpenStreetMap] Geocoded via Photon fallback "${locationQuery}" → ${geocoded.lat}, ${geocoded.lng}`
+          );
         }
-      } catch (error: any) {
-        const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
-        const isRateLimit = error.response?.status === 418 || error.response?.status === 429;
+      }
 
-        if (isRateLimit) {
-          console.warn(`[OpenStreetMap] Rate limited during geocoding. Waiting longer...`);
-          await delay(10000);
-          return [];
-        } else if (isTimeout) {
-          console.warn(`[OpenStreetMap] Timeout during geocoding for: ${locationQuery}`);
-          return [];
-        }
-        console.error(`[OpenStreetMap] Error geocoding: ${locationQuery}`, error.message);
+      if (!geocoded) {
+        console.warn(`[OpenStreetMap] Could not geocode: ${locationQuery}`);
         return [];
       }
+
+      searchLat = geocoded.lat;
+      searchLng = geocoded.lng;
+      console.log(`[OpenStreetMap] Geocoded "${locationQuery}" to: ${searchLat}, ${searchLng}`);
     }
 
     if (searchLat === undefined || searchLng === undefined) {

@@ -1,101 +1,172 @@
-/* HomePage Doodle Styles */
+/* HomePage — light background, high-contrast typography */
 .homepage-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 1.5rem 1rem;
   position: relative;
+  overflow-x: hidden;
+  /* Homepage-only: soft gradient + dot grid + faint diagonal mesh */
+  background-color: #eef2ff;
+  background-image:
+    radial-gradient(rgba(124, 58, 237, 0.09) 1px, transparent 1px),
+    repeating-linear-gradient(
+      -18deg,
+      transparent,
+      transparent 36px,
+      rgba(124, 58, 237, 0.035) 36px,
+      rgba(124, 58, 237, 0.035) 37px
+    ),
+    radial-gradient(ellipse 120% 70% at 50% -15%, rgba(124, 58, 237, 0.2), transparent 55%),
+    radial-gradient(ellipse 80% 55% at 100% 105%, rgba(79, 70, 229, 0.14), transparent 50%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2ff 55%, #e8edff 100%);
+  background-size:
+    32px 32px,
+    auto,
+    auto,
+    auto,
+    auto;
+  background-position: 0 0, 0 0, center top, right bottom, center;
+}
+
+/* Soft vignette so edges feel finished */
+.homepage-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse 85% 65% at 50% 50%, transparent 35%, rgba(248, 250, 252, 0.55) 100%);
 }
 
 .homepage-content {
   max-width: 28rem;
+  width: 100%;
   margin: 0 auto;
   text-align: center;
   position: relative;
-  z-index: 10;
+  z-index: 1;
 }
 
 .homepage-header {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .homepage-title {
-  font-size: 5rem;
+  font-size: clamp(2.75rem, 12vw, 5rem);
   font-family: 'Poppins', sans-serif;
   font-weight: 800;
-  color: #3d2817;
-  margin-bottom: 1rem;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(120deg, #0f172a 20%, #5b21b6 45%, #4f46e5 75%, #312e81 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #0f172a;
+}
+
+/* Fallback where clip not supported */
+@supports not (background-clip: text) {
+  .homepage-title {
+    color: #0f172a;
+    background: none;
+    -webkit-text-fill-color: unset;
+  }
 }
 
 .homepage-subtitle {
-  color: #1e293b;
-  font-size: 1.5rem;
+  color: #334155;
+  font-size: clamp(1.0625rem, 3.5vw, 1.5rem);
   font-family: 'Inter', sans-serif;
   font-weight: 600;
+  line-height: 1.45;
+  max-width: 22rem;
+  margin-left: auto;
+  margin-right: auto;
 }
-
 
 .homepage-button {
   padding: 1rem 2rem;
   font-size: 1.125rem;
-  font-weight: 500;
+  font-weight: 600;
   font-family: 'Inter', sans-serif;
-  border-radius: 8px;
+  border-radius: 12px;
   border: none;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.2s ease;
   color: white;
-  background: #3d2817;
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
   cursor: pointer;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 14px rgba(124, 58, 237, 0.35),
+    0 1px 2px rgba(15, 23, 42, 0.06);
 }
 
 .homepage-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  background: #4a3728;
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 24px rgba(124, 58, 237, 0.4),
+    0 2px 6px rgba(15, 23, 42, 0.08);
+  background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
 }
 
 .homepage-button:active {
   transform: translateY(0px);
 }
 
+.homepage-button:focus-visible {
+  outline: 2px solid #7c3aed;
+  outline-offset: 3px;
+}
+
 .homepage-footer {
-  margin-top: 2rem;
-  color: #1e293b;
-  font-size: 1.125rem;
+  margin-top: 1.75rem;
+  color: #64748b;
+  font-size: 1rem;
   font-family: 'Inter', sans-serif;
   font-weight: 500;
+  line-height: 1.5;
+  max-width: 22rem;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
-/* Responsive Design */
 @media (max-width: 640px) {
-  .homepage-title {
-    font-size: 2.5rem;
-  }
-  
   .homepage-subtitle {
-    font-size: 1.125rem;
+    font-size: 1.0625rem;
   }
-  
+
   .homepage-map {
     font-size: 3.5rem;
   }
-  
+
   .homepage-button {
-    padding: 1rem 2rem;
-    font-size: 1.125rem;
-    width: 90%;
+    width: 100%;
     max-width: 300px;
   }
-  
+
   .homepage-footer {
     font-size: 0.875rem;
-    padding: 0 1rem;
+    padding: 0 0.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .homepage-button:hover {
+    transform: none;
   }
 }

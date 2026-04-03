@@ -137,13 +137,13 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 text-white p-3 sm:p-4 md:p-5 transition-all duration-300 hover:scale-110"
         style={{ 
-          backgroundColor: '#3d2817',
+          backgroundColor: '#7c3aed',
           borderRadius: '50%',
           border: 'none',
           fontFamily: "'Inter', sans-serif"
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a3728'} 
-        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3d2817'}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6d28d9'} 
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
         aria-label="Open chatbot"
       >
         {isOpen ? (
@@ -170,12 +170,12 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
           {/* Header */}
           <div 
             className="text-white p-4"
-            style={{ backgroundColor: '#3d2817', borderRadius: '16px 16px 0 0' }}
+            style={{ backgroundColor: '#7c3aed', borderRadius: '16px 16px 0 0' }}
           >
             <div className="flex justify-between items-center">
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-base sm:text-lg md:text-xl truncate" style={{ fontFamily: "'Poppins', sans-serif" }}>MoodMap Assistant</h3>
-                <p className="text-xs sm:text-sm font-medium" style={{ color: '#fef3c7' }}>AI-Powered</p>
+                <p className="text-xs sm:text-sm font-medium" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>AI-Powered</p>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
@@ -203,7 +203,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
                   }`}
                   style={{
                     borderRadius: '12px',
-                    ...(message.sender === 'user' ? { backgroundColor: '#3d2817' } : {})
+                    ...(message.sender === 'user' ? { backgroundColor: '#7c3aed' } : {})
                   }}
                 >
                   <p
@@ -279,9 +279,9 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
                 onClick={() => handleSend()}
                 disabled={!inputValue.trim() || isTyping}
                 className="text-white px-3 sm:px-4 py-2 font-semibold disabled:opacity-50 transition-all flex-shrink-0 rounded-lg"
-                style={{ backgroundColor: '#3d2817', fontFamily: "'Inter', sans-serif", border: 'none' }}
-                onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#4a3728')} 
-                onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#3d2817')}
+                style={{ backgroundColor: '#7c3aed', fontFamily: "'Inter', sans-serif", border: 'none' }}
+                onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#6d28d9')} 
+                onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#7c3aed')}
                 aria-label="Send message"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>

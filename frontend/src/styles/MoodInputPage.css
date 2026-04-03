@@ -32,7 +32,7 @@
   font-weight: 800;
   color: #1e293b;
   margin-bottom: 0.5rem;
-  color: #3d2817;
+  background-image: linear-gradient(90deg, #7c3aed, #4f46e5);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -96,9 +96,9 @@
 }
 
 .mood-card.selected {
-  border: 2px solid #3d2817;
-  box-shadow: 0 4px 6px -1px rgba(107, 68, 35, 0.2), 0 2px 4px -1px rgba(107, 68, 35, 0.1);
-  background: #fef3c7;
+  border: 2px solid #7c3aed;
+  box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.18), 0 2px 4px -1px rgba(124, 58, 237, 0.10);
+  background: rgba(124, 58, 237, 0.08);
   transform: translateY(-2px);
 }
 
@@ -143,7 +143,7 @@
 .mood-divider-line::before {
   content: '';
   width: 100%;
-  border-top: 1px solid rgba(180, 83, 9, 0.5);
+  border-top: 1px solid rgba(124, 58, 237, 0.35);
 }
 
 .mood-divider-text {
@@ -155,8 +155,8 @@
 
 .mood-divider-text span {
   padding: 0 1rem;
-  background-color: #3d2817;
-  color: #fef3c7;
+  background-color: #7c3aed;
+  color: white;
   font-weight: 500;
 }
 
@@ -188,7 +188,7 @@
 
 .mood-custom-input:focus {
   outline: none;
-  border-color: #3d2817;
+  border-color: #7c3aed;
 }
 
 .mood-custom-input::placeholder {
@@ -204,7 +204,7 @@
   border-radius: 8px;
   border: none;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  background: #3d2817;
+  background: #7c3aed;
   color: white;
   cursor: pointer;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -213,7 +213,7 @@
 .mood-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  background: #4a3728;
+  background: #6d28d9;
 }
 
 .mood-button:active {
@@ -228,19 +228,19 @@
 .mood-selection-display {
   margin-top: 1.5rem;
   padding: 1rem;
-  background-color: rgba(180, 83, 9, 0.2);
+  background-color: rgba(124, 58, 237, 0.08);
   border-radius: 0.5rem;
-  border: 1px solid rgba(217, 119, 6, 0.3);
+  border: 1px solid rgba(124, 58, 237, 0.18);
 }
 
 .mood-selection-text {
-  color: #78350f;
+  color: rgba(17, 24, 39, 0.78);
   font-weight: 500;
 }
 
 .mood-selection-value {
   font-weight: 600;
-  color: #3d2817;
+  color: #111827;
 }
 
 @keyframes float {

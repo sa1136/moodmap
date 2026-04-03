@@ -94,11 +94,28 @@ const DashboardPage: React.FC = () => {
     <div className="min-h-screen relative" style={{ fontFamily: "'Kalam', cursive" }}>
 
       {/* Enhanced Header */}
-      <header className="bg-white sticky top-0 z-40 border-b border-gray-200 shadow-sm">
+      <header
+        className="sticky top-0 z-40 border-b shadow-sm"
+        style={{
+          background:
+            "radial-gradient(900px 420px at 20% 0%, rgba(124, 58, 237, 0.28), rgba(0, 0, 0, 0) 60%), linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98))",
+          borderColor: "rgba(255, 255, 255, 0.10)",
+        }}
+      >
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 sm:py-4 gap-3 sm:gap-0">
             <div className="flex items-center space-x-2 sm:space-x-4 flex-1">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient" style={{ fontFamily: "'Poppins', sans-serif", color: '#1e293b' }}>
+              <h1
+                className="text-2xl sm:text-3xl md:text-4xl font-bold"
+                style={{
+                  fontFamily: "'Poppins', sans-serif",
+                  backgroundImage:
+                    "linear-gradient(90deg, rgba(255, 255, 255, 0.98), rgba(199, 210, 254, 0.92))",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
                 MoodMap
               </h1>
               {currentMood && (
@@ -115,28 +132,25 @@ const DashboardPage: React.FC = () => {
             <nav className="flex space-x-2 sm:space-x-3 w-full sm:w-auto">
               <button
                 onClick={() => navigate('/mood')}
-                className="flex-1 sm:flex-none px-3 sm:px-5 py-2 text-white font-semibold text-sm sm:text-base rounded-lg transition-colors flex items-center justify-center gap-1.5"
-                style={{ backgroundColor: '#3d2817', fontFamily: "'Inter', sans-serif", border: 'none' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a3728'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3d2817'}
+                className="flex-1 sm:flex-none px-3 sm:px-5 py-2 font-semibold text-sm sm:text-base rounded-lg transition-colors flex items-center justify-center gap-1.5 text-slate-900"
+                style={{
+                  backgroundColor: "#ffffff",
+                  fontFamily: "'Inter', sans-serif",
+                  border: "1px solid rgba(255, 255, 255, 0.35)",
+                  boxShadow: "0 1px 2px rgba(0, 0, 0, 0.08)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#f8fafc";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#ffffff";
+                }}
               >
                 <svg className="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span className="hidden sm:inline">New Mood</span>
                 <span className="sm:hidden text-xs">Mood</span>
-              </button>
-              <button
-                onClick={() => navigate('/onboarding')}
-                className="doodle-button flex-1 sm:flex-none px-3 sm:px-5 py-2 bg-gray-100 text-gray-700 font-semibold text-sm sm:text-base hover:bg-gray-200 flex items-center justify-center gap-1.5"
-                style={{ fontFamily: "'Inter', sans-serif" }}
-              >
-                <svg className="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span className="hidden sm:inline">Settings</span>
-                <span className="sm:hidden text-xs">Settings</span>
               </button>
             </nav>
           </div>
@@ -163,7 +177,7 @@ const DashboardPage: React.FC = () => {
             </div>
             <div className="flex items-center space-x-3 flex-wrap">
               {aiPowered && (
-                <span className="text-white text-xs font-medium px-3 py-1.5 rounded-md" style={{ fontFamily: "'Inter', sans-serif", border: 'none', backgroundColor: '#3d2817' }}>
+                <span className="text-white text-xs font-medium px-3 py-1.5 rounded-md" style={{ fontFamily: "'Inter', sans-serif", border: 'none', backgroundColor: '#7c3aed' }}>
                   AI-Powered
                 </span>
               )}
@@ -172,9 +186,9 @@ const DashboardPage: React.FC = () => {
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`px-2 sm:px-4 py-2 font-bold transition-all ${viewMode === 'grid' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                  style={viewMode === 'grid' ? { backgroundColor: '#3d2817', fontFamily: "'Inter', sans-serif" } : { fontFamily: "'Inter', sans-serif" }}
-                  onMouseEnter={viewMode === 'grid' ? (e) => e.currentTarget.style.backgroundColor = '#4a3728' : undefined}
-                  onMouseLeave={viewMode === 'grid' ? (e) => e.currentTarget.style.backgroundColor = '#3d2817' : undefined}
+                  style={viewMode === 'grid' ? { backgroundColor: '#7c3aed', fontFamily: "'Inter', sans-serif" } : { fontFamily: "'Inter', sans-serif" }}
+                  onMouseEnter={viewMode === 'grid' ? (e) => e.currentTarget.style.backgroundColor = '#6d28d9' : undefined}
+                  onMouseLeave={viewMode === 'grid' ? (e) => e.currentTarget.style.backgroundColor = '#7c3aed' : undefined}
                   aria-label="Grid view"
                 >
                   <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
@@ -184,9 +198,9 @@ const DashboardPage: React.FC = () => {
                 <button
                   onClick={() => setViewMode('list')}
                   className={`px-2 sm:px-4 py-2 font-bold transition-all ${viewMode === 'list' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                  style={viewMode === 'list' ? { backgroundColor: '#3d2817', fontFamily: "'Inter', sans-serif" } : { fontFamily: "'Inter', sans-serif" }}
-                  onMouseEnter={viewMode === 'list' ? (e) => e.currentTarget.style.backgroundColor = '#4a3728' : undefined}
-                  onMouseLeave={viewMode === 'list' ? (e) => e.currentTarget.style.backgroundColor = '#3d2817' : undefined}
+                  style={viewMode === 'list' ? { backgroundColor: '#7c3aed', fontFamily: "'Inter', sans-serif" } : { fontFamily: "'Inter', sans-serif" }}
+                  onMouseEnter={viewMode === 'list' ? (e) => e.currentTarget.style.backgroundColor = '#6d28d9' : undefined}
+                  onMouseLeave={viewMode === 'list' ? (e) => e.currentTarget.style.backgroundColor = '#7c3aed' : undefined}
                   aria-label="List view"
                 >
                   <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
@@ -199,9 +213,9 @@ const DashboardPage: React.FC = () => {
 
           {/* AI Explanation */}
           {explanation && (
-            <div className="doodle-card p-4 sm:p-6 mb-4 sm:mb-6" style={{ backgroundColor: '#f5f1eb' }}>
+            <div className="doodle-card p-4 sm:p-6 mb-4 sm:mb-6" style={{ backgroundColor: 'rgba(124, 58, 237, 0.06)' }}>
               <div className="flex items-start">
-                <svg className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#4a3728' }}>
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7c3aed' }}>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
                 <div className="ml-2 sm:ml-4">
@@ -220,7 +234,7 @@ const DashboardPage: React.FC = () => {
             <div className="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4 animate-bounce-gentle">🔍</div>
             <p className="text-gray-900 font-semibold text-base sm:text-lg md:text-xl px-4 text-center" style={{ fontFamily: "'Inter', sans-serif" }}>Finding perfect places for you...</p>
             <div className="mt-3 sm:mt-4 flex space-x-2">
-              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full animate-bounce" style={{ animationDelay: '0ms', backgroundColor: '#4a3728' }}></div>
+              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full animate-bounce" style={{ animationDelay: '0ms', backgroundColor: '#7c3aed' }}></div>
               <div className="w-2 h-2 sm:w-3 sm:h-3 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
               <div className="w-2 h-2 sm:w-3 sm:h-3 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
             </div>
@@ -245,7 +259,7 @@ const DashboardPage: React.FC = () => {
                       <div className="flex items-start gap-3 mb-2">
                         <div
                           className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                          style={{ backgroundColor: '#f5f1eb', color: '#3d2817' }}
+                          style={{ backgroundColor: 'rgba(124, 58, 237, 0.10)', color: '#111827' }}
                           aria-hidden="true"
                         >
                           <span className="text-base font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>
@@ -257,7 +271,7 @@ const DashboardPage: React.FC = () => {
                             <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 break-words min-w-0" style={{ fontFamily: "'Poppins', sans-serif" }}>
                               {place.name}
                             </h3>
-                            <span className="text-xs text-white px-2 sm:px-3 py-1 font-medium flex-shrink-0 rounded-md" style={{ border: 'none', backgroundColor: '#3d2817' }}>
+                            <span className="text-xs text-white px-2 sm:px-3 py-1 font-medium flex-shrink-0 rounded-md" style={{ border: 'none', backgroundColor: '#7c3aed' }}>
                               {place.type}
                             </span>
                           </div>
@@ -293,7 +307,7 @@ const DashboardPage: React.FC = () => {
                           {place.amenities.slice(0, 3).map((amenity: string, idx: number) => (
                             <span
                               key={idx}
-                              className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: '#f5f1eb', color: '#3d2817' }}
+                              className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: 'rgba(124, 58, 237, 0.10)', color: '#111827' }}
                             >
                               {amenity}
                             </span>
@@ -308,9 +322,9 @@ const DashboardPage: React.FC = () => {
                         <button
                           onClick={() => handleShowDetails(place)}
                           className="flex-1 px-3 sm:px-4 py-2 text-white font-medium text-xs sm:text-sm rounded-md transition-colors"
-                          style={{ backgroundColor: '#3d2817', fontFamily: "'Inter', sans-serif", border: 'none' }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a3728'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3d2817'}
+                          style={{ backgroundColor: '#7c3aed', fontFamily: "'Inter', sans-serif", border: 'none' }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6d28d9'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
                         >
                           Details
                         </button>
@@ -332,9 +346,9 @@ const DashboardPage: React.FC = () => {
                   <button 
                     onClick={() => navigate('/mood')}
                     className="px-6 sm:px-8 py-3 sm:py-4 text-white font-medium text-base sm:text-lg rounded-md transition-colors"
-                    style={{ backgroundColor: '#3d2817', fontFamily: "'Inter', sans-serif", border: 'none' }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a3728'} 
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3d2817'}
+                    style={{ backgroundColor: '#7c3aed', fontFamily: "'Inter', sans-serif", border: 'none' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6d28d9'} 
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
                   >
                     🚀 Start Exploring
                   </button>
@@ -362,7 +376,7 @@ const DashboardPage: React.FC = () => {
                     </svg>
                       <span className="truncate">{selectedPlace.city}</span>
                     </span>
-                    <span className="text-white px-2 sm:px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#3d2817' }}>
+                    <span className="text-white px-2 sm:px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#7c3aed' }}>
                       {selectedPlace.type}
                     </span>
                     <div className="flex items-center">
@@ -409,9 +423,9 @@ const DashboardPage: React.FC = () => {
                     <a 
                       href={`tel:${selectedPlace.phone}`} 
                       className="text-sm sm:text-base break-all" 
-                      style={{ color: '#4a3728' }} 
-                      onMouseEnter={(e) => e.currentTarget.style.color = '#3d2817'} 
-                      onMouseLeave={(e) => e.currentTarget.style.color = '#4a3728'}
+                      style={{ color: '#7c3aed' }} 
+                      onMouseEnter={(e) => e.currentTarget.style.color = '#6d28d9'} 
+                      onMouseLeave={(e) => e.currentTarget.style.color = '#7c3aed'}
                     >
                       {selectedPlace.phone}
                     </a>
@@ -427,7 +441,7 @@ const DashboardPage: React.FC = () => {
                       href={selectedPlace.website.startsWith('http') ? selectedPlace.website : `https://${selectedPlace.website}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="underline text-sm sm:text-base break-all" style={{ color: '#4a3728' }} onMouseEnter={(e) => e.currentTarget.style.color = '#3d2817'} onMouseLeave={(e) => e.currentTarget.style.color = '#4a3728'}
+                      className="underline text-sm sm:text-base break-all" style={{ color: '#7c3aed' }} onMouseEnter={(e) => e.currentTarget.style.color = '#6d28d9'} onMouseLeave={(e) => e.currentTarget.style.color = '#7c3aed'}
                     >
                       {selectedPlace.website}
                     </a>
@@ -453,7 +467,7 @@ const DashboardPage: React.FC = () => {
                     {selectedPlace.amenities.map((amenity: string, index: number) => (
                       <span
                         key={index}
-                        className="text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium" style={{ backgroundColor: '#3d2817' }}
+                        className="text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium" style={{ backgroundColor: '#7c3aed' }}
                       >
                         {amenity}
                       </span>

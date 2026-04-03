@@ -4,18 +4,18 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom CSS Variables for MoodMap Dark Chocolate Theme */
+/* Custom CSS Variables for MoodMap Cool Twilight Theme */
 :root {
-  --color-primary: #3d2817;
-  --color-secondary: #4a3728;
-  --color-accent: #5c4033;
-  --color-mood-relaxed: #3d2817;
-  --color-mood-energetic: #4a3728;
-  --color-mood-adventurous: #4a3728;
-  --color-mood-social: #5c4033;
-  --color-mood-creative: #4a3728;
-  --color-mood-focused: #2c1810;
-  --doodle-border-color: #3d2817;
+  --color-primary: #7c3aed; /* violet */
+  --color-secondary: #4f46e5; /* indigo */
+  --color-accent: #10b981; /* emerald */
+  --color-mood-relaxed: #7c3aed;
+  --color-mood-energetic: #4f46e5;
+  --color-mood-adventurous: #10b981;
+  --color-mood-social: #ec4899; /* pink */
+  --color-mood-creative: #a855f7; /* purple */
+  --color-mood-focused: #06b6d4; /* cyan */
+  --doodle-border-color: #7c3aed;
 }
 
 /* Global Styles */
@@ -30,11 +30,14 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #f5f1eb;
+  background:
+    radial-gradient(1200px 700px at 20% 0%, rgba(124, 58, 237, 0.10), rgba(0, 0, 0, 0) 55%),
+    radial-gradient(900px 600px at 90% 25%, rgba(79, 70, 229, 0.08), rgba(0, 0, 0, 0) 55%),
+    linear-gradient(180deg, #f8fafc, #eef2ff);
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
-  color: #291b0f;
+  color: #0f172a;
 }
 
 /* Mobile optimizations */
@@ -70,7 +73,7 @@ body {
 .doodle-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border-color: #3d2817;
+  border-color: var(--color-primary);
 }
 
 .doodle-button:active {
@@ -94,7 +97,7 @@ body {
 .doodle-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-color: #3d2817;
+  border-color: var(--color-primary);
 }
 
 .doodle-input {
@@ -108,20 +111,20 @@ body {
 
 .doodle-input:focus {
   outline: none;
-  border-color: #3d2817;
-  box-shadow: 0 0 0 3px rgba(61, 40, 23, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
 }
 
 /* Custom Components */
 @layer components {
   .btn-primary {
     @apply doodle-button text-white font-bold py-3 px-6;
-    background-color: #3d2817;
+    background-color: var(--color-primary);
   }
   
   .btn-secondary {
     @apply doodle-button text-white font-bold py-3 px-6;
-    background-color: #4a3728;
+    background-color: var(--color-secondary);
   }
   
   .card {
@@ -137,11 +140,11 @@ body {
   }
   
   .gradient-bg {
-    background-color: #3d2817;
+    background-color: var(--color-primary);
   }
   
   .text-gradient {
-    color: #3d2817;
+    color: var(--color-primary);
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
   }
@@ -194,12 +197,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3d2817;
+  background: var(--color-primary);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4a3728;
+  background: var(--color-secondary);
 }
 
 /* Mobile optimizations */

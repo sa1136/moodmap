@@ -32,7 +32,7 @@
   font-weight: 800;
   color: #1e293b;
   margin-bottom: 0.5rem;
-  color: #3d2817;
+  background-image: linear-gradient(90deg, #7c3aed, #4f46e5);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -88,7 +88,7 @@
 
 .onboarding-input:focus {
   outline: none;
-  border-color: #3d2817;
+  border-color: #7c3aed;
 }
 
 .onboarding-input::placeholder {
@@ -129,7 +129,7 @@
 }
 
 .onboarding-preference-item:hover {
-  background: #fef3c7;
+  background: rgba(124, 58, 237, 0.08);
   transform: translateY(-2px);
 }
 
@@ -163,7 +163,7 @@
   border-radius: 8px;
   border: none;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  background: #3d2817;
+  background: #7c3aed;
   color: white;
   cursor: pointer;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -172,7 +172,7 @@
 .onboarding-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  background: #4a3728;
+  background: #6d28d9;
 }
 
 .onboarding-button:active {
