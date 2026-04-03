@@ -22,10 +22,11 @@ router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             });
         }
         let allPlaces = [];
-        let cityName = city || 'your city';
-        if (cityName.includes(',')) {
-            cityName = cityName.split(',')[0].trim();
-        }
+        // Keep full location string for geocoding (e.g. "Boston, MA, US" vs ambiguous "Boston").
+        const locationQuery = (city || '').trim() || 'your city';
+        const shortCityLabel = locationQuery.includes(',')
+            ? locationQuery.split(',')[0].trim()
+            : locationQuery;
         // Parse preferences if provided (can be comma-separated string or array)
         let preferencesArray = [];
         if (preferences) {
@@ -48,28 +49,26 @@ router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 preferencesArray = [String(preferences)].filter((p) => p.length > 0);
             }
         }
-        console.log(`[Places API] Request - mood: ${mood}, city: ${cityName}, lat: ${lat}, lng: ${lng}, preferences:`, preferencesArray);
-        const osmPlaces = yield (0, placesApi_1.fetchPlacesFromOpenStreetMap)(cityName, lat ? parseFloat(lat) : undefined, lng ? parseFloat(lng) : undefined, mood, preferencesArray);
+        console.log(`[Places API] Request - mood: ${mood}, location: ${locationQuery}, lat: ${lat}, lng: ${lng}, preferences:`, preferencesArray);
+        const osmPlaces = yield (0, placesApi_1.fetchPlacesFromOpenStreetMap)(locationQuery, lat ? parseFloat(lat) : undefined, lng ? parseFloat(lng) : undefined, mood, preferencesArray);
         if (osmPlaces.length > 0) {
             allPlaces = osmPlaces;
             console.log(`✅ Successfully fetched ${allPlaces.length} places from OpenStreetMap`);
         }
         else {
-            console.warn(`⚠️  No OpenStreetMap results found for "${cityName}" with mood "${mood}"`);
+            console.warn(`⚠️  No OpenStreetMap results found for "${locationQuery}" with mood "${mood}"`);
             allPlaces = [];
         }
         const userContext = {
             mood: mood,
-            city: cityName,
+            city: shortCityLabel,
         };
         let recommendedPlaces;
-        // Check if any AI provider is available (Groq or OpenAI)
+        // Check if Groq is available
         const hasGroq = !!process.env.GROQ_API_KEY;
-        const hasOpenAI = !!process.env.OPENAI_API_KEY;
-        console.log(`[Places API] AI Provider Check - Groq: ${hasGroq ? '✅' : '❌'}, OpenAI: ${hasOpenAI ? '✅' : '❌'}`);
-        if (hasGroq || hasOpenAI) {
-            const provider = hasGroq ? 'Groq' : 'OpenAI';
-            console.log(`[Places API] Using ${provider} for AI-powered recommendations`);
+        console.log(`[Places API] AI Provider Check - Groq: ${hasGroq ? '✅' : '❌'}`);
+        if (hasGroq) {
+            console.log(`[Places API] Using Groq for AI-powered recommendations`);
             // Only use AI if we have places to work with
             if (allPlaces.length > 0) {
                 try {
@@ -79,9 +78,9 @@ router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         places: recommendedPlaces.length > 0 ? recommendedPlaces : allPlaces.slice(0, 8),
                         explanation,
                         aiPowered: true,
-                        provider: provider.toLowerCase(),
+                        provider: 'groq',
                         mood: mood,
-                        city: city || 'your location'
+                        city: locationQuery
                     });
                 }
                 catch (error) {
@@ -89,10 +88,10 @@ router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                     // If AI fails, still return the places
                     return res.json({
                         places: allPlaces.slice(0, 8),
-                        explanation: `Based on your ${mood} mood, here are some places in ${cityName}!`,
+                        explanation: `Based on your ${mood} mood, here are some places in ${shortCityLabel}!`,
                         aiPowered: false,
                         mood: mood,
-                        city: cityName
+                        city: locationQuery
                     });
                 }
             }
@@ -101,49 +100,46 @@ router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 console.warn(`[Places API] AI available but no places found from OpenStreetMap`);
                 return res.json({
                     places: [],
-                    explanation: `No places found for "${cityName}" with mood "${mood}". Please try a different location or mood.`,
+                    explanation: `No places found for "${shortCityLabel}" with mood "${mood}". Please try a different location or mood.`,
                     aiPowered: true,
-                    provider: provider.toLowerCase(),
+                    provider: 'groq',
                     mood: mood,
-                    city: cityName
+                    city: locationQuery
                 });
             }
         }
         else {
             // No AI available, but still return the OpenStreetMap places (if any)
             if (allPlaces.length > 0) {
-                console.warn('No AI API key found (GROQ_API_KEY or OPENAI_API_KEY). Returning OpenStreetMap places without AI ranking.');
+                console.warn('No GROQ_API_KEY found. Returning OpenStreetMap places without AI ranking.');
                 recommendedPlaces = allPlaces.slice(0, 8); // Return top 8 places from OpenStreetMap
             }
             else {
-                console.warn('No AI API key found and no OpenStreetMap results. Returning empty results.');
+                console.warn('No GROQ_API_KEY found and no OpenStreetMap results. Returning empty results.');
                 recommendedPlaces = [];
             }
             return res.json({
                 places: recommendedPlaces,
                 explanation: recommendedPlaces.length > 0
-                    ? `Based on your ${mood} mood, here are some places we think you'll enjoy in ${cityName}!`
-                    : `No places found for "${cityName}" with mood "${mood}". Please try a different location or mood.`,
+                    ? `Based on your ${mood} mood, here are some places we think you'll enjoy in ${shortCityLabel}!`
+                    : `No places found for "${shortCityLabel}" with mood "${mood}". Please try a different location or mood.`,
                 aiPowered: false,
                 mood: mood,
-                city: cityName
+                city: locationQuery
             });
         }
     }
     catch (error) {
         console.error('Error in places route:', error);
         const { mood, city } = req.query;
-        let fallbackCityName = city || 'your city';
-        if (fallbackCityName.includes(',')) {
-            fallbackCityName = fallbackCityName.split(',')[0].trim();
-        }
+        const fallbackLocation = (city || 'your city').trim();
         return res.status(500).json({
             places: [],
             explanation: `Service temporarily unavailable. Please try again later.`,
             aiPowered: false,
             error: 'Service temporarily unavailable',
             mood: mood,
-            city: fallbackCityName
+            city: fallbackLocation
         });
     }
 }));

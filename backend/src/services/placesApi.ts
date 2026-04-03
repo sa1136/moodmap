@@ -43,9 +43,59 @@ async function getPlaceImages(placeName: string, city: string, placeType?: strin
  * Fetch places from OpenStreetMap/Nominatim (100% FREE, no API key required!)
  * This is a great free alternative that doesn't require any registration.
  */
-function extractCityName(fullAddress: string): string {
+function shortCityLabel(fullAddress: string): string {
   const parts = fullAddress.split(',');
   return parts[0]?.trim() || fullAddress;
+}
+
+/** ISO 3166-1 alpha-2 for Nominatim `countrycodes` when the user picked a full address. */
+function inferCountryCodes(location: string): string | undefined {
+  const t = location.toLowerCase();
+  if (
+    t.includes('united states') ||
+    t.includes('usa') ||
+    /\bu\.s\.a\.?\b/.test(t) ||
+    /\bu\.s\.?\b/.test(t)
+  ) {
+    return 'us';
+  }
+  if (
+    t.includes('united kingdom') ||
+    t.includes(', england') ||
+    t.includes('scotland') ||
+    t.includes('wales') ||
+    t.includes('northern ireland')
+  ) {
+    return 'gb';
+  }
+  if (t.includes('canada')) return 'ca';
+  if (t.includes('australia')) return 'au';
+  return undefined;
+}
+
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/**
+ * Nominatim viewbox: min longitude, max latitude, max longitude, min latitude.
+ * @see https://nominatim.org/release-docs/latest/api/Search/
+ */
+function buildViewbox(lat: number, lng: number, radiusKm: number): string {
+  const latRad = (lat * Math.PI) / 180;
+  const dLat = radiusKm / 111.32;
+  const dLon = radiusKm / (111.32 * Math.max(0.25, Math.cos(latRad)));
+  const minLon = lng - dLon;
+  const maxLon = lng + dLon;
+  const minLat = lat - dLat;
+  const maxLat = lat + dLat;
+  return `${minLon},${maxLat},${maxLon},${minLat}`;
 }
 
 // Helper function to add delay (rate limiting for Nominatim)
@@ -89,6 +139,9 @@ async function retryWithBackoff<T>(
   return null;
 }
 
+const MAX_DISTANCE_KM = 35;
+const VIEWBOX_RADIUS_KM = 26;
+
 export async function fetchPlacesFromOpenStreetMap(
   city: string,
   lat?: number,
@@ -97,61 +150,83 @@ export async function fetchPlacesFromOpenStreetMap(
   preferences?: string[]
 ): Promise<Place[]> {
   try {
-    const cityName = extractCityName(city);
-    console.log(`[OpenStreetMap] Fetching places for city: ${cityName}, mood: ${mood}`);
-    
-    // Use provided lat/lng if available, otherwise geocode the city
+    const locationQuery = city.trim();
+    const cityName = shortCityLabel(locationQuery);
+    const countryCodes = inferCountryCodes(locationQuery);
+
+    console.log(`[OpenStreetMap] Fetching places for location: ${locationQuery}, mood: ${mood}`);
+
     let searchLat = lat;
     let searchLng = lng;
-    
+
     if (!searchLat || !searchLng) {
-      console.log(`[OpenStreetMap] Geocoding city: ${cityName}`);
+      console.log(`[OpenStreetMap] Geocoding: ${locationQuery}`);
       await delay(2000);
-      
+
       try {
-        const geocodeResponse = await retryWithBackoff(async () => {
-          return await axios.get('https://nominatim.openstreetmap.org/search', {
-            params: {
-              q: cityName,
-              format: 'json',
-              limit: 1,
-            },
-            headers: {
-              'User-Agent': 'MoodMap/1.0',
-            },
-            timeout: 30000, // Increased to 30 seconds
+        const runGeocode = async (useCountryFilter: boolean) => {
+          const params: Record<string, string | number> = {
+            q: locationQuery,
+            format: 'json',
+            limit: 5,
+            addressdetails: 1,
+            'accept-language': 'en',
+          };
+          if (useCountryFilter && countryCodes) {
+            params.countrycodes = countryCodes;
+          }
+          return axios.get('https://nominatim.openstreetmap.org/search', {
+            params,
+            headers: { 'User-Agent': 'MoodMap/1.0' },
+            timeout: 30000,
           });
-        });
-        
+        };
+
+        let geocodeResponse = await retryWithBackoff(async () => runGeocode(!!countryCodes));
+
+        if (
+          geocodeResponse?.data?.length === 0 &&
+          countryCodes
+        ) {
+          await delay(1500);
+          geocodeResponse = await retryWithBackoff(async () => runGeocode(false));
+        }
+
         if (!geocodeResponse) {
-          console.warn(`[OpenStreetMap] Could not geocode city: ${cityName} (request failed)`);
+          console.warn(`[OpenStreetMap] Could not geocode: ${locationQuery} (request failed)`);
           return [];
         }
 
         if (geocodeResponse.data && geocodeResponse.data.length > 0) {
           searchLat = parseFloat(geocodeResponse.data[0].lat);
           searchLng = parseFloat(geocodeResponse.data[0].lon);
-          console.log(`[OpenStreetMap] Geocoded "${cityName}" to: ${searchLat}, ${searchLng}`);
+          console.log(`[OpenStreetMap] Geocoded "${locationQuery}" to: ${searchLat}, ${searchLng}`);
         } else {
-          console.warn(`[OpenStreetMap] Could not geocode city: ${cityName} (no results)`);
+          console.warn(`[OpenStreetMap] Could not geocode: ${locationQuery} (no results)`);
           return [];
         }
       } catch (error: any) {
         const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
         const isRateLimit = error.response?.status === 418 || error.response?.status === 429;
-        
+
         if (isRateLimit) {
           console.warn(`[OpenStreetMap] Rate limited during geocoding. Waiting longer...`);
           await delay(10000);
           return [];
         } else if (isTimeout) {
-          console.warn(`[OpenStreetMap] Timeout during geocoding for: ${cityName}`);
+          console.warn(`[OpenStreetMap] Timeout during geocoding for: ${locationQuery}`);
           return [];
         }
-        console.error(`[OpenStreetMap] Error geocoding city: ${cityName}`, error.message);
+        console.error(`[OpenStreetMap] Error geocoding: ${locationQuery}`, error.message);
         return [];
       }
     }
+
+    if (searchLat === undefined || searchLng === undefined) {
+      return [];
+    }
+
+    const viewbox = buildViewbox(searchLat, searchLng, VIEWBOX_RADIUS_KM);
 
     const searchTerms = mapMoodToSearchTerms(mood, preferences);
     console.log(`[OpenStreetMap] Search terms for mood "${mood}" with preferences:`, preferences, '→', searchTerms);
@@ -165,31 +240,31 @@ export async function fetchPlacesFromOpenStreetMap(
       try {
         await delay(2000);
         
-        const query = `${searchTerm} in ${cityName}`;
+        // Comma-separated queries perform better on Nominatim than "X in Y" free text.
+        const query = `${searchTerm}, ${locationQuery}`;
         console.log(`[OpenStreetMap] Searching for: ${query}`);
-        
+
         const searchUrl = 'https://nominatim.openstreetmap.org/search';
-        const searchParams: any = {
+        const searchParams: Record<string, string | number> = {
           q: query,
           format: 'json',
           limit: 15,
           addressdetails: 1,
+          'accept-language': 'en',
+          viewbox,
+          bounded: 1,
         };
-        
-        // Use coordinates if available for better results
-        if (searchLat && searchLng) {
-          searchParams.lat = searchLat;
-          searchParams.lon = searchLng;
-          searchParams.radius = 5000; // 5km radius
+        if (countryCodes) {
+          searchParams.countrycodes = countryCodes;
         }
-        
+
         const searchResponse = await retryWithBackoff(async () => {
           return await axios.get(searchUrl, {
             params: searchParams,
             headers: {
               'User-Agent': 'MoodMap/1.0',
             },
-            timeout: 30000, // Increased to 30 seconds
+            timeout: 30000,
           });
         });
         
@@ -203,9 +278,19 @@ export async function fetchPlacesFromOpenStreetMap(
         
         if (results && results.length > 0) {
           for (const result of results) {
+          const rLat = parseFloat(result.lat);
+          const rLon = parseFloat(result.lon);
+          if (
+            Number.isFinite(rLat) &&
+            Number.isFinite(rLon) &&
+            haversineKm(searchLat, searchLng, rLat, rLon) > MAX_DISTANCE_KM
+          ) {
+            continue;
+          }
+
           const address = result.address || {};
           const name = result.name || result.display_name?.split(',')[0] || 'Place';
-          
+
           if (places.some(p => p.name.toLowerCase() === name.toLowerCase())) {
             continue;
           }
@@ -273,7 +358,7 @@ export async function fetchPlacesFromOpenStreetMap(
             rating: '4.0',
             address: formattedAddress,
             city: extractedCity || cityName,
-            description: `A ${searchTerm || 'place'} in ${cityName}. Discovered via OpenStreetMap.`,
+            description: `A ${searchTerm || 'place'} near ${cityName}. Discovered via OpenStreetMap.`,
             hours: result.tags?.opening_hours || 'Hours vary',
             price: '$$',
             phone: result.tags?.phone || '',
@@ -333,13 +418,17 @@ export async function fetchPlacesFromOpenStreetMap(
             const searchResponse = await retryWithBackoff(async () => {
               return await axios.get('https://nominatim.openstreetmap.org/search', {
                 params: {
-                  q: `${beachQuery}, Los Angeles`,
+                  q: `${beachQuery}, Los Angeles, California, United States`,
                   format: 'json',
                   limit: 3,
                   addressdetails: 1,
+                  'accept-language': 'en',
+                  viewbox,
+                  bounded: 1,
+                  countrycodes: 'us',
                 },
                 headers: { 'User-Agent': 'MoodMap/1.0' },
-                timeout: 30000, // Increased to 30 seconds
+                timeout: 30000,
               });
             });
             
@@ -440,19 +529,19 @@ export async function fetchPlacesFromOpenStreetMap(
       console.log(`[OpenStreetMap] No mood-specific results, trying general search...`);
       try {
         await delay(2000);
-        const generalQuery = `attractions in ${cityName}`;
+        const generalQuery = `attractions, ${locationQuery}`;
         const searchUrl = 'https://nominatim.openstreetmap.org/search';
-        const searchParams: any = {
+        const searchParams: Record<string, string | number> = {
           q: generalQuery,
           format: 'json',
           limit: 10,
           addressdetails: 1,
+          'accept-language': 'en',
+          viewbox,
+          bounded: 1,
         };
-        
-        if (searchLat && searchLng) {
-          searchParams.lat = searchLat;
-          searchParams.lon = searchLng;
-          searchParams.radius = 5000;
+        if (countryCodes) {
+          searchParams.countrycodes = countryCodes;
         }
         
         const generalResponse = await retryWithBackoff(async () => {
@@ -478,9 +567,19 @@ export async function fetchPlacesFromOpenStreetMap(
         
         // Process general results (same logic as above)
         for (const result of generalResults.slice(0, 10)) {
+          const grLat = parseFloat(result.lat);
+          const grLon = parseFloat(result.lon);
+          if (
+            Number.isFinite(grLat) &&
+            Number.isFinite(grLon) &&
+            haversineKm(searchLat, searchLng, grLat, grLon) > MAX_DISTANCE_KM
+          ) {
+            continue;
+          }
+
           const address = result.address || {};
           const name = result.name || result.display_name?.split(',')[0] || 'Place';
-          
+
           if (places.some(p => p.name.toLowerCase() === name.toLowerCase())) continue;
           
           const addressParts: string[] = [];
@@ -583,7 +682,7 @@ function mapMoodToSearchTerms(mood?: string, preferences?: string[]): string[] {
     peaceful: ['park', 'garden', 'meditation center'],
     energetic: hasBeachPreference
       ? ['beach volleyball', 'beach sports', 'surfing', 'beach activities', 'water sports', 'beach fitness', 'pier', 'beachfront', 'beach', 'canal']
-      : ['gym', 'fitness', 'sports', 'fitness center', 'sports complex', 'athletic', 'beach', 'pier'],
+      : ['gym', 'fitness', 'sports', 'fitness center', 'sports complex', 'athletic'],
     curious: ['museum', 'science center', 'planetarium'],
     romantic: ['restaurant', 'wine bar', 'scenic overlook'],
   };
