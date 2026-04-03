@@ -13,6 +13,28 @@ interface ChatbotProps {
   currentCity?: string;
 }
 
+function formatBotMessage(text: string): string {
+  let t = (text || '').trim();
+  if (!t) return t;
+
+  // Add newlines before common "Some options:" style intros.
+  t = t.replace(/(include:)/gi, '$1\n');
+
+  // Convert inline numbered lists "1. X 2. Y" into multiline bullets.
+  // Example: "... include: 1. A - ... 2. B - ..." -> "- A - ...\n- B - ..."
+  if (/\b1\.\s+/.test(t) && /\b2\.\s+/.test(t)) {
+    t = t.replace(/\s*(\d+)\.\s+/g, '\n- ');
+  }
+
+  // Ensure there's spacing after sentence boundaries when a bullet begins.
+  t = t.replace(/([.!?])\s*\n-\s/g, '$1\n\n- ');
+
+  // Collapse excessive blank lines.
+  t = t.replace(/\n{3,}/g, '\n\n');
+
+  return t.trim();
+}
+
 const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -184,7 +206,12 @@ const Chatbot: React.FC<ChatbotProps> = ({ currentMood, currentCity }) => {
                     ...(message.sender === 'user' ? { backgroundColor: '#3d2817' } : {})
                   }}
                 >
-                  <p className="text-xs sm:text-sm break-words">{message.text}</p>
+                  <p
+                    className="text-xs sm:text-sm break-words"
+                    style={{ whiteSpace: 'pre-line' }}
+                  >
+                    {message.sender === 'bot' ? formatBotMessage(message.text) : message.text}
+                  </p>
                   <p className={`text-xs mt-1 ${message.sender === 'user' ? '' : 'text-gray-400'}`} style={message.sender === 'user' ? { color: '#f5f1eb' } : {}}>
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>

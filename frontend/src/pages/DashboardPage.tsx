@@ -2,13 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Chatbot from "../components/Chatbot";
-import Filters, { FilterState } from "../components/Filters";
 import MoodIndicator from "../components/MoodIndicator";
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [places, setPlaces] = useState<any[]>([]);
-  const [filteredPlaces, setFilteredPlaces] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -17,11 +15,6 @@ const DashboardPage: React.FC = () => {
   const [currentMood, setCurrentMood] = useState<string>('');
   const [currentCity, setCurrentCity] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [filters, setFilters] = useState<FilterState>({
-    rating: '',
-    price: '',
-    activityType: ''
-  });
 
   useEffect(() => {
     const savedMood = localStorage.getItem('currentMood');
@@ -63,19 +56,16 @@ const DashboardPage: React.FC = () => {
         if (res.data.places && Array.isArray(res.data.places)) {
           console.log(`[Dashboard] Found ${res.data.places.length} places in response`);
           setPlaces(res.data.places);
-          setFilteredPlaces(res.data.places);
           setExplanation(res.data.explanation || '');
           setAiPowered(res.data.aiPowered || false);
         } else if (Array.isArray(res.data)) {
           console.log(`[Dashboard] Legacy format - Found ${res.data.length} places`);
           setPlaces(res.data);
-          setFilteredPlaces(res.data);
           setExplanation('');
           setAiPowered(false);
         } else {
           console.warn('[Dashboard] Unexpected response format:', res.data);
           setPlaces([]);
-          setFilteredPlaces([]);
           setExplanation('');
           setAiPowered(false);
         }
@@ -84,37 +74,11 @@ const DashboardPage: React.FC = () => {
       .catch(err => {
         console.error('Error fetching places:', err);
         setPlaces([]);
-        setFilteredPlaces([]);
         setExplanation('');
         setAiPowered(false);
         setIsLoading(false);
       });
   }, []);
-
-  // Apply filters when they change
-  useEffect(() => {
-    let filtered = [...places];
-
-    if (filters.rating) {
-      const minRating = parseFloat(filters.rating);
-      filtered = filtered.filter(p => parseFloat(p.rating) >= minRating);
-    }
-
-    if (filters.price) {
-      filtered = filtered.filter(p => {
-        if (filters.price === 'Free') return p.price === 'Free';
-        return p.price === filters.price;
-      });
-    }
-
-    if (filters.activityType) {
-      filtered = filtered.filter(p => 
-        p.type?.toLowerCase().includes(filters.activityType.toLowerCase())
-      );
-    }
-
-    setFilteredPlaces(filtered);
-  }, [filters, places]);
 
   const handleShowDetails = (place: any) => {
     setSelectedPlace(place);
@@ -124,10 +88,6 @@ const DashboardPage: React.FC = () => {
   const handleCloseDetails = () => {
     setShowDetails(false);
     setSelectedPlace(null);
-  };
-
-  const handleFilterChange = (newFilters: FilterState) => {
-    setFilters(newFilters);
   };
 
   return (
@@ -254,11 +214,6 @@ const DashboardPage: React.FC = () => {
           )}
         </div>
 
-        {/* Filters */}
-        {places.length > 0 && (
-          <Filters onFilterChange={handleFilterChange} currentFilters={filters} />
-        )}
-
         {/* Loading State */}
         {isLoading ? (
           <div className="flex flex-col justify-center items-center py-12 sm:py-20">
@@ -272,48 +227,41 @@ const DashboardPage: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Results Count */}
-            {filteredPlaces.length > 0 && (
-              <div className="mb-3 sm:mb-4 text-xs sm:text-sm text-gray-900">
-                Showing <span className="font-semibold" style={{ color: '#4a3728' }}>{filteredPlaces.length}</span> of <span className="font-semibold">{places.length}</span> places
-              </div>
-            )}
-
             {/* Places Grid/List */}
-            {filteredPlaces.length > 0 ? (
+            {places.length > 0 ? (
               <div className={viewMode === 'grid' 
                 ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" 
                 : "space-y-3 sm:space-y-4"
               }>
-                {filteredPlaces.map((place, index) => (
+                {places.map((place, index) => (
                   <div 
                     key={place.id} 
                     className={`doodle-card overflow-hidden bg-white ${
                       viewMode === 'list' ? 'flex flex-col sm:flex-row' : ''
                     }`}
                   >
-                    {/* Place Image */}
-                    {place.photos && place.photos.length > 0 && (
-                      <div className={`${viewMode === 'list' ? 'w-full sm:w-48 h-32 sm:h-full' : 'w-full h-40 sm:h-48'} overflow-hidden flex-shrink-0`}>
-                        <img
-                          src={place.photos[0]}
-                          alt={place.name}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            // Hide image if it fails to load
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                      </div>
-                    )}
-                    
                     {/* Place Content */}
                     <div className={`p-4 sm:p-5 ${viewMode === 'list' ? 'flex-1' : ''}`} style={{ fontFamily: "'Inter', sans-serif" }}>
-                      <div className="flex items-start justify-between mb-2 gap-2">
-                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-1 flex-1 break-words" style={{ fontFamily: "'Poppins', sans-serif" }}>{place.name}</h3>
-                        <span className="text-xs text-white px-2 sm:px-3 py-1 font-medium flex-shrink-0 rounded-md" style={{ border: 'none', backgroundColor: '#3d2817' }}>
-                          {place.type}
-                        </span>
+                      <div className="flex items-start gap-3 mb-2">
+                        <div
+                          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{ backgroundColor: '#f5f1eb', color: '#3d2817' }}
+                          aria-hidden="true"
+                        >
+                          <span className="text-base font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                            {(place.type || place.name || 'P').toString().trim().charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between mb-1 gap-2">
+                            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 break-words min-w-0" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                              {place.name}
+                            </h3>
+                            <span className="text-xs text-white px-2 sm:px-3 py-1 font-medium flex-shrink-0 rounded-md" style={{ border: 'none', backgroundColor: '#3d2817' }}>
+                              {place.type}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                       
                       <p className="text-sm sm:text-base text-gray-900 mb-2 sm:mb-3 flex items-center font-medium">
@@ -331,14 +279,11 @@ const DashboardPage: React.FC = () => {
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-4">
                           <div className="flex items-center">
-                            <svg className="w-4 h-4 sm:w-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            <svg className="w-4 h-4 sm:w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span className="ml-1 text-sm font-semibold text-gray-900">{place.rating}</span>
+                            <span className="ml-1 text-sm font-semibold text-gray-900">{place.distanceLabel || 'Nearby'}</span>
                           </div>
-                          {place.price && (
-                            <span className="text-sm font-medium text-gray-900">{place.price}</span>
-                          )}
                         </div>
                       </div>
 
@@ -369,11 +314,6 @@ const DashboardPage: React.FC = () => {
                         >
                           Details
                         </button>
-                        <button className="doodle-button px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 font-medium hover:bg-gray-200" style={{ fontFamily: "'Inter', sans-serif" }} aria-label="Save place">
-                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                          </svg>
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -386,7 +326,7 @@ const DashboardPage: React.FC = () => {
                 <p className="text-gray-900 mb-4 sm:mb-6 max-w-md mx-auto text-sm sm:text-base md:text-lg font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {places.length === 0 
                     ? "Try selecting a mood to get personalized recommendations! 🎨"
-                    : "No places match your current filters. Try adjusting them! 🔍"}
+                    : "No places found. Try a different mood or location."}
                 </p>
                 {places.length === 0 && (
                   <button 
@@ -426,10 +366,10 @@ const DashboardPage: React.FC = () => {
                       {selectedPlace.type}
                     </span>
                     <div className="flex items-center">
-                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <span className="ml-1 font-semibold text-gray-900">{selectedPlace.rating}</span>
+                      <span className="ml-1 font-semibold text-gray-900">{selectedPlace.distanceLabel || 'Nearby'}</span>
                     </div>
                   </div>
                 </div>
@@ -441,26 +381,6 @@ const DashboardPage: React.FC = () => {
                   ×
                 </button>
               </div>
-
-              {/* Photos */}
-              {selectedPlace.photos && selectedPlace.photos.length > 0 && (
-                <div className="mb-4 sm:mb-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-                    {selectedPlace.photos.map((photo: string, index: number) => (
-                      <img
-                        key={index}
-                        src={photo}
-                        alt={`${selectedPlace.name} photo ${index + 1}`}
-                        className="w-full h-40 sm:h-48 object-cover rounded-xl"
-                        onError={(e) => {
-                          // Hide image if it fails to load
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Description */}
               {selectedPlace.description && (
@@ -478,15 +398,6 @@ const DashboardPage: React.FC = () => {
                       🕒 Hours
                     </h3>
                     <p className="text-gray-900 text-sm sm:text-base">{selectedPlace.hours}</p>
-                  </div>
-                )}
-
-                {selectedPlace.price && (
-                  <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 flex items-center">
-                      💰 Price Range
-                    </h3>
-                    <p className="text-gray-900 font-medium text-sm sm:text-base">{selectedPlace.price}</p>
                   </div>
                 )}
 
@@ -552,18 +463,11 @@ const DashboardPage: React.FC = () => {
               )}
 
               {/* Actions */}
-              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6 border-t border-gray-200">
-                <button 
-                  className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 text-white rounded-md transition-colors duration-200 font-medium text-sm sm:text-base" 
-                  style={{ backgroundColor: '#3d2817' }} 
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a3728'} 
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3d2817'}
-                >
-                  Save Place
-                </button>
+              <div className="pt-4 sm:pt-6 border-t border-gray-200">
                 <button 
                   onClick={handleCloseDetails}
-                  className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-semibold text-sm sm:text-base"
+                  className="w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors duration-200 font-semibold text-sm sm:text-base"
+                  style={{ border: 'none' }}
                 >
                   Close
                 </button>

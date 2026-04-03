@@ -19,7 +19,8 @@ export interface Place {
   id: number;
   name: string;
   type: string;
-  rating: string;
+  distanceKm?: number;
+  distanceLabel?: string;
   address: string;
   city: string;
   description: string;
@@ -62,7 +63,7 @@ export async function generatePersonalizedRecommendations(
       .slice(0, 20)
       .map(
         (place) =>
-          `- ${place.name} (${place.type}): ${place.description}. Rating: ${place.rating}, Price: ${place.price}`
+          `- ${place.name} (${place.type}): ${place.description}. Distance: ${place.distanceLabel || 'unknown'}`
       )
       .join('\n');
 
@@ -84,7 +85,7 @@ Please analyze these places and recommend the top 5-8 places that best match the
 Consider:
 1. How well the place matches the emotional state
 2. User preferences if provided
-3. Place quality (rating)
+3. Practicality (closer is usually better, all else equal)
 4. Variety in recommendations
 
 Return your response as a JSON array of place names that you recommend, in order of relevance.
@@ -137,7 +138,7 @@ Format: ["Place Name 1", "Place Name 2", ...]`;
     if (recommendedPlaces.length < 5) {
       const remaining = places
         .filter((p) => !recommendedPlaces.some((rp) => rp.id === p.id))
-        .sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating))
+        .sort((a, b) => (a.distanceKm ?? Number.POSITIVE_INFINITY) - (b.distanceKm ?? Number.POSITIVE_INFINITY))
         .slice(0, 8 - recommendedPlaces.length);
       recommendedPlaces.push(...remaining);
     }
@@ -153,8 +154,11 @@ Format: ["Place Name 1", "Place Name 2", ...]`;
  * Filter places by mood - simple fallback when AI is unavailable
  */
 function filterPlacesByMood(places: Place[], mood: string): Place[] {
-  // Simple fallback: return places sorted by rating
-  return places.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating)).slice(0, 8);
+  // Simple fallback: prioritize closer places when available
+  return places
+    .slice()
+    .sort((a, b) => (a.distanceKm ?? Number.POSITIVE_INFINITY) - (b.distanceKm ?? Number.POSITIVE_INFINITY))
+    .slice(0, 8);
 }
 
 /**

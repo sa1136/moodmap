@@ -8,7 +8,6 @@ const OnboardingPage: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     city: '',
-    preferences: [] as string[]
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,19 +17,6 @@ const OnboardingPage: React.FC = () => {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
-
-  const preferenceOptions = [
-    'Cafes & Coffee',
-    'Restaurants',
-    'Parks & Nature',
-    'Gyms & Fitness',
-    'Museums & Culture',
-    'Shopping',
-    'Entertainment',
-    'Nightlife',
-    'Outdoor Activities',
-    'Beaches & Water'
-  ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -160,15 +146,6 @@ const OnboardingPage: React.FC = () => {
     }
   };
 
-  const handlePreferenceToggle = (preference: string) => {
-    setFormData(prev => ({
-      ...prev,
-      preferences: prev.preferences.includes(preference)
-        ? prev.preferences.filter(p => p !== preference)
-        : [...prev.preferences, preference]
-    }));
-  };
-
   useEffect(() => {
     return () => {
       if (searchTimeout) {
@@ -183,10 +160,8 @@ const OnboardingPage: React.FC = () => {
     setErrorMessage('');
 
     try {
-      await axios.post('http://localhost:5001/api/user', formData);
-
       localStorage.setItem('userCity', formData.city);
-      localStorage.setItem('userPreferences', JSON.stringify(formData.preferences));
+      localStorage.setItem('userName', formData.name);
 
       navigate('/mood');
     } catch (error) {
@@ -324,26 +299,6 @@ const OnboardingPage: React.FC = () => {
                   ))}
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Preferences */}
-          <div className="onboarding-preferences">
-            <label className="onboarding-preferences-label">
-              What activities do you enjoy? (Select all that apply)
-            </label>
-            <div className="onboarding-preferences-grid">
-              {preferenceOptions.map((preference) => (
-                <label key={preference} className="onboarding-preference-item">
-                  <input
-                    type="checkbox"
-                    checked={formData.preferences.includes(preference)}
-                    onChange={() => handlePreferenceToggle(preference)}
-                    className="onboarding-checkbox"
-                  />
-                  <span className="onboarding-preference-text">{preference}</span>
-                </label>
-              ))}
             </div>
           </div>
 

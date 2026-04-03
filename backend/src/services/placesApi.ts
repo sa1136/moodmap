@@ -280,10 +280,14 @@ export async function fetchPlacesFromOpenStreetMap(
           for (const result of results) {
           const rLat = parseFloat(result.lat);
           const rLon = parseFloat(result.lon);
+          const distanceKm =
+            Number.isFinite(rLat) && Number.isFinite(rLon)
+              ? haversineKm(searchLat, searchLng, rLat, rLon)
+              : undefined;
           if (
             Number.isFinite(rLat) &&
             Number.isFinite(rLon) &&
-            haversineKm(searchLat, searchLng, rLat, rLon) > MAX_DISTANCE_KM
+            (distanceKm ?? 0) > MAX_DISTANCE_KM
           ) {
             continue;
           }
@@ -355,10 +359,11 @@ export async function fetchPlacesFromOpenStreetMap(
             id: parseInt(result.place_id || `${Math.random() * 1000000}`, 10),
             name,
             type: result.type || result.class || searchTerm || 'Place',
-            rating: '4.0',
+            distanceKm,
+            distanceLabel: distanceKm !== undefined ? `${distanceKm.toFixed(1)} km away` : '',
             address: formattedAddress,
             city: extractedCity || cityName,
-            description: `A ${searchTerm || 'place'} near ${cityName}. Discovered via OpenStreetMap.`,
+            description: `A ${searchTerm || 'place'} near ${cityName}.`,
             hours: result.tags?.opening_hours || 'Hours vary',
             price: '$$',
             phone: result.tags?.phone || '',
@@ -499,7 +504,12 @@ export async function fetchPlacesFromOpenStreetMap(
                   id: parseInt(result.place_id || `${Math.random() * 1000000}`, 10),
                   name,
                   type: placeType,
-                  rating: '4.5',
+                  distanceKm: Number.isFinite(parseFloat(result.lat)) && Number.isFinite(parseFloat(result.lon))
+                    ? haversineKm(searchLat, searchLng, parseFloat(result.lat), parseFloat(result.lon))
+                    : undefined,
+                  distanceLabel: Number.isFinite(parseFloat(result.lat)) && Number.isFinite(parseFloat(result.lon))
+                    ? `${haversineKm(searchLat, searchLng, parseFloat(result.lat), parseFloat(result.lon)).toFixed(1)} km away`
+                    : '',
                   address: formattedAddress,
                   city: extractedCity,
                   description: `${name} in ${extractedCity}. A popular beach destination.`,
@@ -569,10 +579,14 @@ export async function fetchPlacesFromOpenStreetMap(
         for (const result of generalResults.slice(0, 10)) {
           const grLat = parseFloat(result.lat);
           const grLon = parseFloat(result.lon);
+          const distanceKm =
+            Number.isFinite(grLat) && Number.isFinite(grLon)
+              ? haversineKm(searchLat, searchLng, grLat, grLon)
+              : undefined;
           if (
             Number.isFinite(grLat) &&
             Number.isFinite(grLon) &&
-            haversineKm(searchLat, searchLng, grLat, grLon) > MAX_DISTANCE_KM
+            (distanceKm ?? 0) > MAX_DISTANCE_KM
           ) {
             continue;
           }
@@ -626,10 +640,11 @@ export async function fetchPlacesFromOpenStreetMap(
             id: parseInt(result.place_id || `${Math.random() * 1000000}`, 10),
             name,
             type: result.type || result.class || 'Place',
-            rating: '4.0',
+            distanceKm,
+            distanceLabel: distanceKm !== undefined ? `${distanceKm.toFixed(1)} km away` : '',
             address: formattedAddress,
             city: extractedCity || cityName,
-            description: `A place in ${cityName}. Discovered via OpenStreetMap.`,
+            description: `A place near ${cityName}.`,
             hours: result.tags?.opening_hours || 'Hours vary',
             price: '$$',
             phone: result.tags?.phone || '',
@@ -668,6 +683,29 @@ function mapMoodToSearchTerms(mood?: string, preferences?: string[]): string[] {
     p.toLowerCase().includes('water') ||
     p.toLowerCase().includes('ocean')
   ) || false;
+
+  const preferenceBoost: string[] = [];
+  const pref = (preferences || []).map((p) => p.toLowerCase());
+  const hasParks = pref.some((p) => p.includes('parks') || p.includes('nature'));
+  const hasGyms = pref.some((p) => p.includes('gyms') || p.includes('fitness'));
+  const hasCafes = pref.some((p) => p.includes('cafes') || p.includes('coffee'));
+  const hasRestaurants = pref.some((p) => p.includes('restaurants'));
+  const hasMuseums = pref.some((p) => p.includes('museums') || p.includes('culture'));
+  const hasShopping = pref.some((p) => p.includes('shopping'));
+  const hasNightlife = pref.some((p) => p.includes('nightlife'));
+  const hasEntertainment = pref.some((p) => p.includes('entertainment'));
+  const hasOutdoor = pref.some((p) => p.includes('outdoor'));
+
+  if (hasParks) preferenceBoost.push('park', 'garden', 'nature reserve');
+  if (hasGyms) preferenceBoost.push('gym', 'fitness centre', 'sports centre');
+  if (hasCafes) preferenceBoost.push('cafe', 'coffee shop');
+  if (hasRestaurants) preferenceBoost.push('restaurant');
+  if (hasMuseums) preferenceBoost.push('museum', 'art gallery');
+  if (hasShopping) preferenceBoost.push('shopping mall', 'market');
+  if (hasEntertainment) preferenceBoost.push('theatre', 'cinema');
+  if (hasNightlife) preferenceBoost.push('bar', 'nightclub');
+  if (hasOutdoor) preferenceBoost.push('hiking trail', 'outdoor activities');
+  if (hasBeachPreference) preferenceBoost.push('beach', 'waterfront');
   
   const termMap: Record<string, string[]> = {
     happy: ['art gallery', 'comedy club', 'entertainment'],
@@ -687,5 +725,13 @@ function mapMoodToSearchTerms(mood?: string, preferences?: string[]): string[] {
     romantic: ['restaurant', 'wine bar', 'scenic overlook'],
   };
 
-  return termMap[moodLower] || ['restaurant', 'cafe', 'park'];
+  const base = termMap[moodLower] || ['restaurant', 'cafe', 'park'];
+  const combined = [...preferenceBoost, ...base];
+  const seen = new Set<string>();
+  return combined.filter((t) => {
+    const key = t.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
