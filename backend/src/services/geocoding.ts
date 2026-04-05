@@ -19,13 +19,16 @@ type PhotonFeature = {
   };
 };
 
-export async function photonGeocode(query: string): Promise<{ lat: number; lon: number } | null> {
+export async function photonGeocode(
+  query: string,
+  timeoutMs = 12000
+): Promise<{ lat: number; lon: number } | null> {
   const q = query?.trim();
   if (!q) return null;
   try {
     const { data } = await axios.get<{ features?: PhotonFeature[] }>(PHOTON_BASE, {
       params: { q, limit: 1, lang: "en" },
-      timeout: 20000,
+      timeout: timeoutMs,
       headers: { Accept: "application/json" },
     });
     const f = data?.features?.[0];
@@ -40,13 +43,17 @@ export async function photonGeocode(query: string): Promise<{ lat: number; lon: 
   }
 }
 
-export async function photonSearch(query: string, limit = 8): Promise<PhotonFeature[]> {
+export async function photonSearch(
+  query: string,
+  limit = 8,
+  timeoutMs = 12000
+): Promise<PhotonFeature[]> {
   const q = query?.trim();
   if (!q || q.length < 2) return [];
   try {
     const { data } = await axios.get<{ features?: PhotonFeature[] }>(PHOTON_BASE, {
       params: { q, limit, lang: "en" },
-      timeout: 20000,
+      timeout: timeoutMs,
       headers: { Accept: "application/json" },
     });
     return Array.isArray(data?.features) ? data.features : [];

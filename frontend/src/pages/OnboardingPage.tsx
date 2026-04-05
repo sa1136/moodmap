@@ -104,7 +104,7 @@ export default function OnboardingPage() {
     setPickedCoords(false);
     if (searchTimeout) clearTimeout(searchTimeout);
     if (value.length > 2) {
-      const timeout = setTimeout(() => searchLocationSuggestions(value), 300);
+      const timeout = setTimeout(() => searchLocationSuggestions(value), 200);
       setSearchTimeout(timeout);
     } else {
       setLocationSuggestions([]);

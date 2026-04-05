@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { Place } from './aiService';
 import { photonGeocode } from './geocoding';
-import { getWikimediaCommonsPhotoUrls } from './wikimediaCommonsPhotos';
 
 /**
  * Generate a deterministic numeric seed from a string so the same place
@@ -31,18 +30,8 @@ function getPicsumPlaceImages(placeName: string, city: string, placeType?: strin
   }
 }
 
-/**
- * Wikimedia Commons (free, no key), then Picsum placeholders.
- */
-async function getPlaceImages(
-  placeName: string,
-  city: string,
-  placeType?: string,
-  _lat?: number,
-  _lng?: number
-): Promise<string[]> {
-  const wikiUrls = await getWikimediaCommonsPhotoUrls(placeName, city);
-  if (wikiUrls?.length) return wikiUrls;
+/** Deterministic Picsum URLs only — no per-place HTTP (was the main latency). */
+function getPlacePhotoUrls(placeName: string, city: string, placeType?: string): string[] {
   return getPicsumPlaceImages(placeName, city, placeType);
 }
 
@@ -164,8 +153,8 @@ function delay(ms: number): Promise<void> {
 // Helper function to retry API calls with exponential backoff
 async function retryWithBackoff<T>(
   fn: () => Promise<T>,
-  maxRetries: number = 3,
-  baseDelay: number = 2000
+  maxRetries: number = 2,
+  baseDelay: number = 700
 ): Promise<T | null> {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -175,7 +164,6 @@ async function retryWithBackoff<T>(
       const isRateLimit = error.response?.status === 418 || error.response?.status === 429;
       
       if (attempt === maxRetries - 1) {
-        // Last attempt failed
         if (isTimeout) {
           console.warn(`[OpenStreetMap] Request timed out after ${maxRetries} attempts`);
         } else if (isRateLimit) {
@@ -184,10 +172,8 @@ async function retryWithBackoff<T>(
         return null;
       }
       
-      // Exponential backoff: 2s, 4s, 8s
       const delayMs = baseDelay * Math.pow(2, attempt);
       if (isRateLimit) {
-        // Longer delay for rate limits
         await delay(delayMs * 2);
       } else {
         await delay(delayMs);
@@ -199,6 +185,10 @@ async function retryWithBackoff<T>(
 
 const MAX_DISTANCE_KM = 35;
 const VIEWBOX_RADIUS_KM = 26;
+/** Nominatim asks ~1 req/s for public endpoint; stay slightly above 1s between calls. */
+const NOMINATIM_GAP_MS = 1100;
+const NOMINATIM_TIMEOUT_MS = 14000;
+const GEOCODE_TIMEOUT_MS = 12000;
 
 export async function fetchPlacesFromOpenStreetMap(
   city: string,
@@ -219,7 +209,6 @@ export async function fetchPlacesFromOpenStreetMap(
 
     if (!searchLat || !searchLng) {
       console.log(`[OpenStreetMap] Geocoding: ${locationQuery}`);
-      await delay(1000);
 
       let geocoded: { lat: number; lng: number } | null = null;
 
@@ -238,14 +227,14 @@ export async function fetchPlacesFromOpenStreetMap(
           return axios.get('https://nominatim.openstreetmap.org/search', {
             params,
             headers: { 'User-Agent': 'MoodMap/1.0 (contact: dev@localhost)' },
-            timeout: 30000,
+            timeout: GEOCODE_TIMEOUT_MS,
           });
         };
 
         let geocodeResponse = await retryWithBackoff(async () => runGeocode(!!countryCodes));
 
         if (geocodeResponse?.data?.length === 0 && countryCodes) {
-          await delay(1500);
+          await delay(NOMINATIM_GAP_MS);
           geocodeResponse = await retryWithBackoff(async () => runGeocode(false));
         }
 
@@ -261,7 +250,7 @@ export async function fetchPlacesFromOpenStreetMap(
       }
 
       if (!geocoded) {
-        const photon = await photonGeocode(locationQuery);
+        const photon = await photonGeocode(locationQuery, GEOCODE_TIMEOUT_MS);
         if (photon) {
           geocoded = { lat: photon.lat, lng: photon.lon };
           console.log(
@@ -291,13 +280,17 @@ export async function fetchPlacesFromOpenStreetMap(
     
     const places: Place[] = [];
     
-    // Try multiple search terms if the first one doesn't return results
-    for (const searchTerm of searchTerms) {
+    // Try a few mood terms; cap list + spacing keeps Nominatim fast and policy-friendly.
+    for (let termIdx = 0; termIdx < searchTerms.length; termIdx++) {
+      const searchTerm = searchTerms[termIdx];
       if (places.length >= 15) break;
-      
+      if (places.length >= 10 && termIdx > 0) break;
+
       try {
-        await delay(2000);
-        
+        if (termIdx > 0) {
+          await delay(NOMINATIM_GAP_MS);
+        }
+
         // Comma-separated queries perform better on Nominatim than "X in Y" free text.
         const query = `${searchTerm}, ${locationQuery}`;
         console.log(`[OpenStreetMap] Searching for: ${query}`);
@@ -323,7 +316,7 @@ export async function fetchPlacesFromOpenStreetMap(
             headers: {
               'User-Agent': 'MoodMap/1.0',
             },
-            timeout: 30000,
+            timeout: NOMINATIM_TIMEOUT_MS,
           });
         });
         
@@ -404,12 +397,10 @@ export async function fetchPlacesFromOpenStreetMap(
             extractedCity = address.city || address.town || address.village || address.municipality || address.county || cityName;
           }
           
-          const placeImages = await getPlaceImages(
+          const placeImages = getPlacePhotoUrls(
             name,
             extractedCity || cityName,
-            result.type || result.class || searchTerm,
-            rLat,
-            rLon
+            result.type || result.class || searchTerm
           );
           
           places.push({
@@ -441,7 +432,7 @@ export async function fetchPlacesFromOpenStreetMap(
         
         if (isRateLimit) {
           console.warn(`[OpenStreetMap] Rate limited for "${searchTerm}". Waiting longer...`);
-          await delay(10000); // Wait 10 seconds for rate limits
+          await delay(4000);
           if (searchTerm === searchTerms[searchTerms.length - 1]) {
             break; // Stop if this is the last search term
           }
@@ -474,10 +465,11 @@ export async function fetchPlacesFromOpenStreetMap(
           'Redondo Beach Pier'
         ];
         
-        for (const beachQuery of laBeachQueries) {
+        for (let bq = 0; bq < laBeachQueries.length; bq++) {
+          const beachQuery = laBeachQueries[bq];
           if (places.length >= 15) break;
           try {
-            await delay(2000);
+            if (bq > 0) await delay(NOMINATIM_GAP_MS);
             const searchResponse = await retryWithBackoff(async () => {
               return await axios.get('https://nominatim.openstreetmap.org/search', {
                 params: {
@@ -492,7 +484,7 @@ export async function fetchPlacesFromOpenStreetMap(
                   countrycodes: 'us',
                 },
                 headers: { 'User-Agent': 'MoodMap/1.0' },
-                timeout: 30000,
+                timeout: NOMINATIM_TIMEOUT_MS,
               });
             });
             
@@ -558,13 +550,7 @@ export async function fetchPlacesFromOpenStreetMap(
                 
                 const rLatBeach = parseFloat(result.lat);
                 const rLonBeach = parseFloat(result.lon);
-                const placeImages = await getPlaceImages(
-                  name,
-                  extractedCity,
-                  placeType,
-                  Number.isFinite(rLatBeach) ? rLatBeach : undefined,
-                  Number.isFinite(rLonBeach) ? rLonBeach : undefined
-                );
+                const placeImages = getPlacePhotoUrls(name, extractedCity, placeType);
                 
                 places.push({
                   id: parseInt(result.place_id || `${Math.random() * 1000000}`, 10),
@@ -605,7 +591,7 @@ export async function fetchPlacesFromOpenStreetMap(
     if (places.length === 0 && mood) {
       console.log(`[OpenStreetMap] No mood-specific results, trying general search...`);
       try {
-        await delay(2000);
+        await delay(NOMINATIM_GAP_MS);
         const generalQuery = `attractions, ${locationQuery}`;
         const searchUrl = 'https://nominatim.openstreetmap.org/search';
         const searchParams: Record<string, string | number> = {
@@ -626,7 +612,7 @@ export async function fetchPlacesFromOpenStreetMap(
           return await axios.get(searchUrl, {
             params: searchParams,
             headers: { 'User-Agent': 'MoodMap/1.0' },
-            timeout: 30000, // Increased to 30 seconds
+            timeout: NOMINATIM_TIMEOUT_MS,
           });
         });
         
@@ -696,12 +682,10 @@ export async function fetchPlacesFromOpenStreetMap(
             extractedCity = address.city || address.town || address.village || address.municipality || address.county || cityName;
           }
           
-          const generalImages = await getPlaceImages(
+          const generalImages = getPlacePhotoUrls(
             name,
             extractedCity || cityName,
-            result.type || result.class,
-            grLat,
-            grLon
+            result.type || result.class
           );
           
           places.push({
@@ -797,10 +781,12 @@ function mapMoodToSearchTerms(mood?: string, preferences?: string[]): string[] {
   const base = termMap[moodLower] || ['restaurant', 'cafe', 'park'];
   const combined = [...preferenceBoost, ...base];
   const seen = new Set<string>();
-  return combined.filter((t) => {
+  const unique = combined.filter((t) => {
     const key = t.toLowerCase();
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
   });
+  // Fewer Nominatim round-trips = much faster; first terms are the most relevant.
+  return unique.slice(0, 5);
 }

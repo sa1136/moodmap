@@ -20,40 +20,43 @@ router.get("/search", async (req, res) => {
 
     let data: unknown[] = [];
 
-    try {
-      const response = await axios.get("https://nominatim.openstreetmap.org/search", {
-        params: {
-          q,
-          format: "json",
-          limit: 8,
-          addressdetails: 1,
-          extratags: 1,
-          "accept-language": "en",
-        },
-        headers: {
-          "User-Agent": "MoodMap/1.0 (contact: dev@localhost)",
-        },
-        timeout: 20000,
-        validateStatus: (s) => s < 500,
-      });
-
-      if (response.status === 429) {
-        console.warn("[locations/search] Nominatim rate-limited (429), using Photon");
-      } else if (Array.isArray(response.data) && response.data.length > 0) {
-        data = response.data;
-      }
-    } catch (e: unknown) {
-      const status = axios.isAxiosError(e) ? e.response?.status : undefined;
-      if (status === 429) {
-        console.warn("[locations/search] Nominatim 429, using Photon");
-      } else {
-        console.warn("[locations/search] Nominatim error, using Photon:", (e as Error)?.message);
-      }
+    // Photon first — faster for autocomplete and easier on Nominatim’s public usage policy.
+    const photonFeatures = await photonSearch(q, 8, 6000);
+    if (photonFeatures.length > 0) {
+      data = photonFeaturesToLegacyNominatim(photonFeatures) as unknown[];
     }
 
     if (data.length === 0) {
-      const features = await photonSearch(q, 8);
-      data = photonFeaturesToLegacyNominatim(features) as unknown[];
+      try {
+        const response = await axios.get("https://nominatim.openstreetmap.org/search", {
+          params: {
+            q,
+            format: "json",
+            limit: 8,
+            addressdetails: 1,
+            extratags: 1,
+            "accept-language": "en",
+          },
+          headers: {
+            "User-Agent": "MoodMap/1.0 (contact: dev@localhost)",
+          },
+          timeout: 8000,
+          validateStatus: (s) => s < 500,
+        });
+
+        if (response.status === 429) {
+          console.warn("[locations/search] Nominatim rate-limited (429)");
+        } else if (Array.isArray(response.data) && response.data.length > 0) {
+          data = response.data;
+        }
+      } catch (e: unknown) {
+        const status = axios.isAxiosError(e) ? e.response?.status : undefined;
+        if (status === 429) {
+          console.warn("[locations/search] Nominatim 429");
+        } else {
+          console.warn("[locations/search] Nominatim error:", (e as Error)?.message);
+        }
+      }
     }
 
     res.json(data);
