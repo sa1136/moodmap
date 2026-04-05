@@ -3,15 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require("dotenv/config");
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
-const dotenv_1 = __importDefault(require("dotenv"));
 const places_1 = __importDefault(require("./routes/places"));
 const user_1 = __importDefault(require("./routes/user"));
 const mood_1 = __importDefault(require("./routes/mood"));
 const locations_1 = __importDefault(require("./routes/locations"));
 const chatbot_1 = __importDefault(require("./routes/chatbot"));
-dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());

@@ -1,13 +1,12 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import placesRouter from "./routes/places";
 import userRouter from "./routes/user";
 import moodRouter from "./routes/mood";
 import locationsRouter from "./routes/locations";
 import chatbotRouter from "./routes/chatbot";
 
-dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());

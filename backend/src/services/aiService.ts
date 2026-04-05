@@ -1,11 +1,23 @@
 import Groq from 'groq-sdk';
 
-// Initialize Groq (for fast LLM inference)
-const groq = process.env.GROQ_API_KEY 
-  ? new Groq({
-      apiKey: process.env.GROQ_API_KEY,
-    })
-  : null;
+/**
+ * Lazy Groq client so env is read after dotenv loads. Module-level init ran before
+ * `dotenv.config()` when it lived only in index.ts body (imports run first).
+ */
+let groqSingleton: Groq | null | undefined;
+
+function getGroq(): Groq | null {
+  if (groqSingleton !== undefined) {
+    return groqSingleton;
+  }
+  const key = process.env.GROQ_API_KEY?.trim();
+  if (!key) {
+    groqSingleton = null;
+    return null;
+  }
+  groqSingleton = new Groq({ apiKey: key });
+  return groqSingleton;
+}
 
 export interface Place {
   id: number;
@@ -47,8 +59,8 @@ export async function generatePersonalizedRecommendations(
       return [];
     }
 
-    // Check if Groq is available
-    if (!groq || !process.env.GROQ_API_KEY) {
+    const groq = getGroq();
+    if (!groq) {
       console.warn('[AI Service] Groq not available, returning places without AI ranking');
       return places;
     }
@@ -84,10 +96,6 @@ Consider:
 
 Return your response as a JSON array of place names that you recommend, in order of relevance.
 Format: ["Place Name 1", "Place Name 2", ...]`;
-
-    if (!groq || !process.env.GROQ_API_KEY) {
-      throw new Error('Groq not available');
-    }
 
     console.log('[AI Service] Using Groq for recommendations');
     const completion = await groq.chat.completions.create({
@@ -175,8 +183,9 @@ Recommended places: ${placesSummary}
 
 Provide a brief, friendly explanation (2-3 sentences) about why these places match the user's mood.`;
 
-    if (!groq || !process.env.GROQ_API_KEY) {
-      throw new Error('Groq not available');
+    const groq = getGroq();
+    if (!groq) {
+      return `Based on your ${userContext.mood} mood, we've selected these places that we think you'll enjoy!`;
     }
 
     console.log('[AI Service] Using Groq for explanation');
