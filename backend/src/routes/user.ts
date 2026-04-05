@@ -9,16 +9,19 @@ router.post('/', (req, res) => {
   try {
     const { name, city, preferences } = req.body;
 
-    if (!name || !city) {
-      return res.status(400).json({ 
-        error: 'Name and city are required' 
+    if (!city || typeof city !== 'string' || !city.trim()) {
+      return res.status(400).json({
+        error: 'City is required',
       });
     }
 
+    const displayName =
+      typeof name === 'string' && name.trim().length > 0 ? name.trim() : 'Guest';
+
     const user = {
       id: uuidv4(),
-      name: name.trim(),
-      city: city.trim(),
+      name: displayName,
+      city: String(city).trim(),
       preferences: preferences || [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()

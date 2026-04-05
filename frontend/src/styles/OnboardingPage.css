@@ -16,6 +16,10 @@
   background: white;
 }
 
+.onboarding-form-card--wide {
+  max-width: 44rem;
+}
+
 .onboarding-form-card:hover {
   transform: translateY(-2px);
   border-color: #cbd5e1;
@@ -43,6 +47,92 @@
   font-size: 1.25rem;
   font-family: 'Inter', sans-serif;
   font-weight: 600;
+}
+
+.onboarding-header--compact-mood {
+  margin-bottom: 1.35rem;
+}
+
+.onboarding-mood-city-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.onboarding-mood-grid {
+  width: 100%;
+  margin-bottom: 0.35rem;
+  align-items: stretch;
+}
+
+.onboarding-field--mood-custom {
+  margin-top: 0.75rem;
+}
+
+/* Same width per column + fixed aspect ⇒ every mood card matches size */
+.onboarding-mood-pick-card--equal.doodle-card {
+  aspect-ratio: 4 / 3;
+  min-height: 6.75rem;
+}
+
+.onboarding-mood-pick-card.doodle-card {
+  overflow: visible;
+  border-width: 2px;
+  border-style: solid;
+  border-color: rgba(124, 58, 237, 0.22);
+  background:
+    radial-gradient(900px 420px at 20% 0%, rgba(124, 58, 237, 0.12), rgba(255, 255, 255, 0) 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.92));
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.onboarding-mood-pick-card.doodle-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(124, 58, 237, 0.45);
+}
+
+.onboarding-mood-pick-card--selected.doodle-card,
+.onboarding-mood-pick-card--selected.doodle-card:hover {
+  border-color: #7c3aed;
+  box-shadow:
+    0 0 0 3px rgba(124, 58, 237, 0.38),
+    0 12px 32px rgba(91, 33, 182, 0.22);
+  background:
+    radial-gradient(700px 320px at 20% 0%, rgba(124, 58, 237, 0.22), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, rgba(245, 243, 255, 0.99), rgba(237, 233, 254, 0.95));
+  transform: translateY(-1px);
+  z-index: 1;
+}
+
+.onboarding-mood-pick-emoji {
+  background: rgba(124, 58, 237, 0.1);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.onboarding-mood-pick-card--selected .onboarding-mood-pick-emoji {
+  background: rgba(124, 58, 237, 0.24);
+  transform: scale(1.06);
+}
+
+.onboarding-mood-pick-badge {
+  background: #7c3aed;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.onboarding-mood-pick-card--selected .onboarding-mood-pick-badge {
+  background: #5b21b6;
+  box-shadow: 0 2px 8px rgba(91, 33, 182, 0.35);
 }
 
 .onboarding-map-container {
@@ -192,6 +282,393 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.onboarding-step-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.onboarding-step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.onboarding-step-dot--active {
+  background: #7c3aed;
+  transform: scale(1.15);
+}
+
+.onboarding-step-dots--light .onboarding-step-dot {
+  background: #cbd5e1;
+}
+
+.onboarding-step-dots--light .onboarding-step-dot--active {
+  background: #7c3aed;
+}
+
+.onboarding-container--in-main {
+  min-height: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.setup-nav-row--narrow {
+  max-width: 28rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.onboarding-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #1e293b;
+  border: 3px solid #1a1a1a;
+  border-radius: 10px;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.onboarding-suggestion-row {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #334155;
+  transition: background-color 0.2s;
+  background-color: #1e293b;
+  min-height: 44px;
+}
+
+.onboarding-suggestion-row:last-child {
+  border-bottom: none;
+}
+
+.onboarding-suggestion-row:hover,
+.onboarding-suggestion-row--kbd {
+  background-color: #334155;
+}
+
+.onboarding-suggestion-title {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.onboarding-suggestion-sub {
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.onboarding-inline-error {
+  color: #b91c1c;
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+}
+
+.setup-mood-scroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 0.25rem 0.25rem 1rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.setup-mood-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.setup-mood-scroll::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.35);
+  border-radius: 3px;
+}
+
+.setup-mood-card {
+  flex: 0 0 min(260px, 78vw);
+  scroll-snap-align: start;
+  text-align: left;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem;
+  background: white;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.setup-mood-card:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+.setup-mood-card--selected {
+  border-color: #7c3aed;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.22);
+}
+
+.setup-mood-emoji {
+  font-size: 2.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.setup-mood-label {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: #0f172a;
+  font-family: 'Poppins', sans-serif;
+  margin-bottom: 0.35rem;
+}
+
+.setup-mood-desc {
+  font-size: 0.875rem;
+  color: #475569;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.setup-nav-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.setup-nav-row .onboarding-button,
+.setup-nav-row .onboarding-button-secondary {
+  flex: 1;
+  width: auto;
+}
+
+.onboarding-button-secondary {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  color: #334155;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.onboarding-button-secondary:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.onboarding-button-full-margin {
+  margin-top: 0.75rem;
+}
+
+/* 10 place types: 1 col, then 2×5 — wide cells so labels stay horizontal (no 5-col squeeze) */
+.setup-preferences-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+@media (min-width: 480px) {
+  .setup-preferences-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.setup-pref-card.doodle-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
+  border-width: 2px;
+  border-style: solid;
+  border-radius: 12px;
+  padding: 0.85rem 2.15rem 0.85rem 0.9rem;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.setup-pref-card.doodle-card:hover {
+  transform: translateY(-2px);
+}
+
+.setup-pref-card-label {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(0.875rem, 2.4vw, 1rem);
+  font-weight: 700;
+  line-height: 1.4;
+  color: #0f172a;
+  word-break: normal;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.setup-pref-card-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  background: #7c3aed;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(91, 33, 182, 0.35);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Theme t0 — violet */
+.setup-pref-card--t0.doodle-card {
+  border-color: rgba(124, 58, 237, 0.32);
+  background:
+    radial-gradient(520px 200px at 12% 0%, rgba(124, 58, 237, 0.16), rgba(255, 255, 255, 0) 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 243, 255, 0.94));
+}
+
+/* Theme t1 — amber */
+.setup-pref-card--t1.doodle-card {
+  border-color: rgba(217, 119, 6, 0.38);
+  background:
+    radial-gradient(520px 200px at 12% 0%, rgba(251, 191, 36, 0.22), rgba(255, 255, 255, 0) 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 251, 235, 0.95));
+}
+
+/* Theme t2 — emerald */
+.setup-pref-card--t2.doodle-card {
+  border-color: rgba(5, 150, 105, 0.35);
+  background:
+    radial-gradient(520px 200px at 12% 0%, rgba(52, 211, 153, 0.2), rgba(255, 255, 255, 0) 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(236, 253, 245, 0.94));
+}
+
+/* Theme t3 — sky */
+.setup-pref-card--t3.doodle-card {
+  border-color: rgba(2, 132, 199, 0.35);
+  background:
+    radial-gradient(520px 200px at 12% 0%, rgba(56, 189, 248, 0.2), rgba(255, 255, 255, 0) 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 249, 255, 0.94));
+}
+
+/* Theme t4 — rose */
+.setup-pref-card--t4.doodle-card {
+  border-color: rgba(225, 29, 72, 0.32);
+  background:
+    radial-gradient(520px 200px at 12% 0%, rgba(251, 113, 133, 0.2), rgba(255, 255, 255, 0) 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 241, 242, 0.94));
+}
+
+.setup-pref-card--selected.setup-pref-card--t0.doodle-card,
+.setup-pref-card--selected.setup-pref-card--t0.doodle-card:hover {
+  border-color: #7c3aed;
+  box-shadow:
+    0 0 0 3px rgba(124, 58, 237, 0.32),
+    0 10px 26px rgba(91, 33, 182, 0.18);
+  background:
+    radial-gradient(480px 180px at 12% 0%, rgba(124, 58, 237, 0.22), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, rgba(245, 243, 255, 0.99), rgba(237, 233, 254, 0.96));
+  transform: translateY(-1px);
+  z-index: 1;
+}
+
+.setup-pref-card--selected.setup-pref-card--t1.doodle-card,
+.setup-pref-card--selected.setup-pref-card--t1.doodle-card:hover {
+  border-color: #d97706;
+  box-shadow:
+    0 0 0 3px rgba(217, 119, 6, 0.28),
+    0 10px 26px rgba(180, 83, 9, 0.16);
+  background:
+    radial-gradient(480px 180px at 12% 0%, rgba(251, 191, 36, 0.28), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, rgba(255, 251, 235, 0.99), rgba(254, 243, 199, 0.92));
+  transform: translateY(-1px);
+  z-index: 1;
+}
+
+.setup-pref-card--selected.setup-pref-card--t2.doodle-card,
+.setup-pref-card--selected.setup-pref-card--t2.doodle-card:hover {
+  border-color: #059669;
+  box-shadow:
+    0 0 0 3px rgba(5, 150, 105, 0.28),
+    0 10px 26px rgba(4, 120, 87, 0.14);
+  background:
+    radial-gradient(480px 180px at 12% 0%, rgba(52, 211, 153, 0.26), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, rgba(236, 253, 245, 0.99), rgba(209, 250, 229, 0.94));
+  transform: translateY(-1px);
+  z-index: 1;
+}
+
+.setup-pref-card--selected.setup-pref-card--t3.doodle-card,
+.setup-pref-card--selected.setup-pref-card--t3.doodle-card:hover {
+  border-color: #0284c7;
+  box-shadow:
+    0 0 0 3px rgba(2, 132, 199, 0.28),
+    0 10px 26px rgba(3, 105, 161, 0.14);
+  background:
+    radial-gradient(480px 180px at 12% 0%, rgba(56, 189, 248, 0.24), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, rgba(240, 249, 255, 0.99), rgba(224, 242, 254, 0.94));
+  transform: translateY(-1px);
+  z-index: 1;
+}
+
+.setup-pref-card--selected.setup-pref-card--t4.doodle-card,
+.setup-pref-card--selected.setup-pref-card--t4.doodle-card:hover {
+  border-color: #e11d48;
+  box-shadow:
+    0 0 0 3px rgba(225, 29, 72, 0.26),
+    0 10px 26px rgba(190, 18, 60, 0.14);
+  background:
+    radial-gradient(480px 180px at 12% 0%, rgba(251, 113, 133, 0.26), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, rgba(255, 241, 242, 0.99), rgba(255, 228, 230, 0.94));
+  transform: translateY(-1px);
+  z-index: 1;
+}
+
+.setup-done-summary {
+  text-align: left;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.setup-done-summary strong {
+  color: #0f172a;
 }
 
 /* Responsive Design */

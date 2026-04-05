@@ -126,7 +126,7 @@ export default function DashboardPage() {
             )}
             <nav className="flex space-x-2 sm:space-x-3 w-full sm:w-auto">
               <button
-                onClick={() => navigate('/mood')}
+                onClick={() => navigate('/onboarding')}
                 className="flex-1 sm:flex-none px-3 sm:px-5 py-2 font-semibold text-sm sm:text-base rounded-lg transition-colors flex items-center justify-center gap-1.5 text-slate-900"
                 style={{
                   backgroundColor: "#ffffff",
@@ -157,12 +157,12 @@ export default function DashboardPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
             <div>
-                <h2 className="text-4xl font-bold mb-2 text-gray-900" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                <h2 className="text-4xl font-bold mb-2 text-white drop-shadow-sm" style={{ fontFamily: "'Poppins', sans-serif" }}>
                 {currentMood ? `Places for Your ${currentMood} Mood` : 'Recommended Places'}
               </h2>
               {currentCity && (
-                <p className="text-gray-900 flex items-center text-lg font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <p className="text-slate-200 flex items-center text-lg font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  <svg className="w-5 h-5 mr-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -208,7 +208,10 @@ export default function DashboardPage() {
 
           {/* AI Explanation */}
           {explanation && (
-            <div className="doodle-card p-4 sm:p-6 mb-4 sm:mb-6" style={{ backgroundColor: 'rgba(124, 58, 237, 0.06)' }}>
+            <div
+              className="doodle-card p-4 sm:p-6 mb-4 sm:mb-6 border border-white/20 shadow-lg"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.94)' }}
+            >
               <div className="flex items-start">
                 <svg className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7c3aed' }}>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -227,7 +230,7 @@ export default function DashboardPage() {
         {isLoading ? (
           <div className="flex flex-col justify-center items-center py-12 sm:py-20">
             <div className="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4 animate-bounce-gentle">🔍</div>
-            <p className="text-gray-900 font-semibold text-base sm:text-lg md:text-xl px-4 text-center" style={{ fontFamily: "'Inter', sans-serif" }}>Finding perfect places for you...</p>
+            <p className="text-slate-100 font-semibold text-base sm:text-lg md:text-xl px-4 text-center drop-shadow-sm" style={{ fontFamily: "'Inter', sans-serif" }}>Finding perfect places for you...</p>
             <div className="mt-3 sm:mt-4 flex space-x-2">
               <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full animate-bounce" style={{ animationDelay: '0ms', backgroundColor: '#7c3aed' }}></div>
               <div className="w-2 h-2 sm:w-3 sm:h-3 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
@@ -331,15 +334,15 @@ export default function DashboardPage() {
             ) : (
               <div className="col-span-full text-center py-8 sm:py-12 md:py-16 px-4">
                 <div className="text-5xl sm:text-6xl md:text-8xl mb-4 sm:mb-6 animate-bounce-gentle">🗺️</div>
-                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4" style={{ fontFamily: "'Poppins', sans-serif" }}>No places found</h3>
-                <p className="text-gray-900 mb-4 sm:mb-6 max-w-md mx-auto text-sm sm:text-base md:text-lg font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4 drop-shadow-sm" style={{ fontFamily: "'Poppins', sans-serif" }}>No places found</h3>
+                <p className="text-slate-200 mb-4 sm:mb-6 max-w-md mx-auto text-sm sm:text-base md:text-lg font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {places.length === 0 
                     ? "Try selecting a mood to get personalized recommendations! 🎨"
                     : "No places found. Try a different mood or location."}
                 </p>
                 {places.length === 0 && (
                   <button 
-                    onClick={() => navigate('/mood')}
+                    onClick={() => navigate('/onboarding')}
                     className="px-6 sm:px-8 py-3 sm:py-4 text-white font-medium text-base sm:text-lg rounded-md transition-colors"
                     style={{ backgroundColor: '#7c3aed', fontFamily: "'Inter', sans-serif", border: 'none' }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6d28d9'} 
