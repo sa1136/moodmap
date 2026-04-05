@@ -3,7 +3,7 @@ import axios from "axios";
 /** Photon (Komoot) — forward geocoder; avoids Nominatim public rate limits for dev/autocomplete. */
 const PHOTON_BASE = "https://photon.komoot.io/api/";
 
-export type PhotonFeature = {
+type PhotonFeature = {
   type: "Feature";
   geometry: { type: "Point"; coordinates: [number, number] };
   properties: Record<string, unknown> & {

@@ -6,15 +6,13 @@ import DashboardPage from './pages/DashboardPage';
 function App() {
   return (
     <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<Navigate to="/homepage" replace />} />
-          <Route path="/homepage" element={<HomePage />} />
-          <Route path="/onboarding" element={<OnboardingPage />} />
-          <Route path="/mood" element={<Navigate to="/onboarding" replace />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<Navigate to="/homepage" replace />} />
+        <Route path="/homepage" element={<HomePage />} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/mood" element={<Navigate to="/onboarding" replace />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+      </Routes>
     </Router>
   );
 }

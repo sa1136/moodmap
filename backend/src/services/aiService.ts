@@ -7,14 +7,6 @@ const groq = process.env.GROQ_API_KEY
     })
   : null;
 
-// Determine which provider to use for chat completions
-function getChatProvider(): 'groq' | null {
-  if (groq && process.env.GROQ_API_KEY) {
-    return 'groq';
-  }
-  return null;
-}
-
 export interface Place {
   id: number;
   name: string;
@@ -93,13 +85,10 @@ Consider:
 Return your response as a JSON array of place names that you recommend, in order of relevance.
 Format: ["Place Name 1", "Place Name 2", ...]`;
 
-    const provider = getChatProvider();
-
-    if (provider !== 'groq' || !groq) {
+    if (!groq || !process.env.GROQ_API_KEY) {
       throw new Error('Groq not available');
     }
 
-    // Use Groq for fast inference
     console.log('[AI Service] Using Groq for recommendations');
     const completion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
@@ -186,13 +175,10 @@ Recommended places: ${placesSummary}
 
 Provide a brief, friendly explanation (2-3 sentences) about why these places match the user's mood.`;
 
-    const provider = getChatProvider();
-
-    if (provider !== 'groq' || !groq) {
+    if (!groq || !process.env.GROQ_API_KEY) {
       throw new Error('Groq not available');
     }
 
-    // Use Groq for fast inference
     console.log('[AI Service] Using Groq for explanation');
     const completion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
