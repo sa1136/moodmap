@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import onboardingWorldMap from '../assets/onboarding-world-map.png';
 import '../styles/OnboardingPage.css';
 
 type Step = 'location' | 'mood' | 'preferences' | 'done';
@@ -415,7 +416,14 @@ export default function OnboardingPage() {
                 We use this to find places near you
               </p>
               <div className="onboarding-map-container">
-                <span className="onboarding-map">📍</span>
+                <img
+                  src={onboardingWorldMap}
+                  alt=""
+                  className="onboarding-world-map-image"
+                  width={240}
+                  height={141}
+                  decoding="async"
+                />
               </div>
             </div>
 

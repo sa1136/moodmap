@@ -202,11 +202,31 @@
 
 .onboarding-map-container {
   margin-top: 1rem;
-  animation: float 3s ease-in-out infinite;
+}
+
+.onboarding-world-map-image {
+  display: block;
+  width: 100%;
+  max-width: min(100%, 12rem);
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 12px;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+
+@media (min-width: 640px) {
+  .onboarding-world-map-image {
+    max-width: min(100%, 16rem);
+  }
 }
 
 .onboarding-map {
   font-size: 2.25rem;
+  display: inline-block;
+  animation: float 3s ease-in-out infinite;
 }
 
 .onboarding-form {
