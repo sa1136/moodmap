@@ -246,162 +246,56 @@ export default function DashboardPage() {
             {/* Places Grid/List */}
             {places.length > 0 ? (
               <div className={viewMode === 'grid' 
-                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" 
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch" 
                 : "space-y-3 sm:space-y-4"
               }>
-                {places.map((place, index) => (
-                  <div 
-                    key={place.id} 
-                    className={`doodle-card overflow-hidden bg-white rounded-2xl shadow-[0_14px_40px_-14px_rgba(15,23,42,0.28)] border border-slate-200/90 flex flex-col max-h-[min(78vh,26rem)] sm:max-h-[min(78vh,28rem)] ${
-                      viewMode === 'list' ? 'sm:flex-row sm:max-h-72' : ''
-                    }`}
+                {places.map((place) => (
+                  <div
+                    key={place.id}
+                    className="doodle-card overflow-hidden bg-white rounded-2xl shadow-[0_14px_40px_-14px_rgba(15,23,42,0.28)] border border-slate-200/90 flex flex-col h-[22rem] sm:h-[24rem] lg:h-[25rem]"
                   >
-                    {place.photos?.[0] ? (
-                      <div
-                        className={`overflow-hidden bg-slate-100 shrink-0 ${
-                          viewMode === 'list' ? 'w-full sm:w-44' : ''
-                        }`}
-                      >
+                    <div className="flex-1 min-h-0 bg-slate-100 overflow-hidden flex items-stretch">
+                      {place.photos?.[0] ? (
                         <img
                           src={place.photos[0]}
                           alt=""
-                          className={`w-full object-cover block ${
-                            viewMode === 'list'
-                              ? 'h-44 sm:h-full sm:min-h-[168px]'
-                              : 'h-44'
-                          }`}
+                          className="w-full h-full object-cover object-center block"
                           loading="lazy"
                           decoding="async"
                         />
-                      </div>
-                    ) : null}
-                    {/* Place Content */}
+                      ) : (
+                        <div
+                          className="w-full h-full flex items-center justify-center bg-gradient-to-br from-violet-100 via-slate-100 to-slate-200 text-slate-400"
+                          aria-hidden
+                        >
+                          <span className="text-5xl">📍</span>
+                        </div>
+                      )}
+                    </div>
                     <div
-                      className={`p-4 sm:p-5 scrollbar-none overflow-y-auto min-h-0 flex-1 ${viewMode === 'list' ? 'min-w-0' : ''}`}
+                      className="p-4 sm:p-5 flex flex-col gap-3 shrink-0 border-t border-slate-100"
                       style={{ fontFamily: "'Inter', sans-serif" }}
                     >
-                      <div className="flex items-start gap-3 mb-2">
-                        <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                          style={{ backgroundColor: 'rgba(124, 58, 237, 0.10)', color: '#111827' }}
-                          aria-hidden="true"
-                        >
-                          <span className="text-base font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>
-                            {(place.type || place.name || 'P').toString().trim().charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start justify-between mb-1 gap-2">
-                            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 break-words min-w-0" style={{ fontFamily: "'Poppins', sans-serif" }}>
-                              {place.name}
-                            </h3>
-                            <span className="text-xs text-white px-2 sm:px-3 py-1 font-medium flex-shrink-0 rounded-md" style={{ border: 'none', backgroundColor: '#7c3aed' }}>
-                              {place.type}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <p className="text-sm sm:text-base text-gray-900 mb-1 flex items-center font-medium">
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span className="truncate">{place.city}</span>
-                      </p>
-
-                      {place.address && String(place.address).trim() ? (
-                        <p className="text-xs sm:text-sm text-gray-600 mb-2 pl-6 sm:pl-7 leading-snug line-clamp-2">
-                          {place.address}
-                        </p>
-                      ) : null}
-
-                      <div className="mb-3 sm:mb-4 space-y-1.5 text-xs sm:text-sm">
-                        {place.cuisine ? (
-                          <p className="text-gray-800 pl-6 sm:pl-7 line-clamp-1">
-                            <span className="font-semibold text-gray-600 mr-1">Food:</span>
-                            {place.cuisine}
-                          </p>
-                        ) : null}
-                        {place.hours ? (
-                          <p className="text-gray-800 pl-6 sm:pl-7 line-clamp-2">
-                            <span className="font-semibold text-gray-600 mr-1">Hours:</span>
-                            {place.hours}
-                          </p>
-                        ) : null}
-                        {place.phone ? (
-                          <p className="pl-6 sm:pl-7">
-                            <a
-                              href={`tel:${String(place.phone).replace(/\s/g, '')}`}
-                              className="font-semibold text-violet-700 hover:text-violet-900 break-all"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {place.phone}
-                            </a>
-                          </p>
-                        ) : null}
-                        {place.website ? (
-                          <p className="pl-6 sm:pl-7 line-clamp-1">
-                            <a
-                              href={
-                                String(place.website).startsWith('http')
-                                  ? place.website
-                                  : `https://${place.website}`
-                              }
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="font-semibold text-violet-700 hover:text-violet-900 underline break-all"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              Website
-                            </a>
-                          </p>
-                        ) : null}
-                      </div>
-
-                      {place.description && (
-                        <p className="text-xs sm:text-sm text-gray-800 mb-3 sm:mb-4 line-clamp-2">{place.description}</p>
-                      )}
-
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-4">
-                          <div className="flex items-center">
-                            <svg className="w-4 h-4 sm:w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span className="ml-1 text-sm font-semibold text-gray-900">{place.distanceLabel || 'Nearby'}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Amenities Preview */}
-                      {place.amenities && place.amenities.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mb-4">
-                          {place.amenities.slice(0, 3).map((amenity: string, idx: number) => (
-                            <span
-                              key={idx}
-                              className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: 'rgba(124, 58, 237, 0.10)', color: '#111827' }}
-                            >
-                              {amenity}
-                            </span>
-                          ))}
-                          {place.amenities.length > 3 && (
-                            <span className="text-xs text-gray-500 px-2 py-1">+{place.amenities.length - 3}</span>
-                          )}
-                        </div>
-                      )}
-
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleShowDetails(place)}
-                          className="flex-1 px-3 sm:px-4 py-2 text-white font-medium text-xs sm:text-sm rounded-md transition-colors"
-                          style={{ backgroundColor: '#7c3aed', fontFamily: "'Inter', sans-serif", border: 'none' }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6d28d9'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
-                        >
-                          Details
-                        </button>
-                      </div>
+                      <h3
+                        className="text-lg sm:text-xl font-bold text-gray-900 break-words line-clamp-2 min-h-[2.75rem] sm:min-h-[3.25rem] leading-snug"
+                        style={{ fontFamily: "'Poppins', sans-serif" }}
+                      >
+                        {place.name}
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => handleShowDetails(place)}
+                        className="w-full px-4 py-2.5 text-white font-semibold text-sm rounded-lg transition-colors"
+                        style={{ backgroundColor: '#7c3aed', fontFamily: "'Inter', sans-serif", border: 'none' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#6d28d9';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#7c3aed';
+                        }}
+                      >
+                        Details
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -435,18 +329,20 @@ export default function DashboardPage() {
       {/* Place Details Modal */}
       {showDetails && selectedPlace && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-2 sm:p-4 z-50 backdrop-blur-sm">
-          <div className="doodle-card scrollbar-none max-w-3xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto bg-white" style={{ fontFamily: "'Inter', sans-serif" }}>
-            <div className="p-4 sm:p-6 md:p-8">
-              {/* Header */}
-              <div className="flex justify-between items-start mb-4 sm:mb-6 gap-2">
+          <div
+            className="doodle-card max-w-3xl w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col overflow-hidden bg-white shadow-2xl"
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
+            <div className="shrink-0 px-4 pt-4 pb-3 sm:px-6 sm:pt-5 sm:pb-3 md:px-8 md:pt-6 md:pb-4 border-b border-slate-100">
+              <div className="flex justify-between items-start gap-2">
                 <div className="flex-1 min-w-0">
                   <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 break-words">{selectedPlace.name}</h2>
                   <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-900">
                     <span className="flex items-center">
                       <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
                       <span className="truncate">{selectedPlace.city}</span>
                     </span>
                     <span className="text-white px-2 sm:px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#7c3aed' }}>
@@ -461,26 +357,17 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={handleCloseDetails}
-                  className="text-gray-400 hover:text-gray-600 text-2xl sm:text-3xl font-bold transition-colors flex-shrink-0"
+                  className="text-gray-400 hover:text-gray-600 text-2xl sm:text-3xl font-bold transition-colors flex-shrink-0 leading-none"
                   aria-label="Close"
                 >
                   ×
                 </button>
               </div>
+            </div>
 
-              {selectedPlace.photos?.[0] ? (
-                <div className="mb-4 sm:mb-6 -mx-4 sm:-mx-6 md:-mx-8 -mt-2 rounded-lg overflow-hidden bg-slate-100">
-                  <img
-                    src={selectedPlace.photos[0]}
-                    alt=""
-                    className="w-full max-h-56 sm:max-h-64 object-cover"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              ) : null}
-
+            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-4 py-4 sm:px-6 md:px-8 sm:py-5">
               {/* Description */}
               {selectedPlace.description && (
                 <div className="mb-4 sm:mb-6">
@@ -572,7 +459,8 @@ export default function DashboardPage() {
 
               {/* Actions */}
               <div className="pt-4 sm:pt-6 border-t border-gray-200">
-                <button 
+                <button
+                  type="button"
                   onClick={handleCloseDetails}
                   className="w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors duration-200 font-semibold text-sm sm:text-base"
                   style={{ border: 'none' }}
