@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Fragment, type ReactNode } from 'react';
 import axios from 'axios';
 
 interface Message {
@@ -28,26 +28,111 @@ const AI_ASSISTANT = {
   userBubbleBorder: '#4c1d95',
 } as const;
 
+/** Normalize model output into clearer paragraph / list boundaries. */
 function formatBotMessage(text: string): string {
   let t = (text || '').trim();
   if (!t) return t;
 
-  // Add newlines before common "Some options:" style intros.
-  t = t.replace(/(include:)/gi, '$1\n');
+  t = t.replace(/\r\n/g, '\n');
 
-  // Convert inline numbered lists "1. X 2. Y" into multiline bullets.
-  // Example: "... include: 1. A - ... 2. B - ..." -> "- A - ...\n- B - ..."
-  if (/\b1\.\s+/.test(t) && /\b2\.\s+/.test(t)) {
-    t = t.replace(/\s*(\d+)\.\s+/g, '\n- ');
+  // Break before common list intros
+  t = t.replace(/\b(include|options?|such as|try|consider)\s*:/gi, '\n\n$1:\n');
+
+  // Numbered run-on lists → one item per line
+  if (/\b1\.\s+\S/.test(t) && /\b2\.\s+\S/.test(t)) {
+    t = t.replace(/\s+(\d+)\.\s+/g, '\n$1. ');
   }
 
-  // Ensure there's spacing after sentence boundaries when a bullet begins.
+  // Colon then dash-list (common LLM pattern)
+  t = t.replace(/:\s*-\s+/g, ':\n\n- ');
+
+  // Newline before list markers after a sentence
+  t = t.replace(/([.!?])\s+([-*•])\s+/g, '$1\n\n$2 ');
+
   t = t.replace(/([.!?])\s*\n-\s/g, '$1\n\n- ');
 
-  // Collapse excessive blank lines.
   t = t.replace(/\n{3,}/g, '\n\n');
-
   return t.trim();
+}
+
+/** Safe inline **bold** (no HTML). */
+function inlineFormatted(line: string): ReactNode {
+  const segments = line.split(/(\*\*[^*]+\*\*)/g).filter((s) => s.length > 0);
+  if (segments.length === 1) return line;
+  return segments.map((seg, i) => {
+    const m = seg.match(/^\*\*([^*]+)\*\*$/);
+    if (m) {
+      return (
+        <strong key={i} className="font-semibold text-gray-900">
+          {m[1]}
+        </strong>
+      );
+    }
+    return <Fragment key={i}>{seg}</Fragment>;
+  });
+}
+
+function renderBotBlock(block: string, key: number): ReactNode {
+  const lines = block
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  if (lines.length === 0) return null;
+
+  const bulletLine = (l: string) =>
+    /^[-–—•*]\s+/.test(l) || /^[-–—•*][^\s]/.test(l);
+  const numberedLine = (l: string) => /^\d{1,2}[.)]\s+/.test(l);
+
+  if (lines.length >= 2 && lines.every(bulletLine)) {
+    return (
+      <ul
+        key={key}
+        className="my-1 pl-4 space-y-1.5 list-disc text-gray-800 marker:text-indigo-600"
+      >
+        {lines.map((l, i) => (
+          <li key={i} className="leading-snug pl-0.5">
+            {inlineFormatted(l.replace(/^[-–—•*]\s*/, '').replace(/^[-–—•*]/, ''))}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  if (lines.length >= 2 && lines.every(numberedLine)) {
+    return (
+      <ol
+        key={key}
+        className="my-1 pl-4 space-y-1.5 list-decimal text-gray-800 marker:text-indigo-600 marker:font-semibold"
+      >
+        {lines.map((l, i) => (
+          <li key={i} className="leading-snug pl-1">
+            {inlineFormatted(l.replace(/^\d{1,2}[.)]\s+/, ''))}
+          </li>
+        ))}
+      </ol>
+    );
+  }
+
+  return (
+    <p key={key} className="my-0 leading-relaxed text-gray-800">
+      {lines.map((line, i) => (
+        <Fragment key={i}>
+          {i > 0 ? <br /> : null}
+          {inlineFormatted(line)}
+        </Fragment>
+      ))}
+    </p>
+  );
+}
+
+function BotMessageContent({ text }: { text: string }) {
+  const formatted = formatBotMessage(text);
+  const blocks = formatted.split(/\n\n+/).map((b) => b.trim()).filter(Boolean);
+  return (
+    <div className="space-y-2.5 text-xs sm:text-sm font-normal">
+      {blocks.map((block, idx) => renderBotBlock(block, idx))}
+    </div>
+  );
 }
 
 function Chatbot({ currentMood, currentCity }: ChatbotProps) {
@@ -221,7 +306,7 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
 
           {/* Messages */}
           <div
-            className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 sm:space-y-4"
+            className="scrollbar-none flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 sm:space-y-4"
             style={{ backgroundColor: AI_ASSISTANT.light }}
           >
             {messages.map((message) => (
@@ -230,10 +315,8 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
                 className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] sm:max-w-[80%] px-3 sm:px-4 py-2 sm:py-3 font-semibold ${
-                    message.sender === 'user'
-                      ? 'text-white'
-                      : 'bg-white text-gray-800 border border-gray-200'
+                  className={`max-w-[85%] sm:max-w-[80%] px-3 sm:px-4 py-2 sm:py-3 ${
+                    message.sender === 'user' ? 'font-semibold text-white' : 'bg-white border border-gray-200'
                   }`}
                   style={{
                     borderRadius: '12px',
@@ -247,15 +330,25 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
                         }),
                   }}
                 >
+                  {message.sender === 'bot' ? (
+                    <div className="break-words">
+                      <BotMessageContent text={message.text} />
+                    </div>
+                  ) : (
+                    <p
+                      className="text-xs sm:text-sm break-words"
+                      style={{ whiteSpace: 'pre-line' }}
+                    >
+                      {message.text}
+                    </p>
+                  )}
                   <p
-                    className="text-xs sm:text-sm break-words"
-                    style={{ whiteSpace: 'pre-line' }}
-                  >
-                    {message.sender === 'bot' ? formatBotMessage(message.text) : message.text}
-                  </p>
-                  <p
-                    className={`text-xs mt-1 ${message.sender === 'user' ? '' : 'text-gray-500'}`}
-                    style={message.sender === 'user' ? { color: 'rgba(237, 233, 254, 0.92)' } : {}}
+                    className={`text-[10px] sm:text-xs mt-2 pt-1.5 border-t border-opacity-30 ${
+                      message.sender === 'user' ? 'border-white/25' : 'border-gray-200'
+                    } ${message.sender === 'user' ? '' : 'text-gray-500'}`}
+                    style={
+                      message.sender === 'user' ? { color: 'rgba(237, 233, 254, 0.92)' } : {}
+                    }
                   >
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
