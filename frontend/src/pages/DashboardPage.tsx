@@ -90,7 +90,7 @@ export default function DashboardPage() {
 
       {/* Enhanced Header */}
       <header
-        className="sticky top-0 z-40 border-b shadow-sm"
+        className="sticky top-0 z-40 border-b shadow-sm backdrop-blur-md"
         style={{
           background:
             "radial-gradient(900px 420px at 20% 0%, rgba(124, 58, 237, 0.28), rgba(0, 0, 0, 0) 60%), linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98))",
@@ -152,10 +152,13 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 relative z-10">
+      <main className="max-w-7xl mx-auto py-8 pb-28 px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header Section with Mood & AI Badge */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
+          <div
+            className="rounded-2xl border border-white/10 bg-white/[0.07] backdrop-blur-md shadow-[0_12px_40px_-12px_rgba(2,6,23,0.45)] px-4 py-5 sm:px-6 sm:py-6 mb-6"
+          >
+          <div className="flex items-center justify-between mb-0 flex-wrap gap-4">
             <div>
                 <h2 className="text-4xl font-bold mb-2 text-white drop-shadow-sm" style={{ fontFamily: "'Poppins', sans-serif" }}>
                 {currentMood ? `Places for Your ${currentMood} Mood` : 'Recommended Places'}
@@ -205,6 +208,7 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
+          </div>
 
           {/* AI Explanation */}
           {explanation && (
@@ -248,7 +252,7 @@ export default function DashboardPage() {
                 {places.map((place, index) => (
                   <div 
                     key={place.id} 
-                    className={`doodle-card overflow-hidden bg-white ${
+                    className={`doodle-card overflow-hidden bg-white rounded-2xl shadow-[0_14px_40px_-14px_rgba(15,23,42,0.28)] border border-slate-200/90 ${
                       viewMode === 'list' ? 'flex flex-col sm:flex-row' : ''
                     }`}
                   >

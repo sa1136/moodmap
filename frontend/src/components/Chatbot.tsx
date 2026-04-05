@@ -13,17 +13,19 @@ interface ChatbotProps {
   currentCity?: string;
 }
 
-/** Orange palette so the assistant is visually distinct from the app’s violet UI */
-const AI_ORANGE = {
-  solid: '#ea580c',
-  solidHover: '#c2410c',
-  light: '#fff7ed',
-  lightHover: '#ffedd5',
-  border: '#fb923c',
-  borderStrong: '#ea580c',
-  textOnLight: '#9a3412',
-  glow: '0 4px 18px rgba(234, 88, 12, 0.5)',
-  glowHover: '0 6px 22px rgba(234, 88, 12, 0.55)',
+/** Dark indigo + lilac — reads as a separate “assistant” surface vs dashboard violet buttons */
+const AI_ASSISTANT = {
+  solid: '#312e81',
+  solidHover: '#1e1b4b',
+  light: '#f5f3ff',
+  lightHover: '#ede9fe',
+  border: '#c4b5fd',
+  borderStrong: '#8b5cf6',
+  textOnLight: '#4c1d95',
+  glow: '0 4px 22px rgba(30, 27, 75, 0.55), 0 0 0 1px rgba(196, 181, 253, 0.35)',
+  glowHover: '0 6px 28px rgba(15, 23, 42, 0.5), 0 0 0 1px rgba(196, 181, 253, 0.5)',
+  userBubble: '#5b21b6',
+  userBubbleBorder: '#4c1d95',
 } as const;
 
 function formatBotMessage(text: string): string {
@@ -150,19 +152,19 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 text-white p-3 sm:p-4 md:p-5 transition-all duration-300 hover:scale-110"
         style={{
-          backgroundColor: AI_ORANGE.solid,
+          backgroundColor: AI_ASSISTANT.solid,
           borderRadius: '50%',
-          border: '2px solid rgba(255, 255, 255, 0.35)',
+          border: '2px solid rgba(196, 181, 253, 0.45)',
           fontFamily: "'Inter', sans-serif",
-          boxShadow: AI_ORANGE.glow,
+          boxShadow: AI_ASSISTANT.glow,
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = AI_ORANGE.solidHover;
-          e.currentTarget.style.boxShadow = AI_ORANGE.glowHover;
+          e.currentTarget.style.backgroundColor = AI_ASSISTANT.solidHover;
+          e.currentTarget.style.boxShadow = AI_ASSISTANT.glowHover;
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = AI_ORANGE.solid;
-          e.currentTarget.style.boxShadow = AI_ORANGE.glow;
+          e.currentTarget.style.backgroundColor = AI_ASSISTANT.solid;
+          e.currentTarget.style.boxShadow = AI_ASSISTANT.glow;
         }}
         aria-label="Open chatbot"
       >
@@ -183,8 +185,8 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
           className="fixed bottom-20 sm:bottom-24 right-2 sm:right-6 z-50 w-[calc(100vw-1rem)] sm:w-96 h-[calc(100vh-6rem)] sm:h-[600px] max-h-[600px] bg-white flex flex-col"
           style={{
             borderRadius: '16px',
-            border: `2px solid ${AI_ORANGE.border}`,
-            boxShadow: '0 12px 40px rgba(234, 88, 12, 0.18)',
+            border: `2px solid ${AI_ASSISTANT.border}`,
+            boxShadow: '0 20px 50px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(196, 181, 253, 0.2)',
             fontFamily: "'Inter', sans-serif",
           }}
         >
@@ -192,20 +194,23 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
           <div
             className="text-white p-4"
             style={{
-              background: `linear-gradient(135deg, ${AI_ORANGE.solid} 0%, ${AI_ORANGE.solidHover} 100%)`,
+              background: `linear-gradient(135deg, #3730a3 0%, ${AI_ASSISTANT.solidHover} 100%)`,
               borderRadius: '14px 14px 0 0',
             }}
           >
             <div className="flex justify-between items-center">
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-base sm:text-lg md:text-xl truncate" style={{ fontFamily: "'Poppins', sans-serif" }}>MoodMap Assistant</h3>
-                <p className="text-xs sm:text-sm font-medium" style={{ color: 'rgba(255, 247, 237, 0.95)' }}>
+                <p className="text-xs sm:text-sm font-medium" style={{ color: 'rgba(221, 214, 254, 0.95)' }}>
                   AI assistant
                 </p>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-white transition-colors" style={{ color: 'white' }} onMouseEnter={(e) => e.currentTarget.style.color = '#f5f1eb'} onMouseLeave={(e) => e.currentTarget.style.color = 'white'}
+                className="text-white transition-colors"
+                style={{ color: 'white' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#ddd6fe')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'white')}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -217,7 +222,7 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
           {/* Messages */}
           <div
             className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 sm:space-y-4"
-            style={{ backgroundColor: AI_ORANGE.light }}
+            style={{ backgroundColor: AI_ASSISTANT.light }}
           >
             {messages.map((message) => (
               <div
@@ -234,11 +239,11 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
                     borderRadius: '12px',
                     ...(message.sender === 'user'
                       ? {
-                          backgroundColor: AI_ORANGE.solid,
-                          border: `1px solid ${AI_ORANGE.solidHover}`,
+                          backgroundColor: AI_ASSISTANT.userBubble,
+                          border: `1px solid ${AI_ASSISTANT.userBubbleBorder}`,
                         }
                       : {
-                          border: `1px solid ${AI_ORANGE.border}`,
+                          border: `1px solid ${AI_ASSISTANT.border}`,
                         }),
                   }}
                 >
@@ -250,7 +255,7 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
                   </p>
                   <p
                     className={`text-xs mt-1 ${message.sender === 'user' ? '' : 'text-gray-500'}`}
-                    style={message.sender === 'user' ? { color: 'rgba(255, 247, 237, 0.9)' } : {}}
+                    style={message.sender === 'user' ? { color: 'rgba(237, 233, 254, 0.92)' } : {}}
                   >
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
@@ -262,20 +267,20 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
               <div className="flex justify-start">
                 <div
                   className="rounded-lg px-4 py-2 shadow-sm border"
-                  style={{ backgroundColor: 'white', borderColor: AI_ORANGE.border }}
+                  style={{ backgroundColor: 'white', borderColor: AI_ASSISTANT.border }}
                 >
                   <div className="flex space-x-1">
                     <div
                       className="w-2 h-2 rounded-full animate-bounce"
-                      style={{ backgroundColor: AI_ORANGE.solid, animationDelay: '0ms' }}
+                      style={{ backgroundColor: AI_ASSISTANT.solid, animationDelay: '0ms' }}
                     />
                     <div
                       className="w-2 h-2 rounded-full animate-bounce"
-                      style={{ backgroundColor: AI_ORANGE.solid, animationDelay: '150ms' }}
+                      style={{ backgroundColor: AI_ASSISTANT.solid, animationDelay: '150ms' }}
                     />
                     <div
                       className="w-2 h-2 rounded-full animate-bounce"
-                      style={{ backgroundColor: AI_ORANGE.solid, animationDelay: '300ms' }}
+                      style={{ backgroundColor: AI_ASSISTANT.solid, animationDelay: '300ms' }}
                     />
                   </div>
                 </div>
@@ -284,7 +289,7 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
 
             {messages.length === 1 && (
               <div className="space-y-2">
-                <p className="text-xs font-semibold mb-2" style={{ color: AI_ORANGE.textOnLight }}>
+                <p className="text-xs font-semibold mb-2" style={{ color: AI_ASSISTANT.textOnLight }}>
                   Quick questions:
                 </p>
                 {quickQuestions.map((q, idx) => (
@@ -296,17 +301,17 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
                       borderRadius: '10px',
                       fontFamily: "'Inter', sans-serif",
                       backgroundColor: 'white',
-                      color: AI_ORANGE.textOnLight,
-                      border: `2px solid ${AI_ORANGE.borderStrong}`,
-                      boxShadow: '0 2px 8px rgba(234, 88, 12, 0.12)',
+                      color: AI_ASSISTANT.textOnLight,
+                      border: `2px solid ${AI_ASSISTANT.borderStrong}`,
+                      boxShadow: '0 2px 10px rgba(49, 46, 129, 0.12)',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = AI_ORANGE.lightHover;
-                      e.currentTarget.style.borderColor = AI_ORANGE.solidHover;
+                      e.currentTarget.style.backgroundColor = AI_ASSISTANT.lightHover;
+                      e.currentTarget.style.borderColor = AI_ASSISTANT.solid;
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = 'white';
-                      e.currentTarget.style.borderColor = AI_ORANGE.borderStrong;
+                      e.currentTarget.style.borderColor = AI_ASSISTANT.borderStrong;
                     }}
                   >
                     {q}
@@ -321,7 +326,7 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
           {/* Input */}
           <div
             className="p-2 sm:p-4 border-t bg-white"
-            style={{ borderRadius: '0 0 14px 14px', borderTopColor: AI_ORANGE.border }}
+            style={{ borderRadius: '0 0 14px 14px', borderTopColor: AI_ASSISTANT.border }}
           >
             <div className="flex space-x-2">
               <input
@@ -330,12 +335,12 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask me anything…"
-                className="flex-1 px-3 sm:px-4 py-2 font-semibold text-sm sm:text-base outline-none focus:ring-2 focus:ring-orange-500/35 focus:border-orange-500"
+                className="flex-1 px-3 sm:px-4 py-2 font-semibold text-sm sm:text-base outline-none focus:ring-2 focus:ring-violet-500/35 focus:border-violet-500"
                 style={{
                   borderRadius: '10px',
-                  border: `2px solid ${AI_ORANGE.border}`,
+                  border: `2px solid ${AI_ASSISTANT.border}`,
                   fontFamily: "'Inter', sans-serif",
-                  backgroundColor: AI_ORANGE.light,
+                  backgroundColor: AI_ASSISTANT.light,
                   color: '#1e293b',
                 }}
               />
@@ -344,16 +349,16 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
                 disabled={!inputValue.trim() || isTyping}
                 className="text-white px-3 sm:px-4 py-2 font-semibold disabled:opacity-50 transition-all flex-shrink-0 rounded-lg"
                 style={{
-                  backgroundColor: AI_ORANGE.solid,
+                  backgroundColor: AI_ASSISTANT.solid,
                   fontFamily: "'Inter', sans-serif",
-                  border: `1px solid ${AI_ORANGE.solidHover}`,
-                  boxShadow: '0 2px 10px rgba(234, 88, 12, 0.35)',
+                  border: `1px solid ${AI_ASSISTANT.solidHover}`,
+                  boxShadow: '0 2px 12px rgba(30, 27, 75, 0.4)',
                 }}
                 onMouseEnter={(e) => {
-                  if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = AI_ORANGE.solidHover;
+                  if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = AI_ASSISTANT.solidHover;
                 }}
                 onMouseLeave={(e) => {
-                  if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = AI_ORANGE.solid;
+                  if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = AI_ASSISTANT.solid;
                 }}
                 aria-label="Send message"
               >
