@@ -14,7 +14,6 @@ export default function DashboardPage() {
   const [aiPowered, setAiPowered] = useState<boolean>(false);
   const [currentMood, setCurrentMood] = useState<string>('');
   const [currentCity, setCurrentCity] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     const savedMood = localStorage.getItem('currentMood');
@@ -173,40 +172,14 @@ export default function DashboardPage() {
                 </p>
               )}
             </div>
-            <div className="flex items-center space-x-3 flex-wrap">
-              {aiPowered && (
-                <span className="text-white text-xs font-medium px-3 py-1.5 rounded-md" style={{ fontFamily: "'Inter', sans-serif", border: 'none', backgroundColor: '#7c3aed' }}>
-                  AI-Powered
-                </span>
-              )}
-              {/* View Toggle */}
-              <div className="flex overflow-hidden ml-auto sm:ml-0 bg-white border border-gray-200 rounded-lg" style={{ borderRadius: '12px' }}>
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`px-2 sm:px-4 py-2 font-bold transition-all ${viewMode === 'grid' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                  style={viewMode === 'grid' ? { backgroundColor: '#7c3aed', fontFamily: "'Inter', sans-serif" } : { fontFamily: "'Inter', sans-serif" }}
-                  onMouseEnter={viewMode === 'grid' ? (e) => e.currentTarget.style.backgroundColor = '#6d28d9' : undefined}
-                  onMouseLeave={viewMode === 'grid' ? (e) => e.currentTarget.style.backgroundColor = '#7c3aed' : undefined}
-                  aria-label="Grid view"
-                >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-2 sm:px-4 py-2 font-bold transition-all ${viewMode === 'list' ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                  style={viewMode === 'list' ? { backgroundColor: '#7c3aed', fontFamily: "'Inter', sans-serif" } : { fontFamily: "'Inter', sans-serif" }}
-                  onMouseEnter={viewMode === 'list' ? (e) => e.currentTarget.style.backgroundColor = '#6d28d9' : undefined}
-                  onMouseLeave={viewMode === 'list' ? (e) => e.currentTarget.style.backgroundColor = '#7c3aed' : undefined}
-                  aria-label="List view"
-                >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-              </div>
-            </div>
+            {aiPowered && (
+              <span
+                className="text-white text-xs font-medium px-3 py-1.5 rounded-md shrink-0"
+                style={{ fontFamily: "'Inter', sans-serif", border: 'none', backgroundColor: '#7c3aed' }}
+              >
+                AI-Powered
+              </span>
+            )}
           </div>
           </div>
 
@@ -245,10 +218,7 @@ export default function DashboardPage() {
           <>
             {/* Places Grid/List */}
             {places.length > 0 ? (
-              <div className={viewMode === 'grid' 
-                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch" 
-                : "space-y-3 sm:space-y-4"
-              }>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch">
                 {places.map((place) => (
                   <div
                     key={place.id}
