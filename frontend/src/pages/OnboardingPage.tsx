@@ -159,6 +159,17 @@ export default function OnboardingPage() {
     };
   }, [searchTimeout]);
 
+  useEffect(() => {
+    const prevHtml = document.documentElement.style.overflow;
+    const prevBody = document.body.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.documentElement.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    };
+  }, []);
+
   const goLocationNext = () => {
     setErrorMessage('');
     const trimmed = city.trim();
@@ -222,7 +233,7 @@ export default function OnboardingPage() {
   const cityLabel = (localStorage.getItem('userCity') || city).trim();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="onboarding-page-root">
       <header
         className="sticky top-0 z-40 border-b shadow-sm shrink-0"
         style={{
@@ -276,8 +287,8 @@ export default function OnboardingPage() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-0">
-        <div className="onboarding-container onboarding-container--in-main flex-1 flex items-center justify-center">
+      <main className="flex-1 flex flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-0 overflow-hidden">
+        <div className="onboarding-container onboarding-container--in-main flex-1 flex min-h-0 w-full items-center justify-center overflow-hidden">
           <div
             className="onboarding-form-card"
           >
