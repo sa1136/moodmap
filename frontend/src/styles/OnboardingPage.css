@@ -5,8 +5,10 @@
   position: relative;
 }
 
+/* Same width + height on every step so the shell does not resize between screens */
 .onboarding-form-card {
-  max-width: 28rem;
+  max-width: 44rem;
+  width: 100%;
   margin: 0 auto;
   position: relative;
   border-radius: 16px;
@@ -14,10 +16,37 @@
   padding: 2rem;
   transition: all 0.3s ease;
   background: white;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+  height: min(calc(100vh - 9rem), 52rem);
+  min-height: min(calc(100vh - 9rem), 52rem);
+  max-height: min(calc(100vh - 9rem), 52rem);
 }
 
-.onboarding-form-card--wide {
-  max-width: 44rem;
+@supports (height: 100dvh) {
+  .onboarding-form-card {
+    height: min(calc(100dvh - 9rem), 52rem);
+    min-height: min(calc(100dvh - 9rem), 52rem);
+    max-height: min(calc(100dvh - 9rem), 52rem);
+  }
+}
+
+/* Step content scrolls inside the fixed-height form card (scrollbar hidden) */
+.onboarding-form-card-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.onboarding-form-card-body::-webkit-scrollbar {
+  display: none;
 }
 
 .onboarding-form-card:hover {
@@ -79,6 +108,19 @@
 .onboarding-mood-pick-card--equal.doodle-card {
   aspect-ratio: 4 / 3;
   min-height: 6.75rem;
+  max-height: 9.5rem;
+}
+
+/* Scroll long mood copy inside the card without clipping selection shadow */
+.onboarding-mood-pick-card-inner {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.onboarding-mood-pick-card-inner::-webkit-scrollbar {
+  display: none;
 }
 
 .onboarding-mood-pick-card.doodle-card {
@@ -289,6 +331,7 @@
   justify-content: center;
   gap: 0.5rem;
   margin-bottom: 1.25rem;
+  flex-shrink: 0;
 }
 
 .onboarding-step-dot {
@@ -337,6 +380,12 @@
   max-height: 200px;
   overflow-y: auto;
   margin-top: 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.onboarding-suggestions::-webkit-scrollbar {
+  display: none;
 }
 
 .onboarding-suggestion-row {
@@ -494,10 +543,15 @@
 
 .setup-pref-card.doodle-card {
   position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  min-height: 3.35rem;
+  max-height: 5.25rem;
   width: 100%;
   box-sizing: border-box;
-  overflow: visible;
+  overflow: hidden;
   border-width: 2px;
   border-style: solid;
   border-radius: 12px;
@@ -519,6 +573,12 @@
   display: block;
   width: 100%;
   max-width: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   font-family: 'Poppins', sans-serif;
   font-size: clamp(0.875rem, 2.4vw, 1rem);
   font-weight: 700;
@@ -527,6 +587,12 @@
   word-break: normal;
   overflow-wrap: break-word;
   white-space: normal;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.setup-pref-card-label::-webkit-scrollbar {
+  display: none;
 }
 
 .setup-pref-card-check {

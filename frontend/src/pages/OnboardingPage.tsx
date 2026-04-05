@@ -219,7 +219,6 @@ export default function OnboardingPage() {
     ? MOOD_OPTIONS.find((m) => m.id === selectedMood)?.label
     : customMood.trim() || '—';
 
-  const flashWideCard = step === 'preferences' || step === 'mood';
   const cityLabel = (localStorage.getItem('userCity') || city).trim();
 
   return (
@@ -280,7 +279,7 @@ export default function OnboardingPage() {
       <main className="flex-1 flex flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-0">
         <div className="onboarding-container onboarding-container--in-main flex-1 flex items-center justify-center">
           <div
-            className={`onboarding-form-card ${flashWideCard ? 'onboarding-form-card--wide' : ''}`}
+            className="onboarding-form-card"
           >
             <div className="onboarding-step-dots" aria-hidden>
               {STEPS.map((s, i) => (
@@ -291,6 +290,7 @@ export default function OnboardingPage() {
               ))}
             </div>
 
+            <div className="onboarding-form-card-body">
         {step === 'mood' && (
           <>
             <div className="onboarding-header onboarding-header--compact-mood">
@@ -326,11 +326,12 @@ export default function OnboardingPage() {
                       setSelectedMood(mood.id);
                       setCustomMood('');
                     }}
-                    className={`doodle-card onboarding-mood-pick-card onboarding-mood-pick-card--equal w-full flex flex-col justify-center p-3 sm:p-3.5 text-left min-h-0 ${
+                    className={`doodle-card onboarding-mood-pick-card onboarding-mood-pick-card--equal w-full flex flex-col text-left min-h-0 p-0 ${
                       isSelected ? 'onboarding-mood-pick-card--selected' : ''
                     }`}
                     style={{ fontFamily: "'Inter', sans-serif" }}
                   >
+                    <div className="onboarding-mood-pick-card-inner w-full min-h-0 flex-1 flex flex-col justify-center p-3 sm:p-3.5">
                     <div className="flex items-start gap-2.5 sm:gap-3 w-full min-w-0 min-h-0">
                       <div
                         className="onboarding-mood-pick-emoji w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-lg sm:text-xl"
@@ -350,10 +351,11 @@ export default function OnboardingPage() {
                             Mood
                           </span>
                         </div>
-                        <p className="text-[0.7rem] sm:text-xs text-gray-700 leading-snug line-clamp-2">
+                        <p className="text-[0.7rem] sm:text-xs text-gray-700 leading-snug">
                           {mood.description}
                         </p>
                       </div>
+                    </div>
                     </div>
                   </button>
                 );
@@ -601,6 +603,7 @@ export default function OnboardingPage() {
             </button>
           </>
         )}
+            </div>
           </div>
         </div>
       </main>
