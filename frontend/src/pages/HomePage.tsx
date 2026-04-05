@@ -1,8 +1,14 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/HomePage.css';
 
 export default function HomePage() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.body.classList.add('homepage-route');
+    return () => document.body.classList.remove('homepage-route');
+  }, []);
 
   const handleGetStarted = () => {
     navigate('/onboarding');
