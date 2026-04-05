@@ -227,6 +227,18 @@ body.homepage-route::before {
   transform: rotate(-1deg) skewX(-5deg);
 }
 
+/* Scroll inside a node without showing the bar (modals, dense cards). Pair with overflow-y-auto. */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 8px;

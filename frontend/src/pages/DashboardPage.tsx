@@ -252,8 +252,8 @@ export default function DashboardPage() {
                 {places.map((place, index) => (
                   <div 
                     key={place.id} 
-                    className={`doodle-card overflow-hidden bg-white rounded-2xl shadow-[0_14px_40px_-14px_rgba(15,23,42,0.28)] border border-slate-200/90 ${
-                      viewMode === 'list' ? 'flex flex-col sm:flex-row' : ''
+                    className={`doodle-card overflow-hidden bg-white rounded-2xl shadow-[0_14px_40px_-14px_rgba(15,23,42,0.28)] border border-slate-200/90 flex flex-col max-h-[min(78vh,26rem)] sm:max-h-[min(78vh,28rem)] ${
+                      viewMode === 'list' ? 'sm:flex-row sm:max-h-72' : ''
                     }`}
                   >
                     {place.photos?.[0] ? (
@@ -276,7 +276,10 @@ export default function DashboardPage() {
                       </div>
                     ) : null}
                     {/* Place Content */}
-                    <div className={`p-4 sm:p-5 ${viewMode === 'list' ? 'flex-1 min-w-0' : ''}`} style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <div
+                      className={`p-4 sm:p-5 scrollbar-none overflow-y-auto min-h-0 flex-1 ${viewMode === 'list' ? 'min-w-0' : ''}`}
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                    >
                       <div className="flex items-start gap-3 mb-2">
                         <div
                           className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -432,7 +435,7 @@ export default function DashboardPage() {
       {/* Place Details Modal */}
       {showDetails && selectedPlace && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-2 sm:p-4 z-50 backdrop-blur-sm">
-          <div className="doodle-card max-w-3xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto bg-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <div className="doodle-card scrollbar-none max-w-3xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto bg-white" style={{ fontFamily: "'Inter', sans-serif" }}>
             <div className="p-4 sm:p-6 md:p-8">
               {/* Header */}
               <div className="flex justify-between items-start mb-4 sm:mb-6 gap-2">
