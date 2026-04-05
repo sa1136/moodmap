@@ -256,8 +256,27 @@ export default function DashboardPage() {
                       viewMode === 'list' ? 'flex flex-col sm:flex-row' : ''
                     }`}
                   >
+                    {place.photos?.[0] ? (
+                      <div
+                        className={`overflow-hidden bg-slate-100 shrink-0 ${
+                          viewMode === 'list' ? 'w-full sm:w-44' : ''
+                        }`}
+                      >
+                        <img
+                          src={place.photos[0]}
+                          alt=""
+                          className={`w-full object-cover block ${
+                            viewMode === 'list'
+                              ? 'h-44 sm:h-full sm:min-h-[168px]'
+                              : 'h-44'
+                          }`}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                    ) : null}
                     {/* Place Content */}
-                    <div className={`p-4 sm:p-5 ${viewMode === 'list' ? 'flex-1' : ''}`} style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <div className={`p-4 sm:p-5 ${viewMode === 'list' ? 'flex-1 min-w-0' : ''}`} style={{ fontFamily: "'Inter', sans-serif" }}>
                       <div className="flex items-start gap-3 mb-2">
                         <div
                           className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -280,13 +299,62 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       
-                      <p className="text-sm sm:text-base text-gray-900 mb-2 sm:mb-3 flex items-center font-medium">
+                      <p className="text-sm sm:text-base text-gray-900 mb-1 flex items-center font-medium">
                         <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                         <span className="truncate">{place.city}</span>
                       </p>
+
+                      {place.address && String(place.address).trim() ? (
+                        <p className="text-xs sm:text-sm text-gray-600 mb-2 pl-6 sm:pl-7 leading-snug line-clamp-2">
+                          {place.address}
+                        </p>
+                      ) : null}
+
+                      <div className="mb-3 sm:mb-4 space-y-1.5 text-xs sm:text-sm">
+                        {place.cuisine ? (
+                          <p className="text-gray-800 pl-6 sm:pl-7 line-clamp-1">
+                            <span className="font-semibold text-gray-600 mr-1">Food:</span>
+                            {place.cuisine}
+                          </p>
+                        ) : null}
+                        {place.hours ? (
+                          <p className="text-gray-800 pl-6 sm:pl-7 line-clamp-2">
+                            <span className="font-semibold text-gray-600 mr-1">Hours:</span>
+                            {place.hours}
+                          </p>
+                        ) : null}
+                        {place.phone ? (
+                          <p className="pl-6 sm:pl-7">
+                            <a
+                              href={`tel:${String(place.phone).replace(/\s/g, '')}`}
+                              className="font-semibold text-violet-700 hover:text-violet-900 break-all"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {place.phone}
+                            </a>
+                          </p>
+                        ) : null}
+                        {place.website ? (
+                          <p className="pl-6 sm:pl-7 line-clamp-1">
+                            <a
+                              href={
+                                String(place.website).startsWith('http')
+                                  ? place.website
+                                  : `https://${place.website}`
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-semibold text-violet-700 hover:text-violet-900 underline break-all"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Website
+                            </a>
+                          </p>
+                        ) : null}
+                      </div>
 
                       {place.description && (
                         <p className="text-xs sm:text-sm text-gray-800 mb-3 sm:mb-4 line-clamp-2">{place.description}</p>
@@ -398,6 +466,18 @@ export default function DashboardPage() {
                 </button>
               </div>
 
+              {selectedPlace.photos?.[0] ? (
+                <div className="mb-4 sm:mb-6 -mx-4 sm:-mx-6 md:-mx-8 -mt-2 rounded-lg overflow-hidden bg-slate-100">
+                  <img
+                    src={selectedPlace.photos[0]}
+                    alt=""
+                    className="w-full max-h-56 sm:max-h-64 object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+              ) : null}
+
               {/* Description */}
               {selectedPlace.description && (
                 <div className="mb-4 sm:mb-6">
@@ -408,12 +488,21 @@ export default function DashboardPage() {
 
               {/* Details Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
+                {selectedPlace.cuisine ? (
+                  <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200 sm:col-span-2">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 flex items-center">
+                      🍽 Cuisine
+                    </h3>
+                    <p className="text-gray-900 text-sm sm:text-base">{selectedPlace.cuisine}</p>
+                  </div>
+                ) : null}
+
                 {selectedPlace.hours && (
                   <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 flex items-center">
                       🕒 Hours
                     </h3>
-                    <p className="text-gray-900 text-sm sm:text-base">{selectedPlace.hours}</p>
+                    <p className="text-gray-900 text-sm sm:text-base whitespace-pre-wrap break-words">{selectedPlace.hours}</p>
                   </div>
                 )}
 

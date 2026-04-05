@@ -1,14 +1,11 @@
 import axios from 'axios';
 import { Place } from './aiService';
 import { photonGeocode } from './geocoding';
+import { getWikimediaCommonsPhotoUrls } from './wikimediaCommonsPhotos';
 
 /**
- * Get real images for a place using Unsplash Source API (free, no auth required)
- * Falls back to a generic image if specific search fails
- */
-/**
  * Generate a deterministic numeric seed from a string so the same place
- * always gets the same image from Picsum Photos.
+ * always gets the same image from Picsum Photos (fallback when no Google key).
  */
 function stringToSeed(s: string): number {
   let hash = 0;
@@ -18,26 +15,35 @@ function stringToSeed(s: string): number {
   return (hash % 1000) + 1; // 1..1000
 }
 
-async function getPlaceImages(placeName: string, city: string, placeType?: string): Promise<string[]> {
+function getPicsumPlaceImages(placeName: string, city: string, placeType?: string): string[] {
   try {
-    // Use picsum.photos with a deterministic seed so the same place
-    // always resolves to the same image (no API key or auth required).
     const seed1 = stringToSeed(`${placeName}${city}`);
     const seed2 = stringToSeed(`${city}${placeType ?? ''}${placeName}`);
 
-    const images = [
-      `https://picsum.photos/seed/${seed1}/800/600`,
-    ];
-
+    const images = [`https://picsum.photos/seed/${seed1}/800/600`];
     if (seed2 !== seed1) {
       images.push(`https://picsum.photos/seed/${seed2}/800/600`);
     }
-
     return images;
   } catch (error) {
     console.warn(`[Images] Could not generate image URLs for ${placeName}:`, error);
     return [];
   }
+}
+
+/**
+ * Wikimedia Commons (free, no key), then Picsum placeholders.
+ */
+async function getPlaceImages(
+  placeName: string,
+  city: string,
+  placeType?: string,
+  _lat?: number,
+  _lng?: number
+): Promise<string[]> {
+  const wikiUrls = await getWikimediaCommonsPhotoUrls(placeName, city);
+  if (wikiUrls?.length) return wikiUrls;
+  return getPicsumPlaceImages(placeName, city, placeType);
 }
 
 /**
@@ -72,6 +78,57 @@ function inferCountryCodes(location: string): string | undefined {
   if (t.includes('canada')) return 'ca';
   if (t.includes('australia')) return 'au';
   return undefined;
+}
+
+/** Nominatim returns OSM tags in `extratags` (with extratags=1); some proxies use `tags`. */
+function nominatimOsmTags(result: {
+  tags?: Record<string, string>;
+  extratags?: Record<string, string> | null;
+}): Record<string, string> {
+  const out: Record<string, string> = {};
+  const merge = (src?: Record<string, string> | null) => {
+    if (!src || typeof src !== 'object') return;
+    for (const [k, v] of Object.entries(src)) {
+      if (v != null && String(v).trim() !== '' && out[k] === undefined) {
+        out[k] = String(v).trim();
+      }
+    }
+  };
+  merge(result.tags);
+  merge(result.extratags ?? undefined);
+  return out;
+}
+
+function amenitiesFromOsm(osm: Record<string, string>, fallback: string): string[] {
+  const a: string[] = [];
+  if (osm.amenity) a.push(osm.amenity);
+  if (osm.shop) a.push(osm.shop);
+  if (osm.leisure) a.push(osm.leisure);
+  if (osm.tourism) a.push(osm.tourism);
+  if (a.length === 0) a.push(fallback);
+  return a.filter(Boolean);
+}
+
+function contactFromOsm(
+  osm: Record<string, string>,
+  defaultHours: string
+): { hours: string; phone: string; website: string } {
+  const hours =
+    osm.opening_hours || osm['opening_hours:kitchen'] || osm['opening_hours:signed'] || defaultHours;
+  const phone = osm.phone || osm['contact:phone'] || '';
+  const website = osm.website || osm['contact:website'] || osm.url || '';
+  return { hours, phone, website };
+}
+
+function cuisineFromOsm(osm: Record<string, string>): string | undefined {
+  const c = osm.cuisine;
+  if (!c) return undefined;
+  const label = c
+    .split(';')
+    .map((x) => x.trim())
+    .filter(Boolean)
+    .join(' · ');
+  return label || undefined;
 }
 
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -251,6 +308,7 @@ export async function fetchPlacesFromOpenStreetMap(
           format: 'json',
           limit: 15,
           addressdetails: 1,
+          extratags: 1,
           'accept-language': 'en',
           viewbox,
           bounded: 1,
@@ -334,18 +392,10 @@ export async function fetchPlacesFromOpenStreetMap(
             formattedAddress = displayParts.join(',').trim() || cityName;
           }
           
-          // Extract amenities from OpenStreetMap tags if available
-          const amenities: string[] = [];
-          if (result.tags) {
-            if (result.tags.amenity) amenities.push(result.tags.amenity);
-            if (result.tags.shop) amenities.push(result.tags.shop);
-            if (result.tags.leisure) amenities.push(result.tags.leisure);
-            if (result.tags.tourism) amenities.push(result.tags.tourism);
-          }
-          // Fallback to type/class if no tags
-          if (amenities.length === 0) {
-            amenities.push(result.type || result.class || searchTerm || 'place');
-          }
+          const osm = nominatimOsmTags(result);
+          const amenities = amenitiesFromOsm(osm, result.type || result.class || searchTerm || 'place');
+          const { hours, phone, website } = contactFromOsm(osm, 'Hours vary');
+          const cuisine = cuisineFromOsm(osm);
           
           // Extract city more accurately (prefer actual city over mall/shopping center names)
           let extractedCity = address.city || address.town || address.village || address.municipality;
@@ -354,7 +404,13 @@ export async function fetchPlacesFromOpenStreetMap(
             extractedCity = address.city || address.town || address.village || address.municipality || address.county || cityName;
           }
           
-          const placeImages = await getPlaceImages(name, extractedCity || cityName, result.type || result.class || searchTerm);
+          const placeImages = await getPlaceImages(
+            name,
+            extractedCity || cityName,
+            result.type || result.class || searchTerm,
+            rLat,
+            rLon
+          );
           
           places.push({
             id: parseInt(result.place_id || `${Math.random() * 1000000}`, 10),
@@ -365,10 +421,11 @@ export async function fetchPlacesFromOpenStreetMap(
             address: formattedAddress,
             city: extractedCity || cityName,
             description: `A ${searchTerm || 'place'} near ${cityName}.`,
-            hours: result.tags?.opening_hours || 'Hours vary',
+            hours,
             price: '$$',
-            phone: result.tags?.phone || '',
-            website: result.tags?.website || '',
+            phone,
+            website,
+            cuisine,
             amenities: amenities.filter(Boolean),
             photos: placeImages,
           });
@@ -428,6 +485,7 @@ export async function fetchPlacesFromOpenStreetMap(
                   format: 'json',
                   limit: 3,
                   addressdetails: 1,
+                  extratags: 1,
                   'accept-language': 'en',
                   viewbox,
                   bounded: 1,
@@ -468,14 +526,12 @@ export async function fetchPlacesFromOpenStreetMap(
                   formattedAddress = displayParts.join(',').trim();
                 }
                 
+                const osmBeach = nominatimOsmTags(result);
                 const amenities: string[] = [];
-                if (result.tags) {
-                  if (result.tags.amenity) amenities.push(result.tags.amenity);
-                  if (result.tags.leisure) amenities.push(result.tags.leisure);
-                  if (result.tags.tourism) amenities.push(result.tags.tourism);
-                }
+                if (osmBeach.amenity) amenities.push(osmBeach.amenity);
+                if (osmBeach.leisure) amenities.push(osmBeach.leisure);
+                if (osmBeach.tourism) amenities.push(osmBeach.tourism);
                 if (amenities.length === 0) {
-                  // Determine type based on query
                   if (beachQuery.toLowerCase().includes('pier')) {
                     amenities.push('pier');
                   } else if (beachQuery.toLowerCase().includes('canal')) {
@@ -484,6 +540,8 @@ export async function fetchPlacesFromOpenStreetMap(
                     amenities.push('beach');
                   }
                 }
+                const beachContact = contactFromOsm(osmBeach, 'Open 24/7');
+                const beachCuisine = cuisineFromOsm(osmBeach);
                 
                 // Determine type for the place
                 let placeType = result.type || 'Place';
@@ -498,8 +556,15 @@ export async function fetchPlacesFromOpenStreetMap(
                 // Extract city dynamically
                 const extractedCity = address.city || address.town || address.village || address.municipality || 'Los Angeles';
                 
-                // Get images dynamically based on place name, city, and type
-                const placeImages = await getPlaceImages(name, extractedCity, placeType);
+                const rLatBeach = parseFloat(result.lat);
+                const rLonBeach = parseFloat(result.lon);
+                const placeImages = await getPlaceImages(
+                  name,
+                  extractedCity,
+                  placeType,
+                  Number.isFinite(rLatBeach) ? rLatBeach : undefined,
+                  Number.isFinite(rLonBeach) ? rLonBeach : undefined
+                );
                 
                 places.push({
                   id: parseInt(result.place_id || `${Math.random() * 1000000}`, 10),
@@ -514,10 +579,11 @@ export async function fetchPlacesFromOpenStreetMap(
                   address: formattedAddress,
                   city: extractedCity,
                   description: `${name} in ${extractedCity}. A popular beach destination.`,
-                  hours: result.tags?.opening_hours || 'Open 24/7',
+                  hours: beachContact.hours,
                   price: 'Free',
-                  phone: result.tags?.phone || '',
-                  website: result.tags?.website || '',
+                  phone: beachContact.phone,
+                  website: beachContact.website,
+                  cuisine: beachCuisine,
                   amenities: amenities.filter(Boolean),
                   photos: placeImages,
                 });
@@ -547,6 +613,7 @@ export async function fetchPlacesFromOpenStreetMap(
           format: 'json',
           limit: 10,
           addressdetails: 1,
+          extratags: 1,
           'accept-language': 'en',
           viewbox,
           bounded: 1,
@@ -619,23 +686,23 @@ export async function fetchPlacesFromOpenStreetMap(
             formattedAddress = displayParts.join(',').trim() || cityName;
           }
           
-          const amenities: string[] = [];
-          if (result.tags) {
-            if (result.tags.amenity) amenities.push(result.tags.amenity);
-            if (result.tags.shop) amenities.push(result.tags.shop);
-            if (result.tags.leisure) amenities.push(result.tags.leisure);
-            if (result.tags.tourism) amenities.push(result.tags.tourism);
-          }
-          if (amenities.length === 0) {
-            amenities.push(result.type || result.class || 'place');
-          }
+          const osmGen = nominatimOsmTags(result);
+          const amenities = amenitiesFromOsm(osmGen, result.type || result.class || 'place');
+          const genContact = contactFromOsm(osmGen, 'Hours vary');
+          const genCuisine = cuisineFromOsm(osmGen);
           
           let extractedCity = address.city || address.town || address.village || address.municipality;
           if (!extractedCity || extractedCity.toLowerCase().includes('mall') || extractedCity.toLowerCase().includes('field')) {
             extractedCity = address.city || address.town || address.village || address.municipality || address.county || cityName;
           }
           
-          const generalImages = await getPlaceImages(name, extractedCity || cityName, result.type || result.class);
+          const generalImages = await getPlaceImages(
+            name,
+            extractedCity || cityName,
+            result.type || result.class,
+            grLat,
+            grLon
+          );
           
           places.push({
             id: parseInt(result.place_id || `${Math.random() * 1000000}`, 10),
@@ -646,10 +713,11 @@ export async function fetchPlacesFromOpenStreetMap(
             address: formattedAddress,
             city: extractedCity || cityName,
             description: `A place near ${cityName}.`,
-            hours: result.tags?.opening_hours || 'Hours vary',
+            hours: genContact.hours,
             price: '$$',
-            phone: result.tags?.phone || '',
-            website: result.tags?.website || '',
+            phone: genContact.phone,
+            website: genContact.website,
+            cuisine: genCuisine,
             amenities: amenities.filter(Boolean),
             photos: generalImages,
           });

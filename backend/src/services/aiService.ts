@@ -28,6 +28,8 @@ export interface Place {
   price: string;
   phone: string;
   website: string;
+  /** OSM cuisine tag when present (e.g. "italian; pizza") */
+  cuisine?: string;
   amenities: string[];
   photos: string[];
 }
