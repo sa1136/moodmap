@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Place } from './aiService';
 import { photonGeocode } from './geocoding';
+import { getWikimediaCommonsPhotoUrls } from './wikimediaCommonsPhotos';
 
 /**
  * Generate a deterministic numeric seed from a string so the same place
@@ -30,9 +31,25 @@ function getPicsumPlaceImages(placeName: string, city: string, placeType?: strin
   }
 }
 
-/** Deterministic Picsum URLs only — no per-place HTTP (was the main latency). */
-function getPlacePhotoUrls(placeName: string, city: string, placeType?: string): string[] {
-  return getPicsumPlaceImages(placeName, city, placeType);
+type PhotoCacheEntry = { urls: string[] | null; cachedAt: number };
+const PHOTO_CACHE_TTL_MS = 1000 * 60 * 60 * 6; // 6 hours
+const wikimediaPhotoCache = new Map<string, PhotoCacheEntry>();
+
+function photoCacheKey(placeName: string, city: string): string {
+  return `${placeName}__${city}`.trim().toLowerCase();
+}
+
+async function getWikimediaPhotoUrlsCached(placeName: string, city: string): Promise<string[] | null> {
+  const key = photoCacheKey(placeName, city);
+  const cached = wikimediaPhotoCache.get(key);
+  const now = Date.now();
+  if (cached && now - cached.cachedAt < PHOTO_CACHE_TTL_MS) {
+    return cached.urls;
+  }
+
+  const urls = await getWikimediaCommonsPhotoUrls(placeName, city);
+  wikimediaPhotoCache.set(key, { urls, cachedAt: now });
+  return urls;
 }
 
 /**
@@ -198,6 +215,17 @@ export async function fetchPlacesFromOpenStreetMap(
   preferences?: string[]
 ): Promise<Place[]> {
   try {
+    // Wikimedia Commons requires per-place HTTP; cap attempts per request to keep latency reasonable.
+    let wikimediaRemaining = 6;
+    const getPlacePhotoUrls = async (placeName: string, cityLabel: string, placeType?: string) => {
+      const fallback = getPicsumPlaceImages(placeName, cityLabel, placeType);
+      if (wikimediaRemaining <= 0) return fallback;
+      wikimediaRemaining -= 1;
+
+      const commons = await getWikimediaPhotoUrlsCached(placeName, cityLabel);
+      return commons && commons.length ? commons : fallback;
+    };
+
     const locationQuery = city.trim();
     const cityName = shortCityLabel(locationQuery);
     const countryCodes = inferCountryCodes(locationQuery);
@@ -397,7 +425,7 @@ export async function fetchPlacesFromOpenStreetMap(
             extractedCity = address.city || address.town || address.village || address.municipality || address.county || cityName;
           }
           
-          const placeImages = getPlacePhotoUrls(
+          const placeImages = await getPlacePhotoUrls(
             name,
             extractedCity || cityName,
             result.type || result.class || searchTerm
@@ -550,7 +578,7 @@ export async function fetchPlacesFromOpenStreetMap(
                 
                 const rLatBeach = parseFloat(result.lat);
                 const rLonBeach = parseFloat(result.lon);
-                const placeImages = getPlacePhotoUrls(name, extractedCity, placeType);
+                const placeImages = await getPlacePhotoUrls(name, extractedCity, placeType);
                 
                 places.push({
                   id: parseInt(result.place_id || `${Math.random() * 1000000}`, 10),
@@ -682,7 +710,7 @@ export async function fetchPlacesFromOpenStreetMap(
             extractedCity = address.city || address.town || address.village || address.municipality || address.county || cityName;
           }
           
-          const generalImages = getPlacePhotoUrls(
+          const generalImages = await getPlacePhotoUrls(
             name,
             extractedCity || cityName,
             result.type || result.class
