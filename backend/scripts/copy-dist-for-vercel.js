@@ -15,4 +15,9 @@ if (!fs.existsSync(srcDir)) {
 
 fs.rmSync(destDir, { recursive: true, force: true });
 fs.cpSync(srcDir, destDir, { recursive: true });
-console.log("copy-dist-for-vercel: dist -> api/dist");
+const appJs = path.join(destDir, "app.js");
+if (!fs.existsSync(appJs)) {
+  console.error("copy-dist-for-vercel: api/dist/app.js missing after copy.");
+  process.exit(1);
+}
+console.log("copy-dist-for-vercel: dist -> api/dist (ok)");
