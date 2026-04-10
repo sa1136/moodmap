@@ -85,7 +85,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen min-h-[100dvh] relative pb-24 sm:pb-28">
 
       {/* Enhanced Header */}
       <header
@@ -151,7 +151,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-8 pb-28 px-4 sm:px-6 lg:px-8 relative z-10">
+      <main className="max-w-7xl xl:max-w-[90rem] 2xl:max-w-[100rem] mx-auto py-8 px-4 sm:px-6 lg:px-8 xl:px-10 relative z-10">
         {/* Header Section with Mood & AI Badge */}
         <div className="mb-8">
           <div
@@ -218,7 +218,7 @@ export default function DashboardPage() {
           <>
             {/* Places Grid/List */}
             {places.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 items-stretch">
                 {places.map((place) => (
                   <div
                     key={place.id}

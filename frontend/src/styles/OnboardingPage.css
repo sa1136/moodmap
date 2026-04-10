@@ -823,3 +823,10 @@
     padding: 3rem 2rem;
   }
 }
+
+/* Wide desktop: slightly wider card so mood/preferences use horizontal space */
+@media (min-width: 1280px) {
+  .onboarding-form-card {
+    max-width: 52rem;
+  }
+}

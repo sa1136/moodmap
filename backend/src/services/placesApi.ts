@@ -43,13 +43,29 @@ async function getWikimediaPhotoUrlsCached(placeName: string, city: string): Pro
   const key = photoCacheKey(placeName, city);
   const cached = wikimediaPhotoCache.get(key);
   const now = Date.now();
-  if (cached && now - cached.cachedAt < PHOTO_CACHE_TTL_MS) {
+  // Only cache successful hits — do not cache misses (avoids Picsum for 6h after one failed request).
+  if (cached?.urls?.length && now - cached.cachedAt < PHOTO_CACHE_TTL_MS) {
     return cached.urls;
   }
 
   const urls = await getWikimediaCommonsPhotoUrls(placeName, city);
-  wikimediaPhotoCache.set(key, { urls, cachedAt: now });
+  if (urls?.length) {
+    wikimediaPhotoCache.set(key, { urls, cachedAt: now });
+  }
   return urls;
+}
+
+/** Cap how many places get a Commons lookup per request (each lookup may run 2 searches; serialized in wikimediaCommonsPhotos). */
+const WIKI_ENRICH_MAX = 20;
+
+/** After OSM list is built, replace Picsum with Commons thumbnails where search finds files. */
+async function enrichPlacesWithWikimediaPhotos(places: Place[]): Promise<void> {
+  for (const place of places.slice(0, WIKI_ENRICH_MAX)) {
+    const urls = await getWikimediaPhotoUrlsCached(place.name, place.city);
+    if (urls?.length) {
+      place.photos = urls;
+    }
+  }
 }
 
 /**
@@ -215,17 +231,6 @@ export async function fetchPlacesFromOpenStreetMap(
   preferences?: string[]
 ): Promise<Place[]> {
   try {
-    // Wikimedia Commons requires per-place HTTP; cap attempts per request to keep latency reasonable.
-    let wikimediaRemaining = 6;
-    const getPlacePhotoUrls = async (placeName: string, cityLabel: string, placeType?: string) => {
-      const fallback = getPicsumPlaceImages(placeName, cityLabel, placeType);
-      if (wikimediaRemaining <= 0) return fallback;
-      wikimediaRemaining -= 1;
-
-      const commons = await getWikimediaPhotoUrlsCached(placeName, cityLabel);
-      return commons && commons.length ? commons : fallback;
-    };
-
     const locationQuery = city.trim();
     const cityName = shortCityLabel(locationQuery);
     const countryCodes = inferCountryCodes(locationQuery);
@@ -425,7 +430,7 @@ export async function fetchPlacesFromOpenStreetMap(
             extractedCity = address.city || address.town || address.village || address.municipality || address.county || cityName;
           }
           
-          const placeImages = await getPlacePhotoUrls(
+          const placeImages = getPicsumPlaceImages(
             name,
             extractedCity || cityName,
             result.type || result.class || searchTerm
@@ -578,7 +583,7 @@ export async function fetchPlacesFromOpenStreetMap(
                 
                 const rLatBeach = parseFloat(result.lat);
                 const rLonBeach = parseFloat(result.lon);
-                const placeImages = await getPlacePhotoUrls(name, extractedCity, placeType);
+                const placeImages = getPicsumPlaceImages(name, extractedCity, placeType);
                 
                 places.push({
                   id: parseInt(result.place_id || `${Math.random() * 1000000}`, 10),
@@ -710,7 +715,7 @@ export async function fetchPlacesFromOpenStreetMap(
             extractedCity = address.city || address.town || address.village || address.municipality || address.county || cityName;
           }
           
-          const generalImages = await getPlacePhotoUrls(
+          const generalImages = getPicsumPlaceImages(
             name,
             extractedCity || cityName,
             result.type || result.class
@@ -745,6 +750,7 @@ export async function fetchPlacesFromOpenStreetMap(
     }
 
     console.log(`[OpenStreetMap] Total places found: ${places.length}`);
+    await enrichPlacesWithWikimediaPhotos(places);
     return places;
   } catch (error: any) {
     console.error('[OpenStreetMap] Error fetching places:', error.message);

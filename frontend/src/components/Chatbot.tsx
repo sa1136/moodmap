@@ -235,8 +235,10 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
       {/* Chatbot Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 text-white p-3 sm:p-4 md:p-5 transition-all duration-300 hover:scale-110"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 lg:bottom-8 lg:right-10 z-50 text-white p-3 sm:p-4 md:p-5 transition-all duration-300 hover:scale-110"
         style={{
+          marginBottom: 'max(0px, env(safe-area-inset-bottom))',
+          marginRight: 'max(0px, env(safe-area-inset-right))',
           backgroundColor: AI_ASSISTANT.solid,
           borderRadius: '50%',
           border: '2px solid rgba(196, 181, 253, 0.45)',
@@ -267,7 +269,7 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
       {/* Chatbot Window */}
       {isOpen && (
         <div
-          className="fixed bottom-20 sm:bottom-24 right-2 sm:right-6 z-50 w-[calc(100vw-1rem)] sm:w-96 h-[calc(100vh-6rem)] sm:h-[600px] max-h-[600px] bg-white flex flex-col"
+          className="fixed bottom-20 sm:bottom-24 right-2 sm:right-6 lg:bottom-28 lg:right-10 z-50 w-[calc(100vw-1rem)] sm:w-96 lg:w-[26rem] h-[calc(100vh-6rem)] sm:h-[600px] max-h-[600px] bg-white flex flex-col"
           style={{
             borderRadius: '16px',
             border: `2px solid ${AI_ASSISTANT.border}`,

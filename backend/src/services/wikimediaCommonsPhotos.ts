@@ -20,19 +20,20 @@ async function throttle(): Promise<void> {
   lastRequestAt = Date.now();
 }
 
+/** One Commons request at a time — avoids rate limits and keeps throttle honest under concurrency. */
+let commonsChain: Promise<unknown> = Promise.resolve();
+function runCommonsSerialized<T>(fn: () => Promise<T>): Promise<T> {
+  const p = commonsChain.then(fn, fn);
+  commonsChain = p.then(() => undefined).catch(() => undefined);
+  return p;
+}
+
 type CommonsPage = {
   imageinfo?: { thumburl?: string; url?: string }[];
 };
 
-/**
- * Search Commons "File:" namespace for images matching place name + city.
- * Results are not guaranteed to be the exact business; good free upgrade vs random stock.
- */
-export async function getWikimediaCommonsPhotoUrls(
-  placeName: string,
-  city: string
-): Promise<string[] | null> {
-  const q = [placeName, city].filter(Boolean).join(' ').trim();
+async function searchCommonsFiles(gsrsearch: string): Promise<string[] | null> {
+  const q = gsrsearch.trim();
   if (q.length < 2) return null;
 
   try {
@@ -45,7 +46,7 @@ export async function getWikimediaCommonsPhotoUrls(
         generator: 'search',
         gsrsearch: q,
         gsrnamespace: 6,
-        gsrlimit: 6,
+        gsrlimit: 8,
         prop: 'imageinfo',
         iiprop: 'url',
         iiurlwidth: 960,
@@ -72,4 +73,28 @@ export async function getWikimediaCommonsPhotoUrls(
     console.warn('[Wikimedia Commons] image search failed:', (e as Error)?.message || e);
     return null;
   }
+}
+
+/**
+ * Search Commons "File:" namespace for images matching place name + city.
+ * Falls back to place name only when "name + city" has no file hits (common for small venues).
+ */
+export async function getWikimediaCommonsPhotoUrls(
+  placeName: string,
+  city: string
+): Promise<string[] | null> {
+  return runCommonsSerialized(async () => {
+    const name = placeName.trim();
+    const full = [name, city].filter(Boolean).join(' ').trim();
+    if (full.length < 2) return null;
+
+    let urls = await searchCommonsFiles(full);
+    if (urls?.length) return urls;
+
+    if (name.length >= 3 && full.toLowerCase() !== name.toLowerCase()) {
+      urls = await searchCommonsFiles(name);
+    }
+
+    return urls?.length ? urls : null;
+  });
 }
