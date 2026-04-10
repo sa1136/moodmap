@@ -18,13 +18,13 @@
     "axios": "^1.12.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
+    "esbuild": "^0.25.2",
     "express": "^4.21.2",
     "groq-sdk": "^0.37.0",
     "serverless-http": "^3.2.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "esbuild": "^0.25.2",
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.21",
     "@types/node": "^24.5.2",
