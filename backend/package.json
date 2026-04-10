@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "vercel-build": "npm run build && node scripts/copy-dist-for-vercel.js",
+    "vercel-build": "npm run build && node scripts/bundle-for-vercel.js",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -24,6 +24,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "esbuild": "^0.25.2",
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.21",
     "@types/node": "^24.5.2",
