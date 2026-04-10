@@ -352,14 +352,14 @@ export default function OnboardingPage() {
                         {mood.emoji}
                       </div>
                       <div className="min-w-0 flex-1 flex flex-col gap-1 items-stretch text-left">
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <div className="min-w-0">
                           <h3
-                            className="text-[0.9375rem] sm:text-base font-bold text-gray-900 leading-snug min-w-0 break-words"
+                            className="onboarding-mood-pick-title font-bold text-gray-900 leading-tight"
                             style={{ fontFamily: "'Poppins', sans-serif" }}
                           >
                             {mood.label}
                           </h3>
-                          <span className="onboarding-mood-pick-badge text-[0.65rem] sm:text-xs text-white px-1.5 py-0.5 font-medium shrink-0 rounded-md">
+                          <span className="onboarding-mood-pick-badge mt-1 inline-block text-[0.65rem] sm:text-xs text-white px-1.5 py-0.5 font-medium rounded-md">
                             Mood
                           </span>
                         </div>

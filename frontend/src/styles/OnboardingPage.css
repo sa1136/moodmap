@@ -190,6 +190,16 @@
   transform: scale(1.06);
 }
 
+/* Keep mood names (Relaxed, Energetic, …) on a single line on narrow / mobile columns */
+.onboarding-mood-pick-title {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: clamp(0.8125rem, 3.4vw, 1rem);
+  max-width: 100%;
+}
+
 .onboarding-mood-pick-badge {
   background: #7c3aed;
   transition: background 0.2s ease, box-shadow 0.2s ease;
