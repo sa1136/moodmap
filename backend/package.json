@@ -19,7 +19,6 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "groq-sdk": "^0.37.0",
-    "serverless-http": "^3.2.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

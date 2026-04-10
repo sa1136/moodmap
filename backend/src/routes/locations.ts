@@ -38,7 +38,9 @@ router.get("/search", async (req, res) => {
             "accept-language": "en",
           },
           headers: {
-            "User-Agent": "MoodMap/1.0 (contact: dev@localhost)",
+            "User-Agent":
+              process.env.NOMINATIM_USER_AGENT?.trim() ||
+              "MoodMap/1.0 (https://github.com/sa1136/moodmap; nominatim usage)",
           },
           timeout: 8000,
           validateStatus: (s) => s < 500,
