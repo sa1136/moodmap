@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, Fragment, type ReactNode } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 
 interface Message {
   id: string;
@@ -169,7 +170,7 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
 
     try {
       // Call backend chatbot endpoint
-      const response = await axios.post('http://localhost:5001/api/chatbot', {
+      const response = await axios.post(`${API_BASE_URL}/api/chatbot`, {
         message: messageToSend,
         mood: currentMood,
         city: currentCity,
@@ -196,7 +197,7 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
       
       // Provide more specific error messages
       if (error.code === 'ECONNREFUSED' || error.message?.includes('Network Error')) {
-        errorText = "Can't connect to the server. Please make sure the backend is running on port 5001.";
+        errorText = "Can't connect to the server. Check that the API is reachable.";
       } else if (error.response?.status === 404) {
         errorText = "The chatbot endpoint wasn't found. Please check the server configuration.";
       } else if (error.response?.status === 500) {
