@@ -343,31 +343,31 @@ export default function OnboardingPage() {
                     }`}
                     style={{ fontFamily: "'Inter', sans-serif" }}
                   >
-                    <div className="onboarding-mood-pick-card-inner w-full min-h-0 flex-1 flex flex-col justify-center p-3 sm:p-3.5">
-                    <div className="flex items-start gap-2.5 sm:gap-3 w-full min-w-0 min-h-0">
-                      <div
-                        className="onboarding-mood-pick-emoji w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-lg sm:text-xl"
-                        aria-hidden
-                      >
-                        {mood.emoji}
-                      </div>
-                      <div className="min-w-0 flex-1 flex flex-col gap-1 items-stretch text-left">
-                        <div className="min-w-0">
-                          <h3
-                            className="onboarding-mood-pick-title font-bold text-gray-900 leading-tight"
-                            style={{ fontFamily: "'Poppins', sans-serif" }}
-                          >
-                            {mood.label}
-                          </h3>
-                          <span className="onboarding-mood-pick-badge mt-1 inline-block text-[0.65rem] sm:text-xs text-white px-1.5 py-0.5 font-medium rounded-md">
-                            Mood
-                          </span>
+                    <div className="onboarding-mood-pick-card-inner w-full min-h-0 flex-1 flex flex-col justify-center p-2.5 sm:p-3.5">
+                      <div className="onboarding-mood-pick-row flex w-full min-w-0 min-h-0 flex-col items-center gap-1.5 text-center md:flex-row md:items-start md:gap-3 md:text-left">
+                        <div
+                          className="onboarding-mood-pick-emoji flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-base md:h-11 md:w-11 md:rounded-xl md:text-xl"
+                          aria-hidden
+                        >
+                          {mood.emoji}
                         </div>
-                        <p className="text-[0.7rem] sm:text-xs text-gray-700 leading-snug">
-                          {mood.description}
-                        </p>
+                        <div className="flex min-w-0 w-full flex-1 flex-col gap-0.5 items-center text-center md:items-stretch md:gap-1 md:text-left">
+                          <div className="min-w-0 w-full text-center md:text-left">
+                            <h3
+                              className="onboarding-mood-pick-title font-bold text-gray-900 leading-tight"
+                              style={{ fontFamily: "'Poppins', sans-serif" }}
+                            >
+                              {mood.label}
+                            </h3>
+                            <span className="onboarding-mood-pick-badge mt-0.5 inline-block text-[0.6rem] sm:text-xs text-white px-1.5 py-0.5 font-medium rounded-md md:mt-1">
+                              Mood
+                            </span>
+                          </div>
+                          <p className="onboarding-mood-pick-desc text-center text-[0.65rem] leading-snug text-gray-700 sm:text-xs md:text-left">
+                            {mood.description}
+                          </p>
+                        </div>
                       </div>
-                    </div>
                     </div>
                   </button>
                 );
