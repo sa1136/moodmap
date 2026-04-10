@@ -1,10 +1,10 @@
 /**
- * Vercel serverless entry (plain JS so the runtime loads compiled output reliably).
- * Requires `npm run build` before deploy so `../dist/app.js` exists.
- * Railway/local: use `npm start` → `dist/index.js` (unchanged).
+ * Vercel serverless entry. Loads app from ./dist (copied by `npm run vercel-build`).
+ * Railway/local: `npm start` uses root `dist/index.js` (unchanged).
  */
 "use strict";
 
-const { app } = require("../dist/app.js");
+const serverless = require("serverless-http");
+const { app } = require("./dist/app.js");
 
-module.exports = app;
+module.exports = serverless(app);

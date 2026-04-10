@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "nodemon src/index.ts",
     "build": "tsc",
+    "vercel-build": "npm run build && node scripts/copy-dist-for-vercel.js",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,6 +20,7 @@
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "groq-sdk": "^0.37.0",
+    "serverless-http": "^3.2.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
