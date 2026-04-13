@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 import Chatbot from "../components/Chatbot";
 import MoodIndicator from "../components/MoodIndicator";
 
@@ -46,7 +47,7 @@ export default function DashboardPage() {
       params.append('preferences', JSON.stringify(userPreferences));
     }
     
-    const apiUrl = `http://localhost:5001/api/places${params.toString() ? `?${params.toString()}` : ''}`;
+    const apiUrl = `${API_BASE_URL}/api/places${params.toString() ? `?${params.toString()}` : ''}`;
 
     axios.get(apiUrl)
       .then(res => {
