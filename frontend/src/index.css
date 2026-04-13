@@ -77,49 +77,12 @@ body::-webkit-scrollbar {
 }
 
 /*
- * Onboarding: iOS ignores background-attachment:fixed on body — use one fixed ::after layer.
- * Grid + gradients are combined here so ::after does not paint over body::before (same z-index).
- * Do NOT lock html/body overflow on mobile — it breaks the keyboard / flash card layout on iOS.
+ * Onboarding uses the same global body gradient + body::before grid as Dashboard.
+ * (Avoid a separate ::after layer — it stacked above ::before and hid the grid.)
  */
 html.onboarding-route,
 body.onboarding-route {
   overscroll-behavior: none;
-}
-
-body.onboarding-route {
-  background-image: none;
-  background-color: #13081f;
-}
-
-/* Hide the default grid layer here — grid is merged into ::after so it stays visible on top */
-body.onboarding-route::before {
-  opacity: 0;
-  visibility: hidden;
-}
-
-body.onboarding-route::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-color: #13081f;
-  /* First layers = on top: line grid, then twilight gradients (same as body default) */
-  background-image:
-    linear-gradient(to bottom, rgba(196, 181, 253, 0.07) 1px, transparent 1px),
-    linear-gradient(to right, rgba(196, 181, 253, 0.07) 1px, transparent 1px),
-    radial-gradient(980px 520px at 15% -5%, rgba(124, 58, 237, 0.5), transparent 60%),
-    radial-gradient(720px 420px at 95% 12%, rgba(99, 102, 241, 0.18), transparent 52%),
-    radial-gradient(900px 560px at 50% 105%, rgba(76, 29, 149, 0.4), transparent 58%),
-    linear-gradient(168deg, #0c0614 0%, #1a0f2e 28%, #2d1a4a 52%, #1f1240 78%, #0d0618 100%);
-  background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-  background-size:
-    40px 40px,
-    40px 40px,
-    auto,
-    auto,
-    auto,
-    auto;
 }
 
 /* Light purple line grid over the app shell (hidden on homepage via body.homepage-route) */
