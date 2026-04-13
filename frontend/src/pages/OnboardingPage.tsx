@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
@@ -50,6 +51,15 @@ export default function OnboardingPage() {
   const [searchTimeout, setSearchTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   /** True only when lat/lng came from picking a search suggestion */
   const [pickedCoords, setPickedCoords] = useState(false);
+
+  /** Viewport-fixed box for location autocomplete (portal — not clipped by flash card overflow). */
+  const [suggestionDropdownBox, setSuggestionDropdownBox] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    maxHeight: number;
+  } | null>(null);
+  const locationFieldWrapRef = useRef<HTMLDivElement>(null);
 
   const stepIndex = STEPS.indexOf(step);
 
@@ -168,6 +178,43 @@ export default function OnboardingPage() {
       document.body.classList.remove('onboarding-route');
     };
   }, []);
+
+  useLayoutEffect(() => {
+    if (step !== 'location' || !showSuggestions || locationSuggestions.length === 0) {
+      setSuggestionDropdownBox(null);
+      return;
+    }
+
+    const wrap = locationFieldWrapRef.current;
+    if (!wrap) {
+      setSuggestionDropdownBox(null);
+      return;
+    }
+
+    const update = () => {
+      const r = wrap.getBoundingClientRect();
+      const gap = 6;
+      const top = r.bottom + gap;
+      const maxHeight = Math.max(120, Math.min(280, window.innerHeight - top - 16));
+      setSuggestionDropdownBox({
+        top,
+        left: r.left,
+        width: r.width,
+        maxHeight,
+      });
+    };
+
+    update();
+    const scrollParent = wrap.closest('.onboarding-form-card-body');
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, true);
+    scrollParent?.addEventListener('scroll', update, { passive: true });
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
+      scrollParent?.removeEventListener('scroll', update);
+    };
+  }, [step, showSuggestions, locationSuggestions]);
 
   const goLocationNext = () => {
     setErrorMessage('');
@@ -379,7 +426,7 @@ export default function OnboardingPage() {
                 <label htmlFor="city" className="onboarding-label">
                   City or area
                 </label>
-                <div style={{ position: 'relative' }}>
+                <div ref={locationFieldWrapRef} style={{ position: 'relative' }}>
                   <input
                     type="text"
                     id="city"
@@ -415,32 +462,6 @@ export default function OnboardingPage() {
                           animation: 'spin 1s linear infinite',
                         }}
                       />
-                    </div>
-                  )}
-                  {showSuggestions && locationSuggestions.length > 0 && (
-                    <div className="onboarding-suggestions">
-                      {locationSuggestions.map((suggestion, index) => (
-                        <div
-                          key={index}
-                          role="button"
-                          tabIndex={0}
-                          onClick={() => handleLocationSelect(suggestion)}
-                          onKeyDown={(ev) => {
-                            if (ev.key === 'Enter') handleLocationSelect(suggestion);
-                          }}
-                          className={`onboarding-suggestion-row ${
-                            selectedSuggestionIndex === index ? 'onboarding-suggestion-row--kbd' : ''
-                          }`}
-                        >
-                          <div className="onboarding-suggestion-title">{suggestion.city}</div>
-                          <div className="onboarding-suggestion-sub">
-                            {suggestion.fullLocation ||
-                              (suggestion.state && suggestion.country
-                                ? `${suggestion.state}, ${suggestion.country}`
-                                : suggestion.country || suggestion.state || '')}
-                          </div>
-                        </div>
-                      ))}
                     </div>
                   )}
                 </div>
@@ -574,6 +595,52 @@ export default function OnboardingPage() {
         </div>
       </main>
     </div>
+
+    {step === 'location' &&
+      showSuggestions &&
+      locationSuggestions.length > 0 &&
+      suggestionDropdownBox &&
+      createPortal(
+        <div
+          className="onboarding-suggestions onboarding-suggestions--portal"
+          role="listbox"
+          aria-label="Location suggestions"
+          style={{
+            position: 'fixed',
+            top: suggestionDropdownBox.top,
+            left: suggestionDropdownBox.left,
+            width: suggestionDropdownBox.width,
+            maxHeight: suggestionDropdownBox.maxHeight,
+            zIndex: 10050,
+          }}
+        >
+          {locationSuggestions.map((suggestion, index) => (
+            <div
+              key={index}
+              role="option"
+              tabIndex={0}
+              aria-selected={selectedSuggestionIndex === index}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => handleLocationSelect(suggestion)}
+              onKeyDown={(ev) => {
+                if (ev.key === 'Enter') handleLocationSelect(suggestion);
+              }}
+              className={`onboarding-suggestion-row ${
+                selectedSuggestionIndex === index ? 'onboarding-suggestion-row--kbd' : ''
+              }`}
+            >
+              <div className="onboarding-suggestion-title">{suggestion.city}</div>
+              <div className="onboarding-suggestion-sub">
+                {suggestion.fullLocation ||
+                  (suggestion.state && suggestion.country
+                    ? `${suggestion.state}, ${suggestion.country}`
+                    : suggestion.country || suggestion.state || '')}
+              </div>
+            </div>
+          ))}
+        </div>,
+        document.body
+      )}
     </>
   );
 }
