@@ -173,8 +173,10 @@ export default function OnboardingPage() {
   }, [searchTimeout]);
 
   useEffect(() => {
+    document.documentElement.classList.add('onboarding-route');
     document.body.classList.add('onboarding-route');
     return () => {
+      document.documentElement.classList.remove('onboarding-route');
       document.body.classList.remove('onboarding-route');
     };
   }, []);
@@ -192,27 +194,54 @@ export default function OnboardingPage() {
     }
 
     const update = () => {
-      const r = wrap.getBoundingClientRect();
-      const gap = 6;
-      const top = r.bottom + gap;
-      const maxHeight = Math.max(120, Math.min(280, window.innerHeight - top - 16));
-      setSuggestionDropdownBox({
-        top,
-        left: r.left,
-        width: r.width,
-        maxHeight,
+      requestAnimationFrame(() => {
+        const el = locationFieldWrapRef.current;
+        if (!el) return;
+
+        const r = el.getBoundingClientRect();
+        const vv = window.visualViewport;
+        const inset = 10;
+        const gap = 8;
+
+        /* Always open below the input (never flip upward). */
+        const top = r.bottom + gap;
+        const vw = vv?.width ?? window.innerWidth;
+        const offsetLeft = vv?.offsetLeft ?? 0;
+        let left = r.left + offsetLeft;
+        let width = r.width;
+        left = Math.max(inset, Math.min(left, vw - inset - Math.min(width, vw - 2 * inset)));
+        width = Math.min(width, vw - 2 * inset);
+
+        /* Use visual viewport bottom so the list fits above the keyboard on mobile */
+        const viewportBottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
+        const maxHeight = Math.max(
+          96,
+          Math.min(260, Math.max(0, viewportBottom - top - inset))
+        );
+
+        setSuggestionDropdownBox({ top, left, width, maxHeight });
       });
     };
 
     update();
+    const t = window.setTimeout(update, 100);
+    const t2 = window.setTimeout(update, 350);
+
     const scrollParent = wrap.closest('.onboarding-form-card-body');
     window.addEventListener('resize', update);
     window.addEventListener('scroll', update, true);
     scrollParent?.addEventListener('scroll', update, { passive: true });
+    window.visualViewport?.addEventListener('resize', update);
+    window.visualViewport?.addEventListener('scroll', update);
+
     return () => {
+      window.clearTimeout(t);
+      window.clearTimeout(t2);
       window.removeEventListener('resize', update);
       window.removeEventListener('scroll', update, true);
       scrollParent?.removeEventListener('scroll', update);
+      window.visualViewport?.removeEventListener('resize', update);
+      window.visualViewport?.removeEventListener('scroll', update);
     };
   }, [step, showSuggestions, locationSuggestions]);
 

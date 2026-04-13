@@ -74,11 +74,45 @@ body::-webkit-scrollbar {
   body {
     background-attachment: scroll;
   }
+}
 
-  /* Keep the shell gradient fixed behind scrolling onboarding cards (see OnboardingPage). */
+/*
+ * Onboarding: iOS often ignores background-attachment:fixed on body — use a fixed ::after layer.
+ * Lock html/body scroll on small screens so only the flash card body scrolls.
+ */
+html.onboarding-route,
+body.onboarding-route {
+  overscroll-behavior: none;
+}
+
+@media (max-width: 768px) {
+  html.onboarding-route,
   body.onboarding-route {
-    background-attachment: fixed;
+    overflow: hidden;
+    height: 100%;
+    max-height: 100dvh;
   }
+}
+
+body.onboarding-route {
+  background-image: none;
+  background-color: #13081f;
+}
+
+body.onboarding-route::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: #13081f;
+  background-image:
+    radial-gradient(980px 520px at 15% -5%, rgba(124, 58, 237, 0.5), transparent 60%),
+    radial-gradient(720px 420px at 95% 12%, rgba(99, 102, 241, 0.18), transparent 52%),
+    radial-gradient(900px 560px at 50% 105%, rgba(76, 29, 149, 0.4), transparent 58%),
+    linear-gradient(168deg, #0c0614 0%, #1a0f2e 28%, #2d1a4a 52%, #1f1240 78%, #0d0618 100%);
+  background-repeat: no-repeat;
+  background-size: auto;
 }
 
 /* Light purple line grid over the app shell (hidden on homepage via body.homepage-route) */
