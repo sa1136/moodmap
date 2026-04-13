@@ -17,16 +17,24 @@
   min-height: 0;
 }
 
+/*
+ * Fixed AppHeader does not consume layout flow — without top padding, this block
+ * starts at y=0 and content is centered under the header (covered / misaligned).
+ * Padding reserves the header band; height is full viewport so flex centers in the visible area.
+ */
 .onboarding-page-root--below-header {
   overflow: hidden;
-  height: calc(100vh - var(--app-header-height, 5.5rem));
-  max-height: calc(100vh - var(--app-header-height, 5.5rem));
+  box-sizing: border-box;
+  height: 100vh;
+  max-height: 100vh;
+  padding-top: var(--app-header-height, 5.5rem);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 @supports (height: 100dvh) {
   .onboarding-page-root--below-header {
-    height: calc(100dvh - var(--app-header-height, 5.5rem));
-    max-height: calc(100dvh - var(--app-header-height, 5.5rem));
+    height: 100dvh;
+    max-height: 100dvh;
   }
 }
 

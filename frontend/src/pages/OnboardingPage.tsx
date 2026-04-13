@@ -229,7 +229,7 @@ export default function OnboardingPage() {
       <AppHeader variant="onboarding" />
       <div className="onboarding-page-root onboarding-page-root--below-header">
         <main className="flex-1 flex flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-0 overflow-hidden">
-        <div className="onboarding-container onboarding-container--in-main flex-1 flex min-h-0 w-full items-stretch justify-center overflow-hidden">
+        <div className="onboarding-container onboarding-container--in-main flex flex-1 min-h-0 w-full flex-col items-center justify-center overflow-hidden">
           <div
             className="onboarding-form-card"
           >
