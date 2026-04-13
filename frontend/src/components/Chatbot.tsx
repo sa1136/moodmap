@@ -130,7 +130,7 @@ function BotMessageContent({ text }: { text: string }) {
   const formatted = formatBotMessage(text);
   const blocks = formatted.split(/\n\n+/).map((b) => b.trim()).filter(Boolean);
   return (
-    <div className="space-y-2.5 text-xs sm:text-sm font-normal">
+    <div className="space-y-2 sm:space-y-2.5 text-[11px] sm:text-sm font-normal leading-snug sm:leading-relaxed">
       {blocks.map((block, idx) => renderBotBlock(block, idx))}
     </div>
   );
@@ -236,7 +236,7 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
       {/* Chatbot Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 lg:bottom-8 lg:right-10 z-50 text-white p-3 sm:p-4 md:p-5 transition-all duration-300 hover:scale-110"
+        className="fixed bottom-3 right-3 sm:bottom-6 sm:right-6 lg:bottom-8 lg:right-10 z-50 text-white p-2 sm:p-4 md:p-5 transition-all duration-300 sm:hover:scale-110 active:scale-95"
         style={{
           marginBottom: 'max(0px, env(safe-area-inset-bottom))',
           marginRight: 'max(0px, env(safe-area-inset-right))',
@@ -257,11 +257,11 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
         aria-label="Open chatbot"
       >
         {isOpen ? (
-          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         ) : (
-          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         )}
@@ -270,9 +270,8 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
       {/* Chatbot Window */}
       {isOpen && (
         <div
-          className="fixed bottom-20 sm:bottom-24 right-2 sm:right-6 lg:bottom-28 lg:right-10 z-50 w-[calc(100vw-1rem)] sm:w-96 lg:w-[26rem] h-[calc(100vh-6rem)] sm:h-[600px] max-h-[600px] bg-white flex flex-col"
+          className="fixed bottom-14 right-2 sm:bottom-24 sm:right-6 lg:bottom-28 lg:right-10 z-50 w-[calc(100vw-1.25rem)] max-w-[20rem] sm:max-w-none sm:w-96 lg:w-[26rem] h-[min(22rem,calc(100dvh-5.5rem))] max-h-[min(22rem,calc(100dvh-5.5rem))] sm:h-[600px] sm:max-h-[600px] bg-white flex flex-col rounded-[14px] sm:rounded-2xl"
           style={{
-            borderRadius: '16px',
             border: `2px solid ${AI_ASSISTANT.border}`,
             boxShadow: '0 20px 50px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(196, 181, 253, 0.2)',
             fontFamily: "'Inter', sans-serif",
@@ -280,27 +279,31 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
         >
           {/* Header */}
           <div
-            className="text-white p-4"
+            className="text-white p-2.5 sm:p-4 rounded-t-[12px] sm:rounded-t-2xl"
             style={{
               background: `linear-gradient(135deg, #3730a3 0%, ${AI_ASSISTANT.solidHover} 100%)`,
-              borderRadius: '14px 14px 0 0',
             }}
           >
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-2 sm:gap-3">
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-base sm:text-lg md:text-xl truncate" style={{ fontFamily: "'Poppins', sans-serif" }}>MoodMap Assistant</h3>
-                <p className="text-xs sm:text-sm font-medium" style={{ color: 'rgba(221, 214, 254, 0.95)' }}>
+                <h3
+                  className="font-bold text-sm sm:text-lg md:text-xl truncate"
+                  style={{ fontFamily: "'Poppins', sans-serif" }}
+                >
+                  MoodMap Assistant
+                </h3>
+                <p className="text-[10px] sm:text-sm font-medium" style={{ color: 'rgba(221, 214, 254, 0.95)' }}>
                   AI assistant
                 </p>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-white transition-colors"
+                className="text-white transition-colors shrink-0 p-0.5"
                 style={{ color: 'white' }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = '#ddd6fe')}
                 onMouseLeave={(e) => (e.currentTarget.style.color = 'white')}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -309,7 +312,7 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
 
           {/* Messages */}
           <div
-            className="scrollbar-none flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 sm:space-y-4"
+            className="scrollbar-none flex-1 overflow-y-auto p-1.5 sm:p-4 space-y-2 sm:space-y-4"
             style={{ backgroundColor: AI_ASSISTANT.light }}
           >
             {messages.map((message) => (
@@ -318,11 +321,11 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
                 className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] sm:max-w-[80%] px-3 sm:px-4 py-2 sm:py-3 ${
+                  className={`max-w-[88%] sm:max-w-[80%] px-2.5 sm:px-4 py-1.5 sm:py-3 ${
                     message.sender === 'user' ? 'font-semibold text-white' : 'bg-white border border-gray-200'
                   }`}
                   style={{
-                    borderRadius: '12px',
+                    borderRadius: '10px',
                     ...(message.sender === 'user'
                       ? {
                           backgroundColor: AI_ASSISTANT.userBubble,
@@ -339,7 +342,7 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
                     </div>
                   ) : (
                     <p
-                      className="text-xs sm:text-sm break-words"
+                      className="text-[11px] sm:text-sm break-words leading-snug sm:leading-normal"
                       style={{ whiteSpace: 'pre-line' }}
                     >
                       {message.text}
@@ -362,20 +365,20 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
             {isTyping && (
               <div className="flex justify-start">
                 <div
-                  className="rounded-lg px-4 py-2 shadow-sm border"
+                  className="rounded-md sm:rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 shadow-sm border"
                   style={{ backgroundColor: 'white', borderColor: AI_ASSISTANT.border }}
                 >
                   <div className="flex space-x-1">
                     <div
-                      className="w-2 h-2 rounded-full animate-bounce"
+                      className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-bounce"
                       style={{ backgroundColor: AI_ASSISTANT.solid, animationDelay: '0ms' }}
                     />
                     <div
-                      className="w-2 h-2 rounded-full animate-bounce"
+                      className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-bounce"
                       style={{ backgroundColor: AI_ASSISTANT.solid, animationDelay: '150ms' }}
                     />
                     <div
-                      className="w-2 h-2 rounded-full animate-bounce"
+                      className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-bounce"
                       style={{ backgroundColor: AI_ASSISTANT.solid, animationDelay: '300ms' }}
                     />
                   </div>
@@ -385,14 +388,17 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
 
             {messages.length === 1 && (
               <div className="space-y-2">
-                <p className="text-xs font-semibold mb-2" style={{ color: AI_ASSISTANT.textOnLight }}>
+                <p
+                  className="text-[10px] sm:text-xs font-semibold mb-1.5 sm:mb-2"
+                  style={{ color: AI_ASSISTANT.textOnLight }}
+                >
                   Quick questions:
                 </p>
                 {quickQuestions.map((q, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSend(q)}
-                    className="w-full text-left text-xs sm:text-sm px-3 sm:px-4 py-2 transition-all font-semibold"
+                    className="w-full text-left text-[11px] sm:text-sm px-2.5 sm:px-4 py-1.5 sm:py-2 transition-all font-semibold"
                     style={{
                       borderRadius: '10px',
                       fontFamily: "'Inter', sans-serif",
@@ -421,19 +427,19 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
 
           {/* Input */}
           <div
-            className="p-2 sm:p-4 border-t bg-white"
-            style={{ borderRadius: '0 0 14px 14px', borderTopColor: AI_ASSISTANT.border }}
+            className="p-1.5 sm:p-4 border-t bg-white rounded-b-[12px] sm:rounded-b-2xl"
+            style={{ borderTopColor: AI_ASSISTANT.border }}
           >
-            <div className="flex space-x-2">
+            <div className="flex space-x-1.5 sm:space-x-2">
               <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask me anything…"
-                className="flex-1 px-3 sm:px-4 py-2 font-semibold text-base outline-none focus:ring-2 focus:ring-violet-500/35 focus:border-violet-500"
+                className="flex-1 px-2.5 sm:px-4 py-1.5 sm:py-2 font-semibold text-base outline-none focus:ring-2 focus:ring-violet-500/35 focus:border-violet-500"
                 style={{
-                  borderRadius: '10px',
+                  borderRadius: '8px',
                   border: `2px solid ${AI_ASSISTANT.border}`,
                   fontFamily: "'Inter', sans-serif",
                   backgroundColor: AI_ASSISTANT.light,
@@ -443,7 +449,7 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
               <button
                 onClick={() => handleSend()}
                 disabled={!inputValue.trim() || isTyping}
-                className="text-white px-3 sm:px-4 py-2 font-semibold disabled:opacity-50 transition-all flex-shrink-0 rounded-lg"
+                className="text-white px-2.5 sm:px-4 py-1.5 sm:py-2 font-semibold disabled:opacity-50 transition-all flex-shrink-0 rounded-md sm:rounded-lg"
                 style={{
                   backgroundColor: AI_ASSISTANT.solid,
                   fontFamily: "'Inter', sans-serif",
