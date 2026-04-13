@@ -162,6 +162,13 @@ export default function OnboardingPage() {
     };
   }, [searchTimeout]);
 
+  useEffect(() => {
+    document.body.classList.add('onboarding-route');
+    return () => {
+      document.body.classList.remove('onboarding-route');
+    };
+  }, []);
+
   const goLocationNext = () => {
     setErrorMessage('');
     const trimmed = city.trim();

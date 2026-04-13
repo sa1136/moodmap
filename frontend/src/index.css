@@ -74,6 +74,11 @@ body::-webkit-scrollbar {
   body {
     background-attachment: scroll;
   }
+
+  /* Keep the shell gradient fixed behind scrolling onboarding cards (see OnboardingPage). */
+  body.onboarding-route {
+    background-attachment: fixed;
+  }
 }
 
 /* Light purple line grid over the app shell (hidden on homepage via body.homepage-route) */
