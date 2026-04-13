@@ -431,7 +431,7 @@ function Chatbot({ currentMood, currentCity }: ChatbotProps) {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask me anything…"
-                className="flex-1 px-3 sm:px-4 py-2 font-semibold text-sm sm:text-base outline-none focus:ring-2 focus:ring-violet-500/35 focus:border-violet-500"
+                className="flex-1 px-3 sm:px-4 py-2 font-semibold text-base outline-none focus:ring-2 focus:ring-violet-500/35 focus:border-violet-500"
                 style={{
                   borderRadius: '10px',
                   border: `2px solid ${AI_ASSISTANT.border}`,

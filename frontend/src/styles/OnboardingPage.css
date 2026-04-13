@@ -287,6 +287,8 @@
   color: #2d3436;
   font-family: 'Inter', sans-serif;
   font-weight: 500;
+  /* 16px+ avoids iOS Safari auto-zoom on focus when body font is smaller */
+  font-size: 1rem;
 }
 
 .onboarding-input:focus {
@@ -810,12 +812,27 @@
 
 /* Responsive Design */
 @media (max-width: 640px) {
+  /* Let the page scroll on small screens — fixed 100vh layouts often misalign when the URL bar shows/hides */
+  .onboarding-page-root {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    max-height: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .onboarding-form-card {
+    --onboarding-form-vpad: 8.25rem;
+    height: auto;
+    min-height: min(48rem, calc(100vh - var(--onboarding-form-vpad)));
+    min-height: min(48rem, calc(100dvh - var(--onboarding-form-vpad)));
+    max-height: none;
+    padding: 1.5rem;
+  }
+
   .onboarding-container {
     padding: 1.5rem 1rem;
-  }
-  
-  .onboarding-form-card {
-    padding: 1.5rem;
   }
   
   .onboarding-title {

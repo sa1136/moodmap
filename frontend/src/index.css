@@ -27,6 +27,12 @@
 html {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* legacy Edge */
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  /* Avoid mobile browsers inflating font size / layout vs desktop */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html::-webkit-scrollbar {
@@ -93,6 +99,8 @@ body.homepage-route::before {
   position: relative;
   z-index: 1;
   min-height: 100vh;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Professional Component Styles */
@@ -261,8 +269,15 @@ body.homepage-route::before {
 
 @media (max-width: 640px) {
   body {
-    font-size: 14px;
+    font-size: 15px;
     padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* iOS Safari zooms the viewport when focused inputs are < 16px */
+  input:not([type='checkbox']):not([type='radio']),
+  textarea,
+  select {
+    font-size: 1rem;
   }
 
   * {
