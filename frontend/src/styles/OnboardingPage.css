@@ -38,6 +38,16 @@
   }
 }
 
+/* Mobile + keyboard: rigid 100dvh + locked body overflow caused the flash card to jump / feel stuck */
+@media (max-width: 768px) {
+  .onboarding-page-root--below-header {
+    height: auto;
+    min-height: 100dvh;
+    min-height: 100svh;
+    max-height: none;
+  }
+}
+
 /*
  * Same width + height on every step. Size from viewport (page does not scroll)
  * so height stays correct while the card is flex-centered in main.
