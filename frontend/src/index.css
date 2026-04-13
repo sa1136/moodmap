@@ -70,13 +70,9 @@ body::-webkit-scrollbar {
   display: none;
 }
 
-@media (max-width: 768px) {
-  body {
-    background-attachment: scroll;
-  }
-}
-
 /*
+ * Keep background-attachment: fixed on mobile too — scroll was making the shell
+ * gradient move under the header while the grid (::before) stayed fixed.
  * Onboarding uses the same global body gradient + body::before grid as Dashboard.
  * (Avoid a separate ::after layer — it stacked above ::before and hid the grid.)
  */
