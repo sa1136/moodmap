@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import onboardingWorldMap from '../assets/onboarding-world-map.png';
-import { API_BASE_URL } from '../config';
 import '../styles/OnboardingPage.css';
 
 type Step = 'location' | 'mood' | 'preferences' | 'done';
@@ -56,7 +55,7 @@ export default function OnboardingPage() {
     if (query.length < 2) return;
     setIsLoadingSuggestions(true);
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/locations/search`, {
+      const response = await axios.get('http://localhost:5001/api/locations/search', {
         params: { q: query },
       });
       const data = response.data;
@@ -209,13 +208,13 @@ export default function OnboardingPage() {
         isCustom: !selectedMood,
         timestamp: new Date().toISOString(),
       };
-      await axios.post(`${API_BASE_URL}/api/mood`, moodData);
+      await axios.post('http://localhost:5001/api/mood', moodData);
       localStorage.setItem('currentMood', moodLabel);
 
       const cityStored = (localStorage.getItem('userCity') || city).trim();
       localStorage.setItem('userPreferences', JSON.stringify(preferences));
       if (cityStored) {
-        await axios.post(`${API_BASE_URL}/api/user`, {
+        await axios.post('http://localhost:5001/api/user', {
           city: cityStored,
           preferences,
         });
