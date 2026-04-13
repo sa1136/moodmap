@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
+import AppHeader from '../components/AppHeader';
 import onboardingWorldMap from '../assets/onboarding-world-map.png';
 import '../styles/OnboardingPage.css';
 
@@ -161,17 +162,6 @@ export default function OnboardingPage() {
     };
   }, [searchTimeout]);
 
-  useEffect(() => {
-    const prevHtml = document.documentElement.style.overflow;
-    const prevBody = document.body.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.documentElement.style.overflow = prevHtml;
-      document.body.style.overflow = prevBody;
-    };
-  }, []);
-
   const goLocationNext = () => {
     setErrorMessage('');
     const trimmed = city.trim();
@@ -235,62 +225,11 @@ export default function OnboardingPage() {
   const cityLabel = (localStorage.getItem('userCity') || city).trim();
 
   return (
-    <div className="onboarding-page-root">
-      <header
-        className="sticky top-0 z-40 border-b shadow-sm shrink-0"
-        style={{
-          background:
-            'radial-gradient(900px 420px at 20% 0%, rgba(124, 58, 237, 0.28), rgba(0, 0, 0, 0) 60%), linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98))',
-          borderColor: 'rgba(255, 255, 255, 0.10)',
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 sm:py-4 gap-3 sm:gap-0">
-            <div className="flex items-center space-x-2 sm:space-x-4 flex-1">
-              <h1
-                className="text-2xl sm:text-3xl md:text-4xl font-bold"
-                style={{
-                  fontFamily: "'Poppins', sans-serif",
-                  backgroundImage:
-                    'linear-gradient(90deg, rgba(255, 255, 255, 0.98), rgba(199, 210, 254, 0.92))',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                MoodMap
-              </h1>
-              <span className="hidden sm:inline text-xs font-semibold px-2.5 py-1 rounded-md text-white/90 border border-white/15 bg-white/10">
-                Setup
-              </span>
-            </div>
-            <nav className="flex space-x-2 sm:space-x-3 w-full sm:w-auto">
-              <button
-                type="button"
-                onClick={() => navigate('/homepage')}
-                className="flex-1 sm:flex-none px-3 sm:px-5 py-2 font-semibold text-sm sm:text-base rounded-lg transition-colors flex items-center justify-center gap-1.5 text-slate-900"
-                style={{
-                  backgroundColor: '#ffffff',
-                  fontFamily: "'Inter', sans-serif",
-                  border: '1px solid rgba(255, 255, 255, 0.35)',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.08)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f8fafc';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                }}
-              >
-                Home
-              </button>
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 flex flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-0 overflow-hidden">
-        <div className="onboarding-container onboarding-container--in-main flex-1 flex min-h-0 w-full items-center justify-center overflow-hidden">
+    <>
+      <AppHeader variant="onboarding" />
+      <div className="onboarding-page-root onboarding-page-root--below-header">
+        <main className="flex-1 flex flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-0 overflow-hidden">
+        <div className="onboarding-container onboarding-container--in-main flex-1 flex min-h-0 w-full items-stretch justify-center overflow-hidden">
           <div
             className="onboarding-form-card"
           >
@@ -628,5 +567,6 @@ export default function OnboardingPage() {
         </div>
       </main>
     </div>
+    </>
   );
 }

@@ -5,21 +5,28 @@
   position: relative;
 }
 
-/* One viewport tall, no page scroll — only the form card body scrolls */
+/*
+ * Below fixed AppHeader: fill remaining viewport; no page scroll —
+ * only .onboarding-form-card-body scrolls. Height uses --app-header-height from AppHeader.
+ */
 .onboarding-page-root {
-  height: 100vh;
-  max-height: 100vh;
-  overflow: hidden;
-  overscroll-behavior: none;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  overscroll-behavior: none;
+  min-height: 0;
+}
+
+.onboarding-page-root--below-header {
+  overflow: hidden;
+  height: calc(100vh - var(--app-header-height, 5.5rem));
+  max-height: calc(100vh - var(--app-header-height, 5.5rem));
 }
 
 @supports (height: 100dvh) {
-  .onboarding-page-root {
-    height: 100dvh;
-    max-height: 100dvh;
+  .onboarding-page-root--below-header {
+    height: calc(100dvh - var(--app-header-height, 5.5rem));
+    max-height: calc(100dvh - var(--app-header-height, 5.5rem));
   }
 }
 
@@ -28,7 +35,6 @@
  * so height stays correct while the card is flex-centered in main.
  */
 .onboarding-form-card {
-  --onboarding-form-vpad: 10.75rem; /* header + main vertical padding */
   max-width: 44rem;
   width: 100%;
   margin: 0 auto;
@@ -42,18 +48,11 @@
   flex-direction: column;
   box-sizing: border-box;
   overflow: hidden;
-  height: min(52rem, calc(100vh - var(--onboarding-form-vpad)));
-  min-height: min(52rem, calc(100vh - var(--onboarding-form-vpad)));
-  max-height: min(52rem, calc(100vh - var(--onboarding-form-vpad)));
-  flex-shrink: 0;
-}
-
-@supports (height: 100dvh) {
-  .onboarding-form-card {
-    height: min(52rem, calc(100dvh - var(--onboarding-form-vpad)));
-    min-height: min(52rem, calc(100dvh - var(--onboarding-form-vpad)));
-    max-height: min(52rem, calc(100dvh - var(--onboarding-form-vpad)));
-  }
+  /* Fit inside flex column below header; inner body scrolls */
+  height: min(52rem, 100%);
+  min-height: 0;
+  max-height: 100%;
+  flex-shrink: 1;
 }
 
 /* Step content scrolls inside the fixed-height form card (scrollbar hidden) */
@@ -812,22 +811,7 @@
 
 /* Responsive Design */
 @media (max-width: 640px) {
-  /* Let the page scroll on small screens — fixed 100vh layouts often misalign when the URL bar shows/hides */
-  .onboarding-page-root {
-    height: auto;
-    min-height: 100vh;
-    min-height: 100dvh;
-    max-height: none;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
   .onboarding-form-card {
-    --onboarding-form-vpad: 8.25rem;
-    height: auto;
-    min-height: min(48rem, calc(100vh - var(--onboarding-form-vpad)));
-    min-height: min(48rem, calc(100dvh - var(--onboarding-form-vpad)));
-    max-height: none;
     padding: 1.5rem;
   }
 

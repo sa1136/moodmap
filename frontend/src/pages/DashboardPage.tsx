@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from "../config";
+import AppHeader from "../components/AppHeader";
 import Chatbot from "../components/Chatbot";
-import MoodIndicator from "../components/MoodIndicator";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -86,73 +86,13 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen min-h-[100dvh] relative pb-24 sm:pb-28">
-
-      {/* Enhanced Header */}
-      <header
-        className="sticky top-0 z-40 border-b shadow-sm backdrop-blur-md"
-        style={{
-          background:
-            "radial-gradient(900px 420px at 20% 0%, rgba(124, 58, 237, 0.28), rgba(0, 0, 0, 0) 60%), linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98))",
-          borderColor: "rgba(255, 255, 255, 0.10)",
-        }}
+    <>
+      <AppHeader variant="dashboard" currentMood={currentMood || undefined} />
+      <div
+        className="min-h-screen min-h-[100dvh] relative pb-24 sm:pb-28"
+        style={{ paddingTop: "var(--app-header-height, 5.5rem)" }}
       >
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 sm:py-4 gap-3 sm:gap-0">
-            <div className="flex items-center space-x-2 sm:space-x-4 flex-1">
-              <h1
-                className="text-2xl sm:text-3xl md:text-4xl font-bold"
-                style={{
-                  fontFamily: "'Poppins', sans-serif",
-                  backgroundImage:
-                    "linear-gradient(90deg, rgba(255, 255, 255, 0.98), rgba(199, 210, 254, 0.92))",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
-                MoodMap
-              </h1>
-              {currentMood && (
-                <div className="hidden sm:block">
-                  <MoodIndicator mood={currentMood} size="sm" />
-                </div>
-              )}
-            </div>
-            {currentMood && (
-              <div className="sm:hidden -mt-2">
-                <MoodIndicator mood={currentMood} size="sm" />
-              </div>
-            )}
-            <nav className="flex space-x-2 sm:space-x-3 w-full sm:w-auto">
-              <button
-                onClick={() => navigate('/onboarding')}
-                className="flex-1 sm:flex-none px-3 sm:px-5 py-2 font-semibold text-sm sm:text-base rounded-lg transition-colors flex items-center justify-center gap-1.5 text-slate-900"
-                style={{
-                  backgroundColor: "#ffffff",
-                  fontFamily: "'Inter', sans-serif",
-                  border: "1px solid rgba(255, 255, 255, 0.35)",
-                  boxShadow: "0 1px 2px rgba(0, 0, 0, 0.08)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#f8fafc";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#ffffff";
-                }}
-              >
-                <svg className="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="hidden sm:inline">New Mood</span>
-                <span className="sm:hidden text-xs">Mood</span>
-              </button>
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl xl:max-w-[90rem] 2xl:max-w-[100rem] mx-auto py-8 px-4 sm:px-6 lg:px-8 xl:px-10 relative z-10">
+        <main className="max-w-7xl xl:max-w-[90rem] 2xl:max-w-[100rem] mx-auto py-8 px-4 sm:px-6 lg:px-8 xl:px-10 relative z-10">
         {/* Header Section with Mood & AI Badge */}
         <div className="mb-8">
           <div
@@ -447,5 +387,6 @@ export default function DashboardPage() {
       {/* Chatbot */}
       <Chatbot currentMood={currentMood} currentCity={currentCity} />
     </div>
+    </>
   );
 }
